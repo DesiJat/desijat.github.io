@@ -1,5 +1,5 @@
 let OLLAMA_ENDPOINT = window.location.protocol + "//" + window.location.hostname + ":11434";
-OLLAMA_ENDPOINT = prompt(`Enter url:like http://localhost:11434 or ${OLLAMA_ENDPOINT}`);
+OLLAMA_ENDPOINT = prompt(`Enter url:like http://192.168.3.91:11434 or ${OLLAMA_ENDPOINT}`);
 // const SYSTEM_PROMPT = `Ai assistant for user helping them learn English.`;
 let SYSTEM_PROMPT = '';  // This will be dynamically set based on dropdown selection
 let prompts = []; // Store the available system prompts
