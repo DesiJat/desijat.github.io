@@ -1,4 +1,5 @@
-const OLLAMA_ENDPOINT = window.location.protocol + "//" + window.location.hostname + ":11434";
+let OLLAMA_ENDPOINT = window.location.protocol + "//" + window.location.hostname + ":11434";
+OLLAMA_ENDPOINT = prompt(`Enter url:like http://localhost:11434 or ${OLLAMA_ENDPOINT}`);
 // const SYSTEM_PROMPT = `Ai assistant for user helping them learn English.`;
 let SYSTEM_PROMPT = '';  // This will be dynamically set based on dropdown selection
 let prompts = []; // Store the available system prompts
@@ -6,6 +7,7 @@ let recognition;
 
 class ChatApp {
     constructor() {
+        document.getElementById('baseUrlInput').value = OLLAMA_ENDPOINT;
         this.messageList = document.getElementById('messageList');
         this.chatForm = document.getElementById('chatForm');
         this.userInput = document.getElementById('userInput');
@@ -245,6 +247,7 @@ class ChatApp {
         }
 
         try {
+            OLLAMA_ENDPOINT=await document.getElementById('baseUrlInput').value;
             const response = await fetch(`${OLLAMA_ENDPOINT}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -322,6 +325,7 @@ class ChatApp {
         this.modelSelect.innerHTML = '<option disabled>Loading models...</option>';
 
         try {
+            OLLAMA_ENDPOINT=await document.getElementById('baseUrlInput').value;
             const response = await fetch(`${OLLAMA_ENDPOINT}/api/tags`, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
