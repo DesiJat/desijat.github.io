@@ -64,7 +64,8 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
-            height: 100vh;
+            height: 100vh; /* Fallback */
+            height: 100dvh; /* Dynamic Viewport Height */
             overflow: hidden;
             transition: background-color 0.3s, color 0.3s;
         }
@@ -81,8 +82,9 @@
             border-bottom: 1px solid var(--border-color);
             z-index: 100;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 15px;
             justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .menu-btn {
@@ -91,7 +93,10 @@
             color: var(--text-color);
             font-size: 1.5rem;
             cursor: pointer;
-            padding: 5px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .mobile-title {
@@ -107,7 +112,7 @@
             display: flex;
             flex-direction: column;
             border-right: 1px solid var(--border-color);
-            transition: transform 0.3s ease, background-color 0.3s;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 200;
             flex-shrink: 0;
         }
@@ -119,7 +124,17 @@
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+        }
+        
+        .close-sidebar-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
         }
 
         .file-list {
@@ -302,12 +317,18 @@
                 top: 0;
                 left: 0;
                 bottom: 0;
+                width: 85%; /* Responsive width */
+                max-width: 300px;
                 transform: translateX(-100%);
                 box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             }
 
             .sidebar.open {
                 transform: translateX(0);
+            }
+            
+            .close-sidebar-btn {
+                display: block;
             }
 
             .overlay.open {
@@ -317,15 +338,27 @@
 
             .main-content {
                 padding: 80px 20px 40px 20px; /* Top padding for fixed header */
+                width: 100%;
             }
 
-            .markdown-body h1 { font-size: 2rem; }
-            .markdown-body h2 { font-size: 1.5rem; }
+            .markdown-body {
+                font-size: 1rem; /* Slightly smaller font on mobile */
+                padding-bottom: 60px;
+            }
+
+            .markdown-body h1 { font-size: 1.8rem; margin-top: 1em; }
+            .markdown-body h2 { font-size: 1.4rem; margin-top: 1.2em; }
             .markdown-body h3 { font-size: 1.2rem; }
             
             .markdown-body blockquote {
                 padding: 10px 15px;
                 margin: 1em 0;
+                border-left-width: 3px;
+            }
+            
+            .markdown-body pre {
+                padding: 10px;
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -333,16 +366,19 @@
 <body>
 
     <div class="mobile-header">
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
         <div class="mobile-title">Vedic Reader</div>
-        <div style="width: 24px;"></div> <!-- Spacer for centering -->
+        <div style="width: 40px;"></div> <!-- Spacer -->
     </div>
 
     <div class="overlay" onclick="closeSidebar()"></div>
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            📚 Vedic Reader
+            <span>📚 Vedic Reader</span>
+            <button class="close-sidebar-btn" onclick="closeSidebar()" aria-label="Close Menu">✕</button>
         </div>
         <ul class="file-list" id="fileList">
             <!-- Files will be injected here -->
