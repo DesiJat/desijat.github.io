@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vedic Books Reader</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Marked.js for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            /* Light Theme (Default) */
+            --bg-color: #ffffff;
+            --text-color: #1a1a1a;
+            --sidebar-bg: #f5f5f5;
+            --sidebar-text: #333333;
+            --accent-color: #6366f1;
+            --border-color: #e5e7eb;
+            --code-bg: #f3f4f6;
+            --quote-bg: #f9fafb;
+            --quote-border: #6366f1;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #111827;
+            --text-color: #e5e7eb;
+            --sidebar-bg: #1f2937;
+            --sidebar-text: #d1d5db;
+            --accent-color: #818cf8;
+            --border-color: #374151;
+            --code-bg: #1f2937;
+            --quote-bg: #1f2937;
+            --quote-border: #818cf8;
+        }
+
+        [data-theme="paper"] {
+            --bg-color: #fdf6e3;
+            --text-color: #3b2f2f;
+            --sidebar-bg: #eee8d5;
+            --sidebar-text: #586e75;
+            --accent-color: #d33682;
+            --border-color: #d2b48c;
+            --code-bg: #eee8d5;
+            --quote-bg: #fdf6e3;
+            --quote-border: #d33682;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            transition: background-color 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            list-style: none;
+        }
+
+        .file-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .file-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-item.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Theme Switcher */
+        .theme-switcher {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--sidebar-text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .theme-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .theme-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 60px;
+            scroll-behavior: smooth;
+        }
+
+        .markdown-body {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        /* Markdown Styles */
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .markdown-body h1 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.8rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.4rem;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1.2em;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            margin-bottom: 1.2em;
+            padding-left: 2em;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid var(--quote-border);
+            background-color: var(--quote-bg);
+            padding: 15px 20px;
+            margin: 1.5em 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+
+        .markdown-body code {
+            background-color: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        .markdown-body pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1.5em;
+        }
+
+        .markdown-body pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .markdown-body strong {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .markdown-body hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 2em 0;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 1.2rem;
+            color: var(--sidebar-text);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 200px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .theme-switcher {
+                display: none;
+            }
+
+            /* Hide theme switcher on mobile for space, or move it */
+            .sidebar-header {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            📚 Vedic Reader
+        </div>
+        <ul class="file-list" id="fileList">
+            <!-- Files will be injected here -->
+        </ul>
+        <div class="theme-switcher">
+            <button class="theme-btn active" onclick="setTheme('light')">Light</button>
+            <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
+            <button class="theme-btn" onclick="setTheme('paper')">Paper</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="content" class="markdown-body">
+            <div class="loading">Select a book to start reading...</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration: List of files to include
+        const files = [
+            { name: "Vigyan Bhairav Tantra", path: "./vigyanBharvTantar.md" },
+            { name: "Patanjali Yoga Sutras", path: "./patanjaliYogsutr.md" },
+            { name: "Vedic Time Table", path: "./timeTable.md" }
+        ];
+
+        const fileListEl = document.getElementById('fileList');
+        const contentEl = document.getElementById('content');
+        let currentTheme = localStorage.getItem('theme') || 'light';
+
+        // Initialize
+        function init() {
+            setTheme(currentTheme);
+            renderFileList();
+
+            // Load the first file by default
+            if (files.length > 0) {
+                loadFile(files[0]);
+            }
+        }
+
+        // Render Sidebar List
+        function renderFileList() {
+            fileListEl.innerHTML = '';
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                li.textContent = file.name;
+                li.onclick = () => loadFile(file);
+                li.dataset.path = file.path;
+                fileListEl.appendChild(li);
+            });
+        }
+
+        // Load and Render File
+        async function loadFile(file) {
+            // Update Active State
+            document.querySelectorAll('.file-item').forEach(el => {
+                el.classList.remove('active');
+                if (el.dataset.path === file.path) el.classList.add('active');
+            });
+
+            contentEl.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const response = await fetch(file.path);
+                if (!response.ok) throw new Error('Failed to load file');
+                const text = await response.text();
+
+                // Parse Markdown
+                contentEl.innerHTML = marked.parse(text);
+
+                // Scroll to top
+                document.querySelector('.main-content').scrollTop = 0;
+
+            } catch (error) {
+                contentEl.innerHTML = `
+                    <div style="text-align:center; padding: 50px;">
+                        <h2>⚠️ Error Loading File</h2>
+                        <p>Could not load <strong>${file.path}</strong>.</p>
+                        <p><em>Note: If you are opening this file directly in the browser (file://), it won't work due to security restrictions.</em></p>
+                        <p>Please run a local server. Example:</p>
+                        <pre style="display:inline-block; text-align:left;">python3 -m http.server</pre>
+                    </div>
+                `;
+                console.error(error);
+            }
+        }
+
+        // Theme Handling
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+
+            // Update Buttons
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase() === theme) btn.classList.add('active');
+            });
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+
+</html>
