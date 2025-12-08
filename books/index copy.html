@@ -403,116 +403,6 @@
                 font-size: 0.85rem;
             }
         }
-
-        /* Scroll to Top Button */
-        .scroll-top-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-
-        .scroll-top-btn.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .scroll-top-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        /* TOC Sidebar */
-        .toc-sidebar {
-            width: 250px;
-            background-color: var(--bg-color);
-            border-left: 1px solid var(--border-color);
-            padding: 20px;
-            overflow-y: auto;
-            display: none;
-            /* Hidden on mobile/initially */
-            flex-shrink: 0;
-            font-size: 0.9rem;
-        }
-
-        .toc-title {
-            font-weight: 700;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--accent-color);
-        }
-
-        .toc-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .toc-item {
-            margin-bottom: 8px;
-        }
-
-        .toc-item a {
-            color: var(--sidebar-text);
-            text-decoration: none;
-            display: block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.2s;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .toc-item a:hover {
-            background-color: var(--sidebar-bg);
-            color: var(--accent-color);
-        }
-
-        .toc-item a.active {
-            background-color: var(--accent-color);
-            color: white;
-            padding-left: 12px;
-        }
-
-        .toc-item.level-2 {
-            padding-left: 10px;
-        }
-
-        .toc-item.level-3 {
-            padding-left: 20px;
-            font-size: 0.85rem;
-        }
-
-        /* Responsive */
-        @media (min-width: 1100px) {
-            .toc-sidebar {
-                display: block;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .scroll-top-btn {
-                bottom: 20px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-            }
-        }
     </style>
 </head>
 
@@ -554,21 +444,6 @@
         </div>
     </div>
 
-    <!-- Right Sidebar for TOC -->
-    <div class="toc-sidebar" id="tocSidebar">
-        <div class="toc-title">Table of Contents</div>
-        <ul class="toc-list" id="tocList"></ul>
-    </div>
-
-    <!-- Scroll to Top Button -->
-    <button class="scroll-top-btn" onclick="scrollToTop()" aria-label="Scroll to Top">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="19" x2="12" y2="5"></line>
-            <polyline points="5 12 12 5 19 12"></polyline>
-        </svg>
-    </button>
-
     <script>
         // Configuration: List of files to include
         const files = [
@@ -579,7 +454,6 @@
             { name: "Vedic Mathematics", path: "vedicMath.md" },
             { name: "Maharishi Panini Ashtadhyayi", path: "maharishiPaniniAshtadhyayi.md" },
         ];
-
         const fileListEl = document.getElementById('fileList');
         const contentEl = document.getElementById('content');
         const sidebarEl = document.getElementById('sidebar');
@@ -631,9 +505,6 @@
                 // Parse Markdown
                 contentEl.innerHTML = marked.parse(text);
 
-                // Generate TOC
-                generateTOC();
-
                 // Scroll to top
                 document.querySelector('.main-content').scrollTop = 0;
 
@@ -649,79 +520,7 @@
                     </div>
                 `;
                 console.error(error);
-                console.error(error);
             }
-        }
-
-        // Generate Table of Contents
-        function generateTOC() {
-            const tocList = document.getElementById('tocList');
-            tocList.innerHTML = '';
-
-            const headers = contentEl.querySelectorAll('h1, h2, h3');
-
-            if (headers.length === 0) return;
-
-            headers.forEach((header, index) => {
-                // Ignore title if it's h1
-                if (header.tagName === 'H1' && index === 0) return;
-
-                const id = 'section-' + index;
-                header.id = id;
-
-                const li = document.createElement('li');
-                li.className = `toc-item level-${header.tagName.toLowerCase().replace('h', '')}`;
-
-                const a = document.createElement('a');
-                a.href = '#' + id;
-                a.textContent = header.textContent;
-                a.onclick = (e) => {
-                    e.preventDefault();
-                    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-                    // Update URL fragment without jumping
-                    history.pushState(null, null, '#' + id);
-                };
-
-                li.appendChild(a);
-                tocList.appendChild(li);
-            });
-
-            setupIntersectionObserver();
-        }
-
-        // Active Section Highlighting
-        function setupIntersectionObserver() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // Remove active class from all links
-                        document.querySelectorAll('.toc-item a').forEach(link => link.classList.remove('active'));
-
-                        // Add active class to current link
-                        const id = entry.target.id;
-                        const activeLink = document.querySelector(`.toc-item a[href="#${id}"]`);
-                        if (activeLink) activeLink.classList.add('active');
-                    }
-                });
-            }, { root: document.querySelector('.main-content'), threshold: 0.1, rootMargin: "-10% 0px -80% 0px" });
-
-            document.querySelectorAll('h1, h2, h3').forEach(section => observer.observe(section));
-        }
-
-        // Scroll to Top Logic
-        const mainContent = document.querySelector('.main-content');
-        const scrollTopBtn = document.querySelector('.scroll-top-btn');
-
-        mainContent.addEventListener('scroll', () => {
-            if (mainContent.scrollTop > 300) {
-                scrollTopBtn.classList.add('visible');
-            } else {
-                scrollTopBtn.classList.remove('visible');
-            }
-        });
-
-        function scrollToTop() {
-            mainContent.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Theme Handling
