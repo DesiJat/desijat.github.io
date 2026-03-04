@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="title">Senior Software Engineer Resume</title>
+  <style>
+    /* Basic reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f4f4f4;
+      color: #333;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1,
+    h2 {
+      color: #333;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2em;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: 1.5em;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 5px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .contact {
+      font-size: 0.8em;
+      margin-bottom: 20px;
+    }
+
+    ul {
+      padding: 22px;
+    }
+
+    .skills ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .skills li {
+      background: #eee;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 4px;
+    }
+.centerContent{
+  text-align: center;
+}
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5em;
+      }
+
+      h2 {
+        font-size: 1.2em;
+      }
+
+      .container {
+        padding: 10px;
+      }
+
+      .contact,
+      .skills li {
+        font-size: 0.9em;
+      }
+    }
+
+    @page {
+      size: auto;
+      margin: 0mm;
+    }
+
+    @media print {
+            .page-break {
+                page-break-before: always;
+            }
+            .no-break {
+                page-break-inside: avoid;
+            }
+        }
+
+    /* @media print {
+      @page {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      body {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+      }
+    } */
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="centerContent" id="name"></h1>
+    <!-- <p class="centerContent contact" id="designation"></p> -->
+    <p class="centerContent contact" id="contact"></p>
+    <p class="centerContent contact" id="sortSkill"></p>
+    
+
+    <div class="section">
+      <h2>Summary</h2>
+      <p id="summary"></p>
+    </div>
+
+    <div class="section">
+      <h2>Experience</h2>
+      <div id="experience"></div>
+    </div>
+
+    <div class="section">
+      <h2>Education</h2>
+      <div id="education"></div>
+    </div>
+
+    <div class="section skills">
+      <h2>Skills</h2>
+      <ul id="skills"></ul>
+    </div>
+
+    <div class="section skills">
+      <h2>Secondary Skills</h2>
+      <ul id="secondarySkills"></ul>
+    </div>
+  </br></br>
+    <div class="section page-break">
+      <h2>Projects</h2>
+      <div id="projects"></div>
+    </div>  
+
+  </div>  
+
+  <script src="./assets/data.js"></script>
+  <script src="./assets/resume.js"></script>
+
+  <!-- <button type="button" onclick=javascript:window.print()>Download HTML</button> -->
+</body>
+
+</html>
