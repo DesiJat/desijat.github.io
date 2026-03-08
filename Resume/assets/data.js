@@ -24,7 +24,7 @@ const resumeData = {
     linkedin: '<a href="https://www.linkedin.com/in/sandeepchoudhari/" target="_blank">linkedin.com/in/sandeepchoudhari</a>',
     address: 'Mohali, Punjab, India'
   },
-  summary: "Senior Software Engineer with 9+ years of experience designing and developing scalable SaaS, FinTech, and Web3 applications using TypeScript, JavaScript, and Node.js. Expertise in NestJS, microservices architecture, real-time systems, and distributed event-driven applications. Strong experience in cryptocurrency integrations (BTC, ETH, XRP, ADA), payment gateways (Stripe, PayPal), and AI/LLM integrations including Ollama-based deployments. Proven ability to build high-performance backend systems using Docker, Redis, RabbitMQ, MySQL, and MongoDB in production environments.",
+  summary: "Senior Software Engineer with 9+ years of experience architecting and developing scalable SaaS, FinTech, and Web3 platforms. Specialized in building distributed multi-tenant systems, event-driven microservices, and real-time architectures using Node.js, NestJS, and TypeScript. Extensive expertise spanning full-stack engineering (React, GraphQL), cloud infrastructure (AWS EC2, S3, Docker, Terraform), and high-performance databases (PostgreSQL, Redis). Proven track record in emerging technologies, including Web3 integrations (Ethereum, EVM/UTXO chains, Fireblocks, Smart Contracts) and AI/LLM automation (Ollama, GGUF models, Google Gemini), driving enterprise-scale production environments.",
   experience: [
     {
       title: "Senior Software Engineer",

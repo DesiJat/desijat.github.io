@@ -10,11 +10,11 @@ Mohali, Punjab, India • ladwapanghal@gmail.com • +918685004675
 
 # Professional Summary
 
-Senior Software Engineer specializing in **scalable backend systems, distributed architectures, and high-performance APIs** using Node.js and TypeScript. Experienced in architecting **microservices platforms, event-driven systems, and real-time communication infrastructure** supporting high-concurrency workloads.
+Senior Software Engineer with 9+ years of experience architecting and developing scalable **SaaS, FinTech, and Web3 platforms**. Specialized in building distributed multi-tenant systems, event-driven microservices, and real-time architectures using **Node.js, NestJS, and TypeScript**.
 
-Proven track record building **multi-tenant SaaS platforms, fintech payment infrastructure, AI-powered automation systems, and Web3 integrations**. Skilled at designing resilient architectures, optimizing performance, and leading complex engineering initiatives from concept to production.
+Extensive expertise spanning full-stack engineering (**React, GraphQL**), scalable cloud infrastructure (**AWS, Docker, Terraform**), and high-performance databases (**PostgreSQL, Redis**). Proven track record leading complex, high-concurrency engineering initiatives from concept to production.
 
-Strong background in **real-time systems, blockchain integrations, AI/LLM infrastructure, and cloud-native deployments**, with a focus on reliability, scalability, and developer productivity.
+Deep background in emerging technologies, including secure Web3 integrations (**Ethereum, EVM/UTXO chains, Fireblocks, Solidity Smart Contracts**) and AI/LLM infrastructure (**Ollama, Google Gemini API**), with a relentless focus on system reliability and developer productivity.
 
 ---
 
