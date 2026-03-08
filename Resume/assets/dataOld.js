@@ -20,7 +20,7 @@ const resumeData = {
   designation: "Senior Software Engineer",
   contact: {
     email: '<a href="mailto:ladwapanghal@gmail.com">ladwapanghal@gmail.com</a>',
-    phone: '<a href="tel:+918685004675">+918685004675</a>',
+    phone: '<a href="tel:+919501852073">+919501852073</a>',
     linkedin: '<a href="https://www.linkedin.com/in/sandeepchoudhari/" target="_blank">linkedin.com/in/sandeepchoudhari</a>',
     address: 'Mohali, Punjab, India'
   },
@@ -83,6 +83,10 @@ const resumeData = {
   ],
   skillCategories: [
     {
+      name: "Languages",
+      skills: ["TypeScript", "JavaScript", "PHP"]
+    },
+    {
       name: "Backend",
       skills: ["Node.js", "NestJS", "Express.js", "Laravel", "gRPC"]
     },
@@ -113,10 +117,6 @@ const resumeData = {
     {
       name: "Tools & Others",
       skills: ["Git", "Jira", "Stripe", "PayPal"]
-    },
-    {
-      name: "Languages",
-      skills: ["TypeScript", "JavaScript", "PHP"]
     }
   ],
   projects: [
@@ -139,17 +139,6 @@ const resumeData = {
       name: "AI-Powered Automation & Multi-Purpose Chatbot Platform",
       desc: "Developed a comprehensive AI platform featuring a Node.js backend and a modern frontend for deploying automated chatbots across diverse domains. Integrated local LLMs via Ollama and GGUF models for data privacy, alongside third-party APIs like Google Gemini for advanced reasoning. Scaled intelligent workflows for automated customer support, document analysis, and task automation.",
       technology: ["Node.js", "Express.js", "Ollama", "GGUF models", "Google Gemini API", "LLMs"],
-    },
-    {
-      name: "Enterprise Multi-Tenant Employee Monitoring & Project Management Platform",
-      desc: "Engineered a full-scale SaaS platform with a NestJS microservices backend (10 services) and an Electron + React desktop agent for cross-platform employee activity tracking. Implemented a 3-tier RBAC system (L1/L2/L3) with JWT authentication, multi-tenant isolation across 7 dedicated PostgreSQL databases, and real-time updates via Socket.IO scaled horizontally with Redis Pub/Sub Adapter. Delivered automated screenshot capture, keyboard/mouse activity logging, offline queue with sync, BullMQ background job processing, and MinIO-based file storage — all containerised with Docker Compose.",
-      technology: [
-        "NestJS", "TypeScript", "Electron", "React", "Vite",
-        "PostgreSQL", "TypeORM", "Redis", "BullMQ",
-        "Socket.IO", "MinIO", "Nodemailer", "Passport.js",
-        "JWT", "Docker", "Docker Compose", "Swagger"
-      ],
     }
-
   ]
 };
