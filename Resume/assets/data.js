@@ -84,7 +84,7 @@ const resumeData = {
   skillCategories: [
     {
       name: "Backend",
-      skills: ["Node.js", "NestJS", "Express.js", "Laravel", "gRPC"]
+      skills: ["Node.js", "NestJS", "Express.js", "Laravel", "gRPC", "GraphQL"]
     },
     {
       name: "Frontend",
@@ -104,7 +104,7 @@ const resumeData = {
     },
     {
       name: "Web3",
-      skills: ["Ethereum", "Bitcoin", "XRP", "ADA", "BCH", "LTC"]
+      skills: ["Ethereum", "Bitcoin", "XRP", "ADA", "BCH", "LTC", "Fireblocks", "RWA", "ERC20", "NFT", "EVM-based Chains", "UTXO-based Chains", "Solidity Smart Contracts"]
     },
     {
       name: "AI",

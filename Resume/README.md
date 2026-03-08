@@ -30,7 +30,7 @@ React.js, Angular, Electron, Vite
 
 ### Backend Engineering
 
-Node.js, NestJS, Express.js, Laravel, gRPC
+Node.js, NestJS, Express.js, Laravel, gRPC, GraphQL
 
 ### Architecture
 
@@ -76,6 +76,9 @@ AI Automation Platforms
 ### Web3 & FinTech
 
 Ethereum, Bitcoin, XRP, Cardano (ADA), BCH, LTC
+EVM-based & UTXO-based Chains
+Fireblocks (Digital Assets & Cryptocurrencies)
+Solidity Smart Contracts, RWA, ERC20, NFT
 Blockchain APIs
 Crypto Wallet Integrations
 
