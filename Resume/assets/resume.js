@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Update header info
+  // Update document title and header info
+  if (resumeData.title) document.title = resumeData.title;
   document.getElementById("name").textContent = resumeData.name;
   document.getElementById("designation").textContent = resumeData.designation;
 

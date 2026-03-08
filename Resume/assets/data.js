@@ -38,7 +38,7 @@ const resumeData = {
         "Integrated LLM and AI-based features using Ollama for intelligent automation workflows.",
         "Containerized and deployed services using Docker for consistent production environments.",
         "Implemented Redis caching strategies improving API response time and system performance.",
-        "Collaborated with cross-functional teams delivering enterprise SaaS platforms."
+        "Collaborated with cross-functional teams to deliver enterprise SaaS platforms."
       ],
     },
     {
@@ -46,7 +46,7 @@ const resumeData = {
       company: "Dabster SoftTech (Mohali, Punjab, India)",
       dates: "May 2018 - January 2021",
       details: [
-        "Developed scalable applications using Laravel, Node.js, React and Angular.",
+        "Developed scalable applications using Laravel, Node.js, React, and Angular.",
         "Integrated secure payment gateways including Stripe and PayPal for FinTech systems.",
         "Implemented push notifications and real-time systems using Socket.IO.",
         "Optimized database performance in MySQL and MongoDB environments.",
@@ -88,31 +88,31 @@ const resumeData = {
     },
     {
       name: "Frontend",
-      skills: ["React.js", "Electron"]
+      skills: ["React.js", "Angular", "Electron", "Vite"]
     },
     {
       name: "Architecture & DevOps",
-      skills: ["Microservices", "Event-Driven Architecture", "REST APIs", "Docker", "CI/CD"]
+      skills: ["Microservices", "Event-Driven Architecture", "REST APIs", "Docker", "Docker Compose", "Terraform", "CI/CD"]
     },
     {
-      name: "Databases & Caching",
-      skills: ["PostgreSQL", "MySQL", "MongoDB", "Redis"]
+      name: "Databases & Storage",
+      skills: ["PostgreSQL", "MySQL", "MongoDB", "Redis", "MinIO"]
     },
     {
       name: "Messaging & Real-time",
-      skills: ["RabbitMQ", "Kafka", "Socket.IO"]
+      skills: ["RabbitMQ", "Kafka", "Socket.IO", "Redis Pub/Sub"]
     },
     {
       name: "Web3",
-      skills: ["Ethereum", "Bitcoin", "XRP", "ADA"]
+      skills: ["Ethereum", "Bitcoin", "XRP", "ADA", "BCH", "LTC"]
     },
     {
       name: "AI",
-      skills: ["LLM Integrations", "GGUF models", "Ollama"]
+      skills: ["LLM Integrations", "Ollama", "GGUF models", "Google Gemini API"]
     },
     {
-      name: "Tools & Others",
-      skills: ["Git", "Jira", "Stripe", "PayPal"]
+      name: "Tools & Libraries",
+      skills: ["Git", "Jira", "Stripe", "PayPal", "Swagger", "JWT", "TypeORM", "BullMQ", "Passport.js"]
     },
     {
       name: "Languages",
@@ -142,7 +142,7 @@ const resumeData = {
     },
     {
       name: "Enterprise Multi-Tenant Employee Monitoring & Project Management Platform",
-      desc: "Engineered a full-scale SaaS platform with a NestJS microservices backend (10 services) and an Electron + React desktop agent for cross-platform employee activity tracking. Implemented a 3-tier RBAC system (L1/L2/L3) with JWT authentication, multi-tenant isolation across 7 dedicated PostgreSQL databases, and real-time updates via Socket.IO scaled horizontally with Redis Pub/Sub Adapter. Delivered automated screenshot capture, keyboard/mouse activity logging, offline queue with sync, BullMQ background job processing, and MinIO-based file storage — all containerised with Docker Compose.",
+      desc: "Engineered a full-scale SaaS platform with a NestJS microservices backend (10 services) and an Electron + React desktop agent for cross-platform employee activity tracking. Implemented a 3-tier RBAC system (L1/L2/L3) with JWT authentication, multi-tenant isolation across 7 dedicated PostgreSQL databases, and real-time updates via Socket.IO scaled horizontally with Redis Pub/Sub Adapter. Delivered automated screenshot capture, keyboard/mouse activity logging, offline queue with sync, BullMQ background job processing, and MinIO-based file storage — all containerized with Docker Compose.",
       technology: [
         "NestJS", "TypeScript", "Electron", "React", "Vite",
         "PostgreSQL", "TypeORM", "Redis", "BullMQ",
