@@ -57,6 +57,7 @@ Redis
 
 ### DevOps & Infrastructure
 
+AWS (EC2, S3, KMS)
 Docker
 Docker Compose
 Terraform
@@ -187,6 +188,6 @@ TypeORM, BullMQ, MinIO
 
 # Education
 
-**Master of Computer Applications (MCA), First Division 5 year integrated**
+**Master of Computer Applications (MCA-5 year integrated), First Division**
 Guru Jambheshwar University of Science and Technology, Hisar, Haryana
 2009 – 2014

@@ -92,7 +92,7 @@ const resumeData = {
     },
     {
       name: "Architecture & DevOps",
-      skills: ["Microservices", "Event-Driven Architecture", "REST APIs", "Docker", "Docker Compose", "Terraform", "CI/CD"]
+      skills: ["AWS (EC2, S3, KMS)", "Microservices", "Event-Driven Architecture", "REST APIs", "Docker", "Docker Compose", "Terraform", "CI/CD"]
     },
     {
       name: "Databases & Storage",
