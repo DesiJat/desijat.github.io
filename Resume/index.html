@@ -173,9 +173,21 @@
     }
 
     .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
+      column-count: 2;
+      column-gap: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .skills-grid {
+        column-count: 3;
+      }
+    }
+
+    .skill-category {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 25px;
+      /* Adds space below each category block */
     }
 
     .skill-category h3 {
@@ -250,18 +262,50 @@
 
     @media print {
       @page {
-        margin: 0;
+        margin: 0.5cm;
       }
 
       body {
-        padding: 1.5cm;
+        padding: 0;
         background: white;
+        font-size: 11pt;
+        /* Optimize text size for print */
       }
 
       .container {
         box-shadow: none;
         padding: 0;
         max-width: 100%;
+        margin: 0;
+      }
+
+      header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+      }
+
+      .section {
+        margin-bottom: 25px;
+        page-break-inside: auto;
+      }
+
+      h2 {
+        margin: 25px 0 15px 0;
+        border-bottom: 2px solid var(--border-color);
+        /* Fallback for the line */
+        page-break-after: avoid;
+        /* Prevent header from being orphaned */
+        break-after: avoid;
+      }
+
+      h2::after {
+        display: none;
+        /* Sometimes causes issues in print */
+      }
+
+      .skills-grid {
+        column-count: 3;
+        column-gap: 15px;
       }
 
       .skill-category,
@@ -270,6 +314,20 @@
       .project {
         break-inside: avoid;
         page-break-inside: avoid;
+        margin-bottom: 15px;
+      }
+
+      .skill-tag {
+        border: 1px solid #ccc;
+        /* More visible border for B&W printing */
+        color: #000;
+        background: transparent;
+      }
+
+      .tech-tag {
+        border: 1px solid #ccc;
+        background: transparent;
+        color: #000;
       }
 
       .page-break {
