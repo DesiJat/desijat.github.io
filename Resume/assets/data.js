@@ -76,7 +76,7 @@ const resumeData = {
   ],
   education: [
     {
-      degree: "Master of Computer Applications (MCA), First Division",
+      degree: "Master of Computer Applications (MCA-5 year integrated), First Division",
       institution: "Guru Jambheshwar University of Science and Technology, Hisar, Haryana",
       dates: "2009 - 2014",
     },
@@ -96,7 +96,7 @@ const resumeData = {
     },
     {
       name: "Databases & Storage",
-      skills: ["PostgreSQL", "MySQL", "MongoDB", "Redis", "MinIO"]
+      skills: ["PostgreSQL", "MySQL", "MongoDB", "Redis"]
     },
     {
       name: "Messaging & Real-time",
@@ -112,7 +112,7 @@ const resumeData = {
     },
     {
       name: "Tools & Libraries",
-      skills: ["Git", "Jira", "Stripe", "PayPal", "Swagger", "JWT", "TypeORM", "BullMQ", "Passport.js"]
+      skills: ["Git", "Jira", "Stripe", "PayPal", "Swagger", "JWT", "TypeORM", "BullMQ", "Passport.js", "MinIO"]
     },
     {
       name: "Languages",

@@ -26,11 +26,11 @@ TypeScript, JavaScript, PHP
 
 ### Frontend Engineering
 
-React.js, Angular, Electron, Vite
+React.js, Electron, Vite
 
 ### Backend Engineering
 
-Node.js, NestJS, Express.js, Laravel, gRPC, GraphQL
+Node.js, NestJS, Express.js, gRPC, GraphQL, Laravel
 
 ### Architecture
 
@@ -54,7 +54,6 @@ PostgreSQL
 MySQL
 MongoDB
 Redis
-MinIO Object Storage
 
 ### DevOps & Infrastructure
 
@@ -75,10 +74,10 @@ AI Automation Platforms
 
 ### Web3 & FinTech
 
-Ethereum, Bitcoin, XRP, Cardano (ADA), BCH, LTC
+Ethereum, Bitcoin, XRP, Fireblocks (Digital Assets & Cryptocurrencies)
+RWA, ERC20, NFT
 EVM-based & UTXO-based Chains
-Fireblocks (Digital Assets & Cryptocurrencies)
-Solidity Smart Contracts, RWA, ERC20, NFT
+Solidity Smart Contracts
 Blockchain APIs
 Crypto Wallet Integrations
 
@@ -87,7 +86,7 @@ Crypto Wallet Integrations
 Git, Jira
 Stripe, PayPal
 Swagger, Passport.js, JWT
-TypeORM, BullMQ
+TypeORM, BullMQ, MinIO
 
 ---
 
@@ -188,6 +187,6 @@ TypeORM, BullMQ
 
 # Education
 
-**Master of Computer Applications (MCA), First Division**
+**Master of Computer Applications (MCA), First Division 5 year integrated**
 Guru Jambheshwar University of Science and Technology, Hisar, Haryana
 2009 – 2014
