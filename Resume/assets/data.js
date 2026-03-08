@@ -104,7 +104,7 @@ const resumeData = {
     },
     {
       name: "Web3",
-      skills: ["Ethereum", "Bitcoin", "XRP", "Fireblocks", "RWA", "ERC20", "NFT", "EVM-based Chains", "UTXO-based Chains", "Solidity Smart Contracts"]
+      skills: ["Ethereum", "Bitcoin", "XRP", "Fireblocks", "RWA", "ERC20", "NFT", "EVM-based Chains", "UTXO-based Chains", "Solidity Smart Contracts", "Ganache", "Hardhat"]
     },
     {
       name: "AI",

@@ -14,7 +14,7 @@ Senior Software Engineer with 9+ years of experience architecting and developing
 
 Extensive expertise spanning full-stack engineering (**React, GraphQL**), scalable cloud infrastructure (**AWS, Docker, Terraform**), and high-performance databases (**PostgreSQL, Redis**). Proven track record leading complex, high-concurrency engineering initiatives from concept to production.
 
-Deep background in emerging technologies, including secure Web3 integrations (**Ethereum, EVM/UTXO chains, Fireblocks, Solidity Smart Contracts**) and AI/LLM infrastructure (**Ollama, Google Gemini API**), with a relentless focus on system reliability and developer productivity.
+Deep background in emerging technologies, including secure Web3 integrations (**Ethereum, EVM/UTXO chains, Fireblocks, Solidity Smart Contracts**) and AI/LLM infrastructure (**Ollama, GGUF models, Google Gemini API**), with a relentless focus on system reliability and developer productivity.
 
 ---
 
@@ -78,7 +78,7 @@ AI Automation Platforms
 Ethereum, Bitcoin, XRP, Fireblocks (Digital Assets & Cryptocurrencies)
 RWA, ERC20, NFT
 EVM-based & UTXO-based Chains
-Solidity Smart Contracts
+Solidity Smart Contracts, Ganache (Local Blockchain), Hardhat (Contract Testing)
 Blockchain APIs
 Crypto Wallet Integrations
 
