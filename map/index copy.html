@@ -236,74 +236,7 @@
         }
 
         .info-value.coord {
-            color: #fbbf24;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .copy-btn {
-            cursor: pointer;
-            opacity: 0.5;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .copy-btn:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .share-row {
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            justify-content: center;
-        }
-
-        .share-btn {
-            background: rgba(37, 99, 235, 0.15);
-            color: #3b82f6;
-            border: 1px solid rgba(37, 99, 235, 0.3);
-            border-radius: 12px;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .share-btn:hover {
-            background: #2563eb;
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .shared-marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .shared-marker-pulse {
-            width: 16px;
-            height: 16px;
-            background: #2563eb;
-            border: 2px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(37, 99, 235, 0.6);
-            animation: shared-pulse 2s infinite;
-        }
-
-        @keyframes shared-pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+            color: #60a5fa;
         }
 
         /* ─── Cache Panel ─── */
@@ -452,8 +385,8 @@
         }
 
         .input-group input.selecting {
-            border-color: #2563eb;
-            box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+            border-color: #fbbf24;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
         }
 
         .select-btn {
@@ -471,13 +404,13 @@
         }
 
         .select-btn:hover {
-            background: rgba(37, 99, 235, 0.1);
-            border-color: rgba(37, 99, 235, 0.3);
+            background: rgba(251, 191, 36, 0.1);
+            border-color: rgba(251, 191, 36, 0.3);
         }
 
         .select-btn.selecting {
-            background: #2563eb;
-            color: #fff;
+            background: #fbbf24;
+            color: #000;
         }
 
         .route-actions {
@@ -500,7 +433,7 @@
             justify-content: center;
         }
 
-        .route-btn.primary { background: #2563eb; color: #fff; }
+        .route-btn.primary { background: #fbbf24; color: #000; }
         .route-btn.secondary { background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); flex: 0 0 44px; }
         .route-btn.danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); flex: 0 0 60px; }
 
@@ -515,7 +448,7 @@
             justify-content: space-between;
         }
 
-        .route-summary span { color: #3b82f6; font-weight: 600; }
+        .route-summary span { color: #fbbf24; font-weight: 600; }
 
         .route-instructions {
             max-height: 200px;
@@ -533,10 +466,10 @@
             color: #aaa;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
 
-        .instruction-icon { color: #3b82f6; font-size: 14px; }
+        .instruction-icon { color: #fbbf24; font-size: 12px; }
 
         /* ─── Progress Bar ─── */
         .progress-container {
@@ -1033,17 +966,11 @@
     <div class="info-panel" id="infoPanel">
         <div class="info-row">
             <span class="info-label">Latitude</span>
-            <span class="info-value coord">
-                <span id="infoLat">—</span>
-                <span class="copy-btn" onclick="copyCoord('lat')" title="Copy Latitude">📋</span>
-            </span>
+            <span class="info-value coord" id="infoLat">—</span>
         </div>
         <div class="info-row">
             <span class="info-label">Longitude</span>
-            <span class="info-value coord">
-                <span id="infoLng">—</span>
-                <span class="copy-btn" onclick="copyCoord('lng')" title="Copy Longitude">📋</span>
-            </span>
+            <span class="info-value coord" id="infoLng">—</span>
         </div>
         <div class="info-row">
             <span class="info-label">Zoom</span>
@@ -1068,12 +995,6 @@
         <div class="info-row">
             <span class="info-label">Tiles Cached</span>
             <span class="info-value" id="infoCached">0</span>
-        </div>
-        <div class="share-row">
-            <button class="share-btn" id="btnShare" onclick="shareLocation()">
-                <span class="icon">🔗</span>
-                Share Link
-            </button>
         </div>
     </div>
 
@@ -1123,12 +1044,12 @@
     <div class="routing-panel hidden" id="routingPanel">
         <h3>🛣️ Route Planner</h3>
         <div class="input-group">
-            <input type="text" id="routeFrom" placeholder="Start point (click map or paste lat,lng)">
+            <input type="text" id="routeFrom" placeholder="Start point" readonly>
             <button class="select-btn" id="btnCurrentStart" title="Use current location">📍</button>
             <button class="select-btn" id="btnSelectStart" onclick="startSelecting('start')" title="Select on map">👆</button>
         </div>
         <div class="input-group">
-            <input type="text" id="routeTo" placeholder="Destination (click map or paste lat,lng)">
+            <input type="text" id="routeTo" placeholder="Destination" readonly>
             <button class="select-btn" id="btnSelectEnd" onclick="startSelecting('end')" title="Select on map">👆</button>
         </div>
         <div class="route-actions">
@@ -1289,56 +1210,6 @@
             }
         };
 
-        let sharedMarker = null;
-
-        function shareLocation() {
-            const center = map.getCenter();
-            const alt = document.getElementById('infoAlt').textContent;
-            const altParam = alt !== 'Unavailable' ? `,${alt.replace('m', '')}` : '';
-            
-            const shareUrl = `${window.location.origin}${window.location.pathname}?shared=${center.lat.toFixed(6)},${center.lng.toFixed(6)}${altParam}`;
-            
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                showToast('Share link copied to clipboard!', 'success');
-            }).catch(err => {
-                showToast('Failed to copy link', 'error');
-            });
-        }
-
-        function checkSharedLocation() {
-            const params = new URLSearchParams(window.location.search);
-            const shared = params.get('shared');
-            
-            if (shared) {
-                const parts = shared.split(',');
-                if (parts.length >= 2) {
-                    const lat = parseFloat(parts[0]);
-                    const lng = parseFloat(parts[1]);
-                    const alt = parts[2] ? parts[2] + 'm' : null;
-                    
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                        const latlng = [lat, lng];
-                        
-                        if (sharedMarker) map.removeLayer(sharedMarker);
-                        
-                        sharedMarker = L.marker(latlng, {
-                            icon: L.divIcon({
-                                className: 'shared-marker',
-                                html: '<div class="shared-marker-pulse"></div>',
-                                iconSize: [20, 20]
-                            })
-                        }).addTo(map);
-                        
-                        const popupContent = alt ? `<b>Shared Location</b><br>Altitude: ${alt}` : `<b>Shared Location</b>`;
-                        sharedMarker.bindPopup(popupContent).openPopup();
-                        
-                        map.setView(latlng, 15);
-                        showToast('Viewing shared location', 'success');
-                    }
-                }
-            }
-        }
-
         async function initMap() {
             await openDB();
 
@@ -1387,13 +1258,8 @@
             window.addEventListener('online', updateOnlineStatus);
             window.addEventListener('offline', updateOnlineStatus);
 
-            // Check for shared location from URL
-            checkSharedLocation();
-
-            // Try to get user location on load (only if no shared location)
-            if (!window.location.search.includes('shared')) {
-                locateUser();
-            }
+            // Try to get user location on load
+            locateUser();
         }
 
         // ─── Solar & Time Logic ───
@@ -1745,7 +1611,7 @@
         }
 
         async function setWaypoint(type, latlng) {
-            const label = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+            const label = `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
             if (type === 'start') {
                 routeStart = latlng;
                 document.getElementById('routeFrom').value = label;
@@ -1753,7 +1619,7 @@
                 startMarker = L.marker(latlng, {
                     icon: L.divIcon({
                         className: 'start-marker',
-                        html: '<div style="background:#2563eb; width:12px; height:12px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 10px rgba(0,0,0,0.5)"></div>',
+                        html: '<div style="background:#fbbf24; width:12px; height:12px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 10px rgba(0,0,0,0.5)"></div>',
                         iconSize: [12, 12]
                     })
                 }).addTo(map);
@@ -1768,30 +1634,6 @@
                         iconSize: [12, 12]
                     })
                 }).addTo(map);
-            }
-        }
-
-        function parseCoordinates(val) {
-            if (!val) return null;
-            const parts = val.split(/[\s,]+/);
-            if (parts.length >= 2) {
-                const lat = parseFloat(parts[0]);
-                const lng = parseFloat(parts[1]);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    return { lat, lng };
-                }
-            }
-            return null;
-        }
-
-        async function copyCoord(type) {
-            const val = document.getElementById(type === 'lat' ? 'infoLat' : 'infoLng').textContent;
-            if (val === '—') return;
-            try {
-                await navigator.clipboard.writeText(val);
-                showToast(`Copied ${type === 'lat' ? 'Latitude' : 'Longitude'}`, 'success');
-            } catch (err) {
-                showToast('Failed to copy', 'error');
             }
         }
 
@@ -1815,9 +1657,9 @@
 
                 if (routeLayer) map.removeLayer(routeLayer);
                 routeLayer = L.polyline(coordinates, {
-                    color: '#2563eb',
-                    weight: 6,
-                    opacity: 0.9,
+                    color: '#fbbf24',
+                    weight: 5,
+                    opacity: 0.8,
                     lineJoin: 'round'
                 }).addTo(map);
 
@@ -2041,20 +1883,6 @@
             }, err => {
                 showToast('Could not get location', 'error');
             });
-        });
-
-        // ─── Manual Input Logic ───
-        ['routeFrom', 'routeTo'].forEach(id => {
-            const input = document.getElementById(id);
-            input.addEventListener('change', () => {
-                const type = id === 'routeFrom' ? 'start' : 'end';
-                const latlng = parseCoordinates(input.value);
-                if (latlng) {
-                    setWaypoint(type, latlng);
-                    map.panTo(latlng);
-                }
-            });
-            input.addEventListener('focus', stopSelecting);
         });
 
         // ─── Keyboard shortcuts ───
