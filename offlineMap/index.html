@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Offline Map</title>
+    <meta name="description" content="Offline-capable interactive map with GPS tracking and tile caching">
+
+    <!-- Leaflet CSS (local) -->
+    <link rel="stylesheet" href="libs/leaflet/leaflet.css" />
+    <!-- custome css -->
+    <link rel="stylesheet" href="assets/custome.css" />
+
+
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <h1 onclick="window.location.href='index.html'">📍 Offline Map</h1>
+        <div class="status-badge" id="statusBadge">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Checking...</span>
+        </div>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-box hidden" id="searchBox">
+        <input type="text" id="searchInput" placeholder="Search location..." autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <!-- Map -->
+    <div id="map"></div>
+
+    <!-- Info Panel -->
+    <div class="info-panel" id="infoPanel">
+        <div class="info-row">
+            <span class="info-label">Latitude</span>
+            <span class="info-value coord">
+                <span id="infoLat">—</span>
+                <span class="copy-btn" onclick="copyCoord('lat')" title="Copy Latitude">📋</span>
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Longitude</span>
+            <span class="info-value coord">
+                <span id="infoLng">—</span>
+                <span class="copy-btn" onclick="copyCoord('lng')" title="Copy Longitude">📋</span>
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Zoom</span>
+            <span class="info-value" id="infoZoom">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Altitude</span>
+            <span class="info-value" id="infoAlt">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Current Time</span>
+            <span class="info-value" id="infoTime">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Sunrise</span>
+            <span class="info-value" id="infoSunrise">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Sunset</span>
+            <span class="info-value" id="infoSunset">—</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Tiles Cached</span>
+            <span class="info-value" id="infoCached">0</span>
+        </div>
+        <div class="share-row">
+            <button class="share-btn" id="btnShare" onclick="shareLocation()">
+                <span class="icon">🔗</span>
+                Share Link
+            </button>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="ctrl-btn" id="btnLocate" title="My Location">📍</button>
+        <button class="ctrl-btn" id="btnSearch" title="Search">🔍</button>
+        <button class="ctrl-btn" id="btnTheme" title="Toggle Dark/Light">🌙</button>
+        <button class="ctrl-btn" id="btnLayers" title="Cache Tiles">💾</button>
+        <button class="ctrl-btn" id="btnZoomIn" title="Zoom In">+</button>
+        <button class="ctrl-btn" id="btnZoomOut" title="Zoom Out">−</button>
+        <button class="ctrl-btn" id="btnRouting" title="Routing">
+            <span class="icon">🛣️</span>
+        </button>
+        <button class="ctrl-btn" id="btnInfo" title="Information">ℹ️</button>
+    </div>
+
+    <!-- Cache Panel -->
+    <div class="cache-panel hidden" id="cachePanel">
+        <h3>⚡ Tile Cache Manager</h3>
+        <div class="cache-actions">
+            <button class="cache-btn" id="btnCacheView" onclick="cacheCurrentView()">
+                <span class="icon">📥</span>
+                Cache current view
+            </button>
+            <button class="cache-btn" id="btnCacheArea" onclick="cacheArea()">
+                <span class="icon">🗺️</span>
+                Cache area (zoom 10–16)
+            </button>
+            <button class="cache-btn danger" id="btnClearCache" onclick="clearTileCache()">
+                <span class="icon">🗑️</span>
+                Clear all cached tiles
+            </button>
+        </div>
+        <div class="cache-stats" id="cacheStats">
+            Cached: <span id="cacheCount">0</span> tiles
+        </div>
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Caching...</div>
+        </div>
+    </div>
+
+    <!-- Routing Panel -->
+    <div class="routing-panel hidden" id="routingPanel">
+        <h3>🛣️ Route Planner</h3>
+        <div class="input-group">
+            <input type="text" id="routeFrom" placeholder="Start point (click map or paste lat,lng)">
+            <button class="select-btn" id="btnCurrentStart" title="Use current location">📍</button>
+            <button class="select-btn" id="btnSelectStart" onclick="startSelecting('start')"
+                title="Select on map">👆</button>
+        </div>
+        <div class="input-group">
+            <input type="text" id="routeTo" placeholder="Destination (click map or paste lat,lng)">
+            <button class="select-btn" id="btnSelectEnd" onclick="startSelecting('end')"
+                title="Select on map">👆</button>
+        </div>
+        <div class="route-actions">
+            <button class="route-btn secondary" id="btnSwapRoute" title="Swap Start and End">🔄</button>
+            <button class="route-btn primary" id="btnGetRoute">Get Route</button>
+            <button class="route-btn danger" id="btnClearRoute">Clear</button>
+        </div>
+        <div class="route-summary">
+            Distance: <span id="routeDist">0 km</span> | Time: <span id="routeTime">0 min</span>
+        </div>
+        <div class="route-instructions" id="routeInstructions">
+            <ul id="instructionList">
+                <!-- Instructions will be inserted here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-title">Clear Cache?</div>
+            <div class="modal-text">This will delete all offline tiles for both light and dark themes. You will need an
+                internet connection to view these areas again.</div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="modalCancel">Cancel</button>
+                <button class="modal-btn confirm" id="modalConfirm">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS (local) -->
+    <script src="libs/leaflet/leaflet.js"></script>
+    <!-- custome js -->
+    <script src="assets/custome.js"></script>
+</body>
+
+</html>

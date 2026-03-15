@@ -1,0 +1,20 @@
+[
+  {
+    "name": "New Delhi",
+    "lat": 28.6139,
+    "lon": 77.2090,
+    "display_name": "New Delhi, Delhi, India"
+  },
+  {
+    "name": "Mumbai",
+    "lat": 19.0760,
+    "lon": 72.8777,
+    "display_name": "Mumbai, Maharashtra, India"
+  },
+  {
+    "name": "Bangalore",
+    "lat": 12.9716,
+    "lon": 77.5946,
+    "display_name": "Bangalore, Karnataka, India"
+  }
+]
