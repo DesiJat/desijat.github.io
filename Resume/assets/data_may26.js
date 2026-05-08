@@ -29,7 +29,7 @@ const resumeData = {
     {
       title: "Senior Software Engineer",
       company: "Antier Solutions (Mohali, Punjab, India)",
-      dates: "January 2021 - April 2026",
+      dates: "January 2021 - Present",
       details: [
         "Designed and developed scalable backend systems using Node.js, TypeScript, NestJS, and microservices architecture.",
         "Built and maintained Web3-based FinTech applications integrating Ethereum, Bitcoin, Ripple, Cardano, and other cryptocurrencies.",
@@ -104,15 +104,15 @@ const resumeData = {
     },
     {
       name: "Web3",
-      skills: ["Ethereum", "Bitcoin", "XRP", "Fireblocks", "RWA", "ERC20", "NFT", "EVM-based Chains", "UTXO-based Chains", "Ganache"]
+      skills: ["Ethereum", "Bitcoin", "XRP", "Fireblocks", "RWA", "ERC20", "NFT", "EVM-based Chains", "UTXO-based Chains", "Solidity Smart Contracts", "Ganache", "Hardhat"]
     },
     {
       name: "AI",
-      skills: ["llama.cpp", "LLM Integrations", "Ollama", "GGUF models", "Google Gemini API", "VectorDB"]
+      skills: ["llama.cpp", "LLM Integrations", "Ollama", "GGUF models", "Google Gemini API", "vectorDB"]
     },
     {
       name: "Tools & Libraries",
-      skills: ["Git", "Jira", "Stripe", "PayPal", "Swagger", "JWT", "TypeORM", "BullMQ", "Passport.js", "MinIO", "JMeter", "Postman", "k6"]
+      skills: ["Git", "Jira", "Stripe", "PayPal", "Swagger", "JWT", "TypeORM", "BullMQ", "Passport.js", "MinIO"]
     },
     {
       name: "Languages",
@@ -138,7 +138,7 @@ const resumeData = {
     {
       name: "AI-Powered Automation & Multi-Purpose Chatbot Platform",
       desc: "Developed a comprehensive AI platform featuring a Node.js backend and a modern frontend for deploying automated chatbots across diverse domains. Integrated local LLMs via Ollama and GGUF models for data privacy, alongside third-party APIs like Google Gemini for advanced reasoning. Scaled intelligent workflows for automated customer support, document analysis, and task automation.",
-      technology: ["Node.js", "Express.js", "Ollama", "llama.cpp", "GGUF models", "Google Gemini API", "LLMs", "VectorDB", "GraphQL"],
+      technology: ["Node.js", "Express.js", "Ollama", "llama.cpp", "GGUF models", "Google Gemini API", "LLMs"],
     },
     {
       name: "Enterprise Multi-Tenant Employee Monitoring & Project Management Platform",
