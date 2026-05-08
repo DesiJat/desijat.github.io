@@ -84,7 +84,7 @@ const resumeData = {
   skillCategories: [
     {
       name: "Backend",
-      skills: ["Node.js", "NestJS", "Express.js", "gRPC", "GraphQL", "Laravel"]
+      skills: ["Node.js", "NestJS", "Express.js", "gRPC", "GraphQL"]
     },
     {
       name: "Frontend",
@@ -114,10 +114,10 @@ const resumeData = {
       name: "Tools & Libraries",
       skills: ["Git", "Jira", "Stripe", "PayPal", "Swagger", "JWT", "TypeORM", "BullMQ", "Passport.js", "MinIO", "JMeter", "Postman", "k6"]
     },
-    {
-      name: "Languages",
-      skills: ["TypeScript", "JavaScript", "PHP"]
-    }
+    // {
+    //   name: "Languages",
+    //   skills: ["TypeScript", "JavaScript", "PHP"]
+    // }
   ],
   projects: [
     {
