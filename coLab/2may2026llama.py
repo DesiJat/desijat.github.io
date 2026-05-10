@@ -183,7 +183,6 @@ def start_llama_server():
     cmd1 = f"""
     ./{BUILD_NAME}/bin/llama-server \
       -hf {MODEL_NAME} \
-      -ngl 99 \
       --host 0.0.0.0 \
       --port {PORT}
     """
@@ -253,9 +252,9 @@ def main():
     ensure_dir(BASE_DIR) # create working dir
     setup_env()
     # install_system()
-    build_llama()
+    # build_llama()
     # copy_hf_cache()
-    # start_llama_server()
+    start_llama_server()
     # check_server()
     # cloudflared_download()
     # cloudflared_run()
