@@ -1,0 +1,7 @@
+*/hf-cache/
+*/buildGpu/
+*/buildCpu/
+*/ggml-org/
+*/gguf/
+.DS_Store
+*.DS_Store
