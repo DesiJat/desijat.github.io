@@ -5,7 +5,8 @@ const path = require('path');
 const mapType = 'light'; // light or dark
 const folderName = 'tiles1';
 
-const BASE_DIR = `/Users/apple/data/camera/public/map/${folderName}/${mapType}`;
+// const BASE_DIR = `/Users/apple/data/camera/public/map/${folderName}/${mapType}`;
+const BASE_DIR = `/Users/apple/data/desijat.github.io/offlineMap/${folderName}/${mapType}`;
 const LAT = 30.703852;
 const LNG = 76.708162;
 const MIN_ZOOM = 2;
