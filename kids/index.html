@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kids Room | Alphabet, Numbers, Rhymes & Writing Tracing Board</title>
+  <meta name="description" content="An interactive premium learning space for children to practice alphabets, trace writing, count numbers, and sing nursery rhymes. Includes a customizable voice troubleshooter and difficulty levels.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-light">
+
+  <div id="app-container">
+    
+    <!-- Sidebar Navigation (Desktop) / Nav Controller (Mobile) -->
+    <aside id="sidebar">
+      <div>
+        <div class="brand-section">
+          <h1 class="brand-title">🧸 KIDS ROOM</h1>
+        </div>
+        
+        <nav>
+          <ul class="nav-links">
+            <li class="nav-item active" data-target="home">
+              <button id="nav-btn-home" aria-label="Go to Home Screen">
+                <span class="nav-icon">🏡</span>
+                <span>Home</span>
+              </button>
+            </li>
+            <li class="nav-item" data-target="alphabet">
+              <button id="nav-btn-alphabet" aria-label="Go to Alphabet Classroom">
+                <span class="nav-icon">🔤</span>
+                <span>Alphabet</span>
+              </button>
+            </li>
+            <li class="nav-item" data-target="varnamala">
+              <button id="nav-btn-varnamala" aria-label="Go to Hindi Varnamala">
+                <span class="nav-icon">🕉️</span>
+                <span>वर्णमाला</span>
+              </button>
+            </li>
+            <li class="nav-item" data-target="numbers">
+              <button id="nav-btn-numbers" aria-label="Go to Numbers Playground">
+                <span class="nav-icon">🔢</span>
+                <span>Numbers</span>
+              </button>
+            </li>
+            <li class="nav-item" data-target="rhymes">
+              <button id="nav-btn-rhymes" aria-label="Go to Hindi Rhymes Theater">
+                <span class="nav-icon">🎶</span>
+                <span>Rhymes</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Settings panel inside sidebar -->
+      <div class="settings-box">
+        <div class="setting-row">
+          <span class="setting-label">Theme</span>
+          <div class="theme-options">
+            <button class="theme-btn active" data-theme="light">☀️ Light</button>
+            <button class="theme-btn" data-theme="dark">🌙 Dark</button>
+            <button class="theme-btn" data-theme="epaper">📖 Ink</button>
+          </div>
+        </div>
+        
+        <div class="setting-row">
+          <span class="setting-label">Sound FX</span>
+          <div class="audio-btn-wrapper">
+            <button class="audio-toggle-btn" id="sound-toggle" aria-label="Toggle Sound Effects">
+              <span id="sound-icon">🔊</span>
+              <span id="sound-text">Sound: ON</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <span class="setting-label">Troubleshoot</span>
+          <div class="audio-btn-wrapper">
+            <button class="audio-toggle-btn" id="diag-open-btn" title="Open Speech & Sound Diagnostics">
+              <span>🔧</span>
+              <span>Diagnostics</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main learning viewport content -->
+    <main id="main-panel">
+      
+      <!-- Mobile Quick header utility bar -->
+      <div class="mobile-utility-bar">
+        <div class="mobile-logo">🧸 Kids Room</div>
+        <div class="mobile-actions">
+          <button class="mobile-theme-btn" id="mobile-theme-btn" title="Change Theme" aria-label="Change Theme Icon">☀️</button>
+          <button class="mobile-sound-btn" id="mobile-sound-btn" title="Toggle Sound" aria-label="Toggle Sound Icon">🔊</button>
+          <button class="mobile-diag-btn" id="mobile-diag-btn" title="Diagnostics" aria-label="Open Diagnostics">🔧</button>
+        </div>
+      </div>
+
+      <!-- iOS Sound Advisory alert Banner -->
+      <div id="ios-sound-banner" style="display: none;">
+        <span>🔊 <strong>iOS/Safari Sound Tip:</strong> If you only hear drum pops but no voice reading the cards, please make sure your device's physical <strong>Silent/Mute switch</strong> is turned <strong>OFF</strong>. Web Speech requires silent mode to be inactive.</span>
+        <button onclick="document.getElementById('ios-sound-banner').style.display='none'" class="close-banner-btn">&times;</button>
+      </div>
+
+      <!-- SECTION 1: HOME -->
+      <section id="home-section" class="content-section active">
+        <div class="welcome-decorations">
+          <div class="cloud cloud-1"></div>
+          <div class="cloud cloud-2"></div>
+        </div>
+        
+        <div class="section-header" style="z-index: 2;">
+          <div>
+            <h2 class="section-title">Hello Little Friend! 👋</h2>
+            <p class="section-subtitle">What would you like to explore and learn today?</p>
+          </div>
+        </div>
+        
+        <div class="welcome-grid" style="z-index: 2;">
+          <div class="welcome-card" style="--card-color: var(--color-primary)">
+            <span class="welcome-card-icon">🔤</span>
+            <h3 class="welcome-card-title">ABC Alphabet</h3>
+            <p class="welcome-card-desc">Practice uppercase letters, sound them out, draw them on the canvas board, and play matching games!</p>
+            <button class="welcome-card-btn" onclick="app.switchSection('alphabet')">Let's Go!</button>
+          </div>
+
+          <div class="welcome-card" style="--card-color: var(--color-accent)">
+            <span class="welcome-card-icon">🕉️</span>
+            <h3 class="welcome-card-title">हिन्दी वर्णमाला</h3>
+            <p class="welcome-card-desc">Practice Hindi vowels and consonants, trace writing outlines, and play vocabulary games!</p>
+            <button class="welcome-card-btn" onclick="app.switchSection('varnamala')">Let's Go!</button>
+          </div>
+
+          <div class="welcome-card" style="--card-color: var(--color-secondary)">
+            <span class="welcome-card-icon">🔢</span>
+            <h3 class="welcome-card-title">123 Numbers</h3>
+            <p class="welcome-card-desc">Count from 1 to 10 with interactive balloons, pop items, and fun matching quizzes!</p>
+            <button class="welcome-card-btn" onclick="app.switchSection('numbers')">Let's Go!</button>
+          </div>
+
+          <div class="welcome-card" style="--card-color: var(--color-tertiary)">
+            <span class="welcome-card-icon">🎶</span>
+            <h3 class="welcome-card-title">Hindi Rhymes</h3>
+            <p class="welcome-card-desc">Sing nursery rhymes (मछली, चंदा मामा, तितली, घोड़ा) with dancing characters and lyric tracking!</p>
+            <button class="welcome-card-btn" onclick="app.switchSection('rhymes')">Let's Go!</button>
+          </div>
+        </div>
+
+        <div class="home-footer-troubleshoot" style="z-index: 2;">
+          🔊 Having voice problems? <a href="#" id="home-diag-link">Open Speech Diagnostics Panel</a>
+        </div>
+      </section>
+
+      <!-- SECTION 2: ALPHABET -->
+      <section id="alphabet-section" class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">ABC Alphabet Room</h2>
+            <p class="section-subtitle">Tap a card to hear it, flip to see its word, or play the quiz!</p>
+          </div>
+          <div class="section-actions">
+            <button class="action-btn active" id="alpha-mode-cards">🎴 Flash Cards</button>
+            <button class="action-btn" id="alpha-mode-quiz">🎮 Quiz Game</button>
+          </div>
+        </div>
+        
+        <!-- Cards Grid View -->
+        <div id="alpha-cards-container" class="alphabet-grid">
+          <!-- Dynamic cards injected via JS -->
+        </div>
+        
+        <!-- Quiz View -->
+        <div id="alpha-quiz-container" style="display: none; width: 100%;">
+          <div class="quiz-container">
+            <!-- Difficulty Selector tabs -->
+            <div class="difficulty-menu-wrapper">
+              <span class="diff-label">Difficulty:</span>
+              <div class="diff-tabs" id="alpha-diff-tabs">
+                <button class="diff-tab active" data-diff="easy" aria-label="Select Easy difficulty">🟢 Easy</button>
+                <button class="diff-tab" data-diff="medium" aria-label="Select Medium difficulty">🟡 Medium</button>
+                <button class="diff-tab" data-diff="hard" aria-label="Select Hard difficulty">🔴 Hard</button>
+              </div>
+            </div>
+
+            <div class="quiz-score-header">
+              <span id="alpha-quiz-prompt-text">Find the letter:</span>
+              <span>Score: <span class="quiz-score-num" id="alpha-score">0</span> ⭐</span>
+            </div>
+            
+            <div class="quiz-question-box">
+              <div class="quiz-instruction" id="alpha-quiz-instruction">Tap the card for:</div>
+              <div class="quiz-question-target" id="alpha-quiz-target">A</div>
+            </div>
+            
+            <div class="quiz-options" id="alpha-quiz-options">
+              <!-- Dynamic answers injected via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Results Screen -->
+        <div id="alpha-result-container" class="quiz-results-screen">
+          <div class="quiz-results-emoji">🏆</div>
+          <h2 class="quiz-results-title">Super Job!</h2>
+          <p class="quiz-results-score">You scored <span id="alpha-final-score">0</span> out of 10 stars!</p>
+          <button class="action-btn" id="alpha-restart-btn">🔄 Play Again</button>
+        </div>
+      </section>
+
+      <!-- SECTION: HINDI VARNAMALA -->
+      <section id="varnamala-section" class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">हिन्दी वर्णमाला (Varnamala Room)</h2>
+            <p class="section-subtitle">Tap a card to hear it, flip to see its word, or play the quiz!</p>
+          </div>
+          <div class="section-actions">
+            <button class="action-btn active" id="varna-mode-cards">🎴 Flash Cards</button>
+            <button class="action-btn" id="varna-mode-quiz">🎮 Quiz Game</button>
+          </div>
+        </div>
+        
+        <!-- Cards Grid View -->
+        <div id="varna-cards-container" class="alphabet-grid">
+          <!-- Dynamic cards injected via JS -->
+        </div>
+        
+        <!-- Quiz View -->
+        <div id="varna-quiz-container" style="display: none; width: 100%;">
+          <div class="quiz-container">
+            <!-- Difficulty Selector tabs -->
+            <div class="difficulty-menu-wrapper">
+              <span class="diff-label">Difficulty:</span>
+              <div class="diff-tabs" id="varna-diff-tabs">
+                <button class="diff-tab active" data-diff="easy" aria-label="Select Easy difficulty">🟢 Easy</button>
+                <button class="diff-tab" data-diff="medium" aria-label="Select Medium difficulty">🟡 Medium</button>
+                <button class="diff-tab" data-diff="hard" aria-label="Select Hard difficulty">🔴 Hard</button>
+              </div>
+            </div>
+
+            <div class="quiz-score-header">
+              <span id="varna-quiz-prompt-text">Find the letter:</span>
+              <span>Score: <span class="quiz-score-num" id="varna-score">0</span> ⭐</span>
+            </div>
+            
+            <div class="quiz-question-box">
+              <div class="quiz-instruction" id="varna-quiz-instruction">Tap the card for:</div>
+              <div class="quiz-question-target" id="varna-quiz-target">अ</div>
+            </div>
+            
+            <div class="quiz-options" id="varna-quiz-options">
+              <!-- Dynamic answers injected via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Results Screen -->
+        <div id="varna-result-container" class="quiz-results-screen">
+          <div class="quiz-results-emoji">🏆</div>
+          <h2 class="quiz-results-title">Super Job!</h2>
+          <p class="quiz-results-score">You scored <span id="varna-final-score">0</span> out of 10 stars!</p>
+          <button class="action-btn" id="varna-restart-btn">🔄 Play Again</button>
+        </div>
+      </section>
+
+      <!-- SECTION 3: NUMBERS -->
+      <section id="numbers-section" class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">123 Numbers Room</h2>
+            <p class="section-subtitle">Learn numbers and tap floating items to count them!</p>
+          </div>
+          <div class="section-actions">
+            <button class="action-btn active" id="num-mode-learn">🔢 Count Room</button>
+            <button class="action-btn" id="num-mode-quiz">🎮 Quiz Game</button>
+          </div>
+        </div>
+        
+        <!-- Learn Panel -->
+        <div class="numbers-container" id="num-learn-container">
+          <div class="numbers-grid" id="numbers-grid-buttons">
+            <!-- Dynamic number cards injected via JS -->
+          </div>
+          
+          <div class="numbers-display-panel">
+            <div class="number-panel-top" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <div class="big-number" id="number-display-big">1</div>
+              <div class="big-number-word" id="number-display-word">One</div>
+              <button class="tracing-btn-mini" id="number-trace-btn" style="margin-top: 10px; font-size: 0.9rem; padding: 6px 14px; border: 3px solid var(--text-main); border-radius: var(--border-radius-sm); font-weight: bold; background: var(--bg-card); color: var(--text-main); box-shadow: var(--shadow-hover);" onclick="tracingBoard.open(state.selectedNumber.toString());">✍️ Trace Number</button>
+            </div>
+            
+            <div class="counting-playground" id="counting-playground">
+              <!-- Dynamic count assets injected here -->
+            </div>
+            
+            <div class="number-panel-bottom">
+              Tap the items to count them! 👆
+            </div>
+          </div>
+        </div>
+        
+        <!-- Quiz Panel -->
+        <div id="num-quiz-container" style="display: none; width: 100%;">
+          <div class="quiz-container">
+            <!-- Difficulty Selector tabs -->
+            <div class="difficulty-menu-wrapper">
+              <span class="diff-label">Difficulty:</span>
+              <div class="diff-tabs" id="num-diff-tabs">
+                <button class="diff-tab active" data-diff="easy" aria-label="Select Easy difficulty">🟢 Easy</button>
+                <button class="diff-tab" data-diff="medium" aria-label="Select Medium difficulty">🟡 Medium</button>
+                <button class="diff-tab" data-diff="hard" aria-label="Select Hard difficulty">🔴 Hard</button>
+              </div>
+            </div>
+
+            <div class="quiz-score-header">
+              <span id="num-quiz-prompt-text">Count & Play:</span>
+              <span>Score: <span class="quiz-score-num" id="num-score">0</span> ⭐</span>
+            </div>
+            
+            <div class="quiz-question-box">
+              <div class="quiz-instruction" id="num-quiz-instruction">Count the items and select the correct number:</div>
+              <div class="counting-playground" id="num-quiz-playground">
+                <!-- Quiz items to count -->
+              </div>
+            </div>
+            
+            <div class="quiz-options" id="num-quiz-options">
+              <!-- Dynamic answers injected via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Results Screen -->
+        <div id="num-result-container" class="quiz-results-screen">
+          <div class="quiz-results-emoji">🎖️</div>
+          <h2 class="quiz-results-title">Fantastic!</h2>
+          <p class="quiz-results-score">You scored <span id="num-final-score">0</span> out of 10 stars!</p>
+          <button class="action-btn" id="num-restart-btn">🔄 Play Again</button>
+        </div>
+      </section>
+
+      <!-- SECTION 4: HINDI RHYMES -->
+      <section id="rhymes-section" class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">हिंदी बालगीत (Hindi Rhymes)</h2>
+            <p class="section-subtitle">Play a rhyme, watch characters dance, and sing along!</p>
+          </div>
+        </div>
+        
+        <div class="rhymes-layout">
+          <!-- Rhyme selector sidebar list -->
+          <ul class="rhymes-list" id="rhymes-selection-list">
+            <!-- Injected by JS -->
+          </ul>
+          
+          <!-- Player Panel Screen -->
+          <div class="rhyme-player-panel">
+            <!-- CSS Animated Scene Viewport -->
+            <div class="rhyme-visuals-screen">
+              <!-- Scene 1: Fish (Machhli) -->
+              <div class="rhyme-scene fish-scene" id="scene-fish">
+                <div class="water"></div>
+                <div class="fish">🐠</div>
+                <div class="fish-2">🐡</div>
+              </div>
+              
+              <!-- Scene 2: Moon (Chanda Mama) -->
+              <div class="rhyme-scene moon-scene" id="scene-moon">
+                <div class="stars"></div>
+                <div class="moon">🌙</div>
+                <div class="clouds">
+                  <span>☁️</span>
+                  <span>☁️</span>
+                </div>
+              </div>
+              
+              <!-- Scene 3: Butterfly (Titli) -->
+              <div class="rhyme-scene butterfly-scene" id="scene-butterfly">
+                <div class="garden">
+                  <span>🌻</span>
+                  <span>🌸</span>
+                  <span>🌷</span>
+                </div>
+                <div class="butterfly">🦋</div>
+              </div>
+              
+              <!-- Scene 4: Rocking Horse (Lakdi Ki Kathi) -->
+              <div class="rhyme-scene horse-scene" id="scene-horse">
+                <div class="road"></div>
+                <div class="horse">🐎</div>
+              </div>
+            </div>
+            
+            <!-- Lyric readers -->
+            <div class="rhyme-lyrics-panel">
+              <div class="rhyme-controls">
+                <button class="rhyme-btn btn-play" id="rhyme-play-btn" aria-label="Toggle Rhymes Play State">▶️ Play Song</button>
+                <button class="rhyme-btn btn-stop" id="rhyme-stop-btn" aria-label="Stop Rhymes Playback">⏹️ Stop</button>
+                <button class="rhyme-btn btn-lang" id="rhyme-lang-btn" title="Toggle Voice language">🗣️ Voice: Native Hindi</button>
+              </div>
+              
+              <div class="lyrics-container" id="rhymes-lyrics-container">
+                <div class="lyric-line">Select a rhyme to start singing!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <!-- MODAL: Tracing Canvas Overlay -->
+  <div class="modal-overlay" id="tracing-modal">
+    <div class="modal-content">
+      <button class="modal-close" id="tracing-close-btn" aria-label="Close tracing modal">×</button>
+      <div class="tracing-header">
+        <h3 class="tracing-title">Trace the Letter <span id="tracing-letter-title">A</span></h3>
+        <p class="tracing-subtitle">Draw along the outline on the canvas below!</p>
+      </div>
+      
+      <div class="tracing-canvas-wrapper">
+        <div class="canvas-guide-letter" id="tracing-guide-char">A</div>
+        <canvas id="tracing-canvas"></canvas>
+      </div>
+      
+      <div class="tracing-actions">
+        <button class="tracing-btn btn-clear" id="tracing-clear-btn" aria-label="Clear trace drawing">🧹 Clear</button>
+        <button class="tracing-btn btn-done" id="tracing-done-btn" aria-label="Save trace drawing">🎉 Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confetti Container -->
+  <div id="confetti-container" style="position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:9999;"></div>
+
+  <!-- MODAL: Speech & Audio Diagnostics Troubleshooter -->
+  <div class="modal-overlay" id="diagnostics-modal">
+    <div class="modal-content diagnostics-content">
+      <button class="modal-close" id="diagnostics-close-btn" aria-label="Close diagnostics modal">×</button>
+      <div class="diagnostics-header">
+        <h3 class="diagnostics-title">🔧 Speech & Audio Diagnostics</h3>
+        <p class="diagnostics-subtitle">Troubleshoot Web Audio sound triggers and Speech Synthesis output logs.</p>
+      </div>
+      
+      <div class="diagnostics-body">
+        <div class="diagnostics-grid">
+          <!-- Status Card -->
+          <div class="diag-card">
+            <h4>System Status</h4>
+            <ul class="diag-status-list">
+              <li>Web Audio API: <span id="diag-status-audio" class="badge">Checking...</span></li>
+              <li>Speech Synthesis: <span id="diag-status-speech" class="badge">Checking...</span></li>
+              <li>Active Voices: <span id="diag-status-voices-count" class="badge">0</span></li>
+            </ul>
+          </div>
+          
+          <!-- Test Card -->
+          <div class="diag-card">
+            <h4>Voice & Sound Tester</h4>
+            <div class="diag-field">
+              <label for="diag-voice-select">Choose Voice</label>
+              <select id="diag-voice-select" class="diag-select">
+                <option value="">(Default Browser Voice)</option>
+              </select>
+            </div>
+            <div class="diag-field">
+              <label for="diag-test-text">Test Text</label>
+              <input type="text" id="diag-test-text" class="diag-input" value="Hello! Can you hear me speaking?">
+            </div>
+            <div class="diag-actions">
+              <button class="diag-btn btn-primary" id="diag-btn-speech-test">🗣️ Test Speech</button>
+              <button class="diag-btn btn-secondary" id="diag-btn-audio-test">🎵 Test Sound</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal Command Box -->
+        <div class="diag-card mac-troubleshoot">
+          <h4>🍏 macOS Speech Fixing Instructions</h4>
+          <p>If you only hear the drum pops but no voice reading, the macOS speech synthesis daemon might be locked up. Copy and run this command in your Mac's <strong>Terminal</strong> application to restart it:</p>
+          <div class="code-terminal-wrapper">
+            <code id="diag-terminal-command">killall SpeechSynthesisServer com.apple.speech.speechsynthesisd</code>
+            <button class="copy-terminal-btn" id="diag-btn-copy-command">📋 Copy</button>
+          </div>
+        </div>
+
+        <!-- Logs Box -->
+        <div class="diag-card">
+          <h4>Diagnostic Activity Log</h4>
+          <div class="diag-log-console" id="diag-log-console">
+            <!-- Dynamic logs will be printed here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
