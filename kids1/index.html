@@ -16,17 +16,41 @@
     
     <!-- Sidebar Navigation (Desktop) / Nav Controller (Mobile) -->
     <aside id="sidebar">
-      <div class="sidebar-top">
+      <div>
         <div class="brand-section">
           <h1 class="brand-title">🧸 KIDS ROOM</h1>
         </div>
         
         <nav>
-          <ul class="nav-links" id="sidebar-nav-links">
+          <ul class="nav-links">
             <li class="nav-item active" data-target="home">
               <button id="nav-btn-home" aria-label="Go to Home Screen">
                 <span class="nav-icon">🏡</span>
                 <span>Home</span>
+              </button>
+            </li>
+            <li class="nav-item" data-target="alphabet">
+              <button id="nav-btn-alphabet" aria-label="Go to Alphabet Classroom">
+                <span class="nav-icon">🔤</span>
+                <span>Alphabet</span>
+              </button>
+            </li>
+            <li class="nav-item" data-target="varnamala">
+              <button id="nav-btn-varnamala" aria-label="Go to Hindi Varnamala">
+                <span class="nav-icon">🕉️</span>
+                <span>वर्णमाला</span>
+              </button>
+            </li>
+            <li class="nav-item" data-target="numbers">
+              <button id="nav-btn-numbers" aria-label="Go to Numbers Playground">
+                <span class="nav-icon">🔢</span>
+                <span>Numbers</span>
+              </button>
+            </li>
+            <li class="nav-item" data-target="rhymes">
+              <button id="nav-btn-rhymes" aria-label="Go to Hindi Rhymes Theater">
+                <span class="nav-icon">🎶</span>
+                <span>Rhymes</span>
               </button>
             </li>
           </ul>
@@ -99,8 +123,34 @@
           </div>
         </div>
         
-        <div class="welcome-grid" id="welcome-links-grid" style="z-index: 2;">
-          <!-- Dynamically populated from data.json categories -->
+        <div class="welcome-grid" style="z-index: 2;">
+          <div class="welcome-card" style="--card-color: var(--color-primary)">
+            <span class="welcome-card-icon">🔤</span>
+            <h3 class="welcome-card-title">ABC Alphabet</h3>
+            <p class="welcome-card-desc">Practice uppercase letters, sound them out, draw them on the canvas board, and play matching games!</p>
+            <button class="welcome-card-btn" onclick="app.switchSection('alphabet')">Let's Go!</button>
+          </div>
+
+          <div class="welcome-card" style="--card-color: var(--color-accent)">
+            <span class="welcome-card-icon">🕉️</span>
+            <h3 class="welcome-card-title">हिन्दी वर्णमाला</h3>
+            <p class="welcome-card-desc">Practice Hindi vowels and consonants, trace writing outlines, and play vocabulary games!</p>
+            <button class="welcome-card-btn" onclick="app.switchSection('varnamala')">Let's Go!</button>
+          </div>
+
+          <div class="welcome-card" style="--card-color: var(--color-secondary)">
+            <span class="welcome-card-icon">🔢</span>
+            <h3 class="welcome-card-title">123 Numbers</h3>
+            <p class="welcome-card-desc">Count from 1 to 10 with interactive balloons, pop items, and fun matching quizzes!</p>
+            <button class="welcome-card-btn" onclick="app.switchSection('numbers')">Let's Go!</button>
+          </div>
+
+          <div class="welcome-card" style="--card-color: var(--color-tertiary)">
+            <span class="welcome-card-icon">🎶</span>
+            <h3 class="welcome-card-title">Hindi Rhymes</h3>
+            <p class="welcome-card-desc">Sing nursery rhymes (मछली, चंदा मामा, तितली, घोड़ा) with dancing characters and lyric tracking!</p>
+            <button class="welcome-card-btn" onclick="app.switchSection('rhymes')">Let's Go!</button>
+          </div>
         </div>
 
         <div class="home-footer-troubleshoot" style="z-index: 2;">
@@ -108,31 +158,31 @@
         </div>
       </section>
 
-      <!-- SECTION: DYNAMIC CARD GRID CLASSROOM -->
-      <section id="cards-section" class="content-section">
+      <!-- SECTION 2: ALPHABET -->
+      <section id="alphabet-section" class="content-section">
         <div class="section-header">
           <div>
-            <h2 class="section-title" id="cards-section-title">Classroom</h2>
-            <p class="section-subtitle" id="cards-section-subtitle">Tap a card to hear it, flip to see its word, or play the quiz!</p>
+            <h2 class="section-title">ABC Alphabet Room</h2>
+            <p class="section-subtitle">Tap a card to hear it, flip to see its word, or play the quiz!</p>
           </div>
           <div class="section-actions">
-            <button class="action-btn active" id="cards-mode-btn">🎴 Flash Cards</button>
-            <button class="action-btn" id="cards-quiz-btn">🎮 Quiz Game</button>
+            <button class="action-btn active" id="alpha-mode-cards">🎴 Flash Cards</button>
+            <button class="action-btn" id="alpha-mode-quiz">🎮 Quiz Game</button>
           </div>
         </div>
         
         <!-- Cards Grid View -->
-        <div id="cards-grid-container" class="alphabet-grid">
+        <div id="alpha-cards-container" class="alphabet-grid">
           <!-- Dynamic cards injected via JS -->
         </div>
         
         <!-- Quiz View -->
-        <div id="cards-quiz-container" style="display: none; width: 100%;">
+        <div id="alpha-quiz-container" style="display: none; width: 100%;">
           <div class="quiz-container">
             <!-- Difficulty Selector tabs -->
             <div class="difficulty-menu-wrapper">
               <span class="diff-label">Difficulty:</span>
-              <div class="diff-tabs" id="cards-diff-tabs">
+              <div class="diff-tabs" id="alpha-diff-tabs">
                 <button class="diff-tab active" data-diff="easy" aria-label="Select Easy difficulty">🟢 Easy</button>
                 <button class="diff-tab" data-diff="medium" aria-label="Select Medium difficulty">🟡 Medium</button>
                 <button class="diff-tab" data-diff="hard" aria-label="Select Hard difficulty">🔴 Hard</button>
@@ -140,27 +190,83 @@
             </div>
 
             <div class="quiz-score-header">
-              <span id="cards-quiz-prompt-text">Find:</span>
-              <span>Score: <span class="quiz-score-num" id="cards-score">0</span> ⭐</span>
+              <span id="alpha-quiz-prompt-text">Find the letter:</span>
+              <span>Score: <span class="quiz-score-num" id="alpha-score">0</span> ⭐</span>
             </div>
             
             <div class="quiz-question-box">
-              <div class="quiz-instruction" id="cards-quiz-instruction">Tap the card for:</div>
-              <div class="quiz-question-target" id="cards-quiz-target">A</div>
+              <div class="quiz-instruction" id="alpha-quiz-instruction">Tap the card for:</div>
+              <div class="quiz-question-target" id="alpha-quiz-target">A</div>
             </div>
             
-            <div class="quiz-options" id="cards-quiz-options">
+            <div class="quiz-options" id="alpha-quiz-options">
               <!-- Dynamic answers injected via JS -->
             </div>
           </div>
         </div>
 
         <!-- Quiz Results Screen -->
-        <div id="cards-result-container" class="quiz-results-screen">
+        <div id="alpha-result-container" class="quiz-results-screen">
           <div class="quiz-results-emoji">🏆</div>
-          <h2 class="quiz-results-title" id="cards-result-title">Super Job!</h2>
-          <p class="quiz-results-score">You scored <span id="cards-final-score">0</span> out of 10 stars!</p>
-          <button class="action-btn" id="cards-restart-btn">🔄 Play Again</button>
+          <h2 class="quiz-results-title">Super Job!</h2>
+          <p class="quiz-results-score">You scored <span id="alpha-final-score">0</span> out of 10 stars!</p>
+          <button class="action-btn" id="alpha-restart-btn">🔄 Play Again</button>
+        </div>
+      </section>
+
+      <!-- SECTION: HINDI VARNAMALA -->
+      <section id="varnamala-section" class="content-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">हिन्दी वर्णमाला (Varnamala Room)</h2>
+            <p class="section-subtitle">Tap a card to hear it, flip to see its word, or play the quiz!</p>
+          </div>
+          <div class="section-actions">
+            <button class="action-btn active" id="varna-mode-cards">🎴 Flash Cards</button>
+            <button class="action-btn" id="varna-mode-quiz">🎮 Quiz Game</button>
+          </div>
+        </div>
+        
+        <!-- Cards Grid View -->
+        <div id="varna-cards-container" class="alphabet-grid">
+          <!-- Dynamic cards injected via JS -->
+        </div>
+        
+        <!-- Quiz View -->
+        <div id="varna-quiz-container" style="display: none; width: 100%;">
+          <div class="quiz-container">
+            <!-- Difficulty Selector tabs -->
+            <div class="difficulty-menu-wrapper">
+              <span class="diff-label">Difficulty:</span>
+              <div class="diff-tabs" id="varna-diff-tabs">
+                <button class="diff-tab active" data-diff="easy" aria-label="Select Easy difficulty">🟢 Easy</button>
+                <button class="diff-tab" data-diff="medium" aria-label="Select Medium difficulty">🟡 Medium</button>
+                <button class="diff-tab" data-diff="hard" aria-label="Select Hard difficulty">🔴 Hard</button>
+              </div>
+            </div>
+
+            <div class="quiz-score-header">
+              <span id="varna-quiz-prompt-text">Find the letter:</span>
+              <span>Score: <span class="quiz-score-num" id="varna-score">0</span> ⭐</span>
+            </div>
+            
+            <div class="quiz-question-box">
+              <div class="quiz-instruction" id="varna-quiz-instruction">Tap the card for:</div>
+              <div class="quiz-question-target" id="varna-quiz-target">अ</div>
+            </div>
+            
+            <div class="quiz-options" id="varna-quiz-options">
+              <!-- Dynamic answers injected via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Results Screen -->
+        <div id="varna-result-container" class="quiz-results-screen">
+          <div class="quiz-results-emoji">🏆</div>
+          <h2 class="quiz-results-title">Super Job!</h2>
+          <p class="quiz-results-score">You scored <span id="varna-final-score">0</span> out of 10 stars!</p>
+          <button class="action-btn" id="varna-restart-btn">🔄 Play Again</button>
         </div>
       </section>
 

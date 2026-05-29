@@ -155,19 +155,6 @@ button {
   transition: background-color var(--transition-speed), border var(--transition-speed);
 }
 
-.sidebar-top {
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  flex-grow: 1;
-  margin-bottom: 16px;
-  /* Hide scrollbar but keep functionality */
-  scrollbar-width: none;
-}
-.sidebar-top::-webkit-scrollbar {
-  display: none;
-}
-
 .brand-section {
   text-align: center;
   margin-bottom: 32px;

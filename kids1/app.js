@@ -6,7 +6,8 @@
 
 // --- GLOBAL CURRICULUM DATA STATE ---
 let appData = {
-  categories: [],
+  alphabet: [],
+  varnamala: [],
   numbers: [],
   rhymes: [],
   quizzes: {}
@@ -18,13 +19,19 @@ const state = {
   theme: 'light',
   soundEnabled: true,
   
-  // Card Grid State
-  currentCategory: 'alphabet',
-  cardsDifficulty: 'easy', // 'easy', 'medium', 'hard'
-  cardsQuizActive: false,
-  cardsQuizScore: 0,
-  cardsQuizCount: 0,
-  cardsCurrentTarget: null,
+  // Alphabet State
+  alphaDifficulty: 'easy', // 'easy', 'medium', 'hard'
+  alphaQuizActive: false,
+  alphaQuizScore: 0,
+  alphaQuizCount: 0,
+  alphaCurrentTarget: null,
+  
+  // Varnamala State
+  varnaDifficulty: 'easy', // 'easy', 'medium', 'hard'
+  varnaQuizActive: false,
+  varnaQuizScore: 0,
+  varnaQuizCount: 0,
+  varnaCurrentTarget: null,
   
   // Numbers State
   numDifficulty: 'easy', // 'easy', 'medium', 'hard'
@@ -1006,8 +1013,8 @@ const app = {
 
     // 3. Render dynamic content
     this.setupEventListeners();
-    this.renderNavigationMenu();
-    this.renderWelcomeGrid();
+    this.renderAlphabetCards();
+    this.renderVarnamalaCards();
     this.renderNumbersGrid();
     this.renderRhymesList();
 
@@ -1036,7 +1043,8 @@ const app = {
     state.isPlayingRhyme = false;
     this.updateRhymePlayButtonUI();
     
-    this.resetCardsQuiz();
+    this.resetAlphabetQuiz();
+    this.resetVarnamalaQuiz();
     this.resetNumbersQuiz();
 
     document.querySelectorAll('.content-section').forEach(section => {
@@ -1136,28 +1144,43 @@ const app = {
       });
     }
 
-    // Cards Section Toggle Mode Buttons
-    const cardsModeBtn = document.getElementById('cards-mode-btn');
-    if (cardsModeBtn) {
-      cardsModeBtn.addEventListener('click', () => {
-        this.toggleCardsMode('cards');
-        AudioSynth.play('tap');
-      });
+    // Sound toggle buttons
+    const soundToggle = document.getElementById('sound-toggle');
+    if (soundToggle) {
+      soundToggle.addEventListener('click', () => this.toggleSound());
     }
-    const cardsQuizBtn = document.getElementById('cards-quiz-btn');
-    if (cardsQuizBtn) {
-      cardsQuizBtn.addEventListener('click', () => {
-        this.toggleCardsMode('quiz');
-        AudioSynth.play('tap');
-      });
+    const mobSoundBtn = document.getElementById('mobile-sound-btn');
+    if (mobSoundBtn) {
+      mobSoundBtn.addEventListener('click', () => this.toggleSound());
     }
-    const cardsRestartBtn = document.getElementById('cards-restart-btn');
-    if (cardsRestartBtn) {
-      cardsRestartBtn.addEventListener('click', () => {
-        this.startCardsQuiz();
-        AudioSynth.play('tap');
-      });
-    }
+
+    // Alphabet Section Toggle Mode Buttons
+    document.getElementById('alpha-mode-cards').addEventListener('click', () => {
+      this.toggleAlphabetMode('cards');
+      AudioSynth.play('tap');
+    });
+    document.getElementById('alpha-mode-quiz').addEventListener('click', () => {
+      this.toggleAlphabetMode('quiz');
+      AudioSynth.play('tap');
+    });
+    document.getElementById('alpha-restart-btn').addEventListener('click', () => {
+      this.startAlphabetQuiz();
+      AudioSynth.play('tap');
+    });
+
+    // Varnamala Section Toggle Mode Buttons
+    document.getElementById('varna-mode-cards').addEventListener('click', () => {
+      this.toggleVarnamalaMode('cards');
+      AudioSynth.play('tap');
+    });
+    document.getElementById('varna-mode-quiz').addEventListener('click', () => {
+      this.toggleVarnamalaMode('quiz');
+      AudioSynth.play('tap');
+    });
+    document.getElementById('varna-restart-btn').addEventListener('click', () => {
+      this.startVarnamalaQuiz();
+      AudioSynth.play('tap');
+    });
 
     // Numbers Section Toggle Mode Buttons
     document.getElementById('num-mode-learn').addEventListener('click', () => {
@@ -1207,16 +1230,35 @@ const app = {
         AudioSynth.play('tap');
       });
     }
+    const homeDiagLink = document.getElementById('home-diag-link');
+    if (homeDiagLink) {
+      homeDiagLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        Diagnostics.open();
+        AudioSynth.play('tap');
+      });
+    }
 
     // Quiz Difficulty Selector Menus Bindings
-    document.querySelectorAll('#cards-diff-tabs .diff-tab').forEach(tab => {
+    document.querySelectorAll('#alpha-diff-tabs .diff-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const diff = tab.getAttribute('data-diff');
-        state.cardsDifficulty = diff;
-        document.querySelectorAll('#cards-diff-tabs .diff-tab').forEach(t => t.classList.remove('active'));
+        state.alphaDifficulty = diff;
+        document.querySelectorAll('#alpha-diff-tabs .diff-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         AudioSynth.play('tap');
-        this.startCardsQuiz();
+        this.startAlphabetQuiz();
+      });
+    });
+
+    document.querySelectorAll('#varna-diff-tabs .diff-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const diff = tab.getAttribute('data-diff');
+        state.varnaDifficulty = diff;
+        document.querySelectorAll('#varna-diff-tabs .diff-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        AudioSynth.play('tap');
+        this.startVarnamalaQuiz();
       });
     });
 
@@ -1232,110 +1274,16 @@ const app = {
     });
   },
 
-  renderNavigationMenu() {
-    const navLinks = document.getElementById('sidebar-nav-links');
-    if (!navLinks) return;
-    
-    // Clear dynamic categories, keeping home
-    const homeLi = navLinks.querySelector('li[data-target="home"]');
-    navLinks.innerHTML = '';
-    if (homeLi) navLinks.appendChild(homeLi);
-    
-    appData.categories.forEach(cat => {
-      const li = document.createElement('li');
-      li.className = 'nav-item';
-      li.setAttribute('data-target', cat.id);
-      
-      const text = cat.menuTitle || cat.title;
-      li.innerHTML = `
-        <button id="nav-btn-${cat.id}" aria-label="Go to ${cat.title}">
-          <span class="nav-icon">${cat.icon}</span>
-          <span>${text}</span>
-        </button>
-      `;
-      
-      li.addEventListener('click', () => {
-        if (cat.type === 'cards') {
-          this.loadCardCategory(cat.id);
-        } else {
-          this.switchSection(cat.id);
-        }
-      });
-      navLinks.appendChild(li);
-    });
-  },
-
-  renderWelcomeGrid() {
-    const grid = document.getElementById('welcome-links-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    const colors = ['var(--color-primary)', 'var(--color-accent)', 'var(--color-secondary)', 'var(--color-tertiary)', 'var(--color-correct)'];
-
-    appData.categories.forEach((cat, index) => {
-      const cardColor = colors[index % colors.length];
-      const card = document.createElement('div');
-      card.className = 'welcome-card';
-      card.style.setProperty('--card-color', cardColor);
-      
-      const titleText = state.theme === 'epaper' || cat.id !== 'varnamala' ? cat.title : cat.titleHindi;
-
-      card.innerHTML = `
-        <span class="welcome-card-icon">${cat.icon}</span>
-        <h3 class="welcome-card-title">${titleText}</h3>
-        <p class="welcome-card-desc">${cat.description}</p>
-        <button class="welcome-card-btn">Let's Go!</button>
-      `;
-      
-      card.querySelector('.welcome-card-btn').addEventListener('click', () => {
-        if (cat.type === 'cards') {
-          this.loadCardCategory(cat.id);
-        } else {
-          this.switchSection(cat.id);
-        }
-      });
-      
-      grid.appendChild(card);
-    });
-  },
-
-  // --- DYNAMIC CARDS MODULE ---
-  loadCardCategory(categoryId) {
-    state.currentCategory = categoryId;
-    this.resetCardsQuiz();
-    this.toggleCardsMode('cards');
-
-    const cat = appData.categories.find(c => c.id === categoryId);
-    if (!cat) return;
-
-    const sectionTitle = document.getElementById('cards-section-title');
-    const sectionSubtitle = document.getElementById('cards-section-subtitle');
-    
-    if (sectionTitle) sectionTitle.textContent = cat.title;
-    if (sectionSubtitle) sectionSubtitle.textContent = cat.description;
-
-    this.renderCards();
-    this.switchSection('cards');
-  },
-
-  renderCards() {
-    const container = document.getElementById('cards-grid-container');
+  // --- ALPHABET MODULE ---
+  renderAlphabetCards() {
+    const container = document.getElementById('alpha-cards-container');
     if (!container) return;
     container.innerHTML = '';
 
-    const items = appData[state.currentCategory];
-    const cat = appData.categories.find(c => c.id === state.currentCategory);
-    const lang = cat ? cat.lang : 'en-US';
-
-    if (!items) return;
-
-    items.forEach(item => {
+    appData.alphabet.forEach(item => {
       const card = document.createElement('div');
       card.className = 'letter-card';
       card.setAttribute('data-char', item.char);
-
-      // const translation = item.englishWord ? `<span style="font-size: 0.8rem; color: var(--text-muted); display: block;">(${item.englishWord})</span>` : '';
-      const translation = item.wordMeaning ? `<span style="font-size: 0.8rem; color: var(--text-muted); display: block;">(${item.wordMeaning})</span>` : '';
 
       card.innerHTML = `
         <div class="letter-card-inner">
@@ -1345,7 +1293,296 @@ const app = {
           <div class="letter-card-back" style="background-color: ${item.color}15; border-color: ${item.color}">
             <div class="letter-icon-back" style="font-size: 2.5rem; margin-bottom: 5px;">${item.emoji}</div>
             <span class="letter-word-back">${item.word}</span>
-            ${translation}
+            <button class="tracing-btn-mini" style="margin-top: 10px; font-size: 0.85rem; padding: 4px 8px; border: 2px solid ${item.color}; border-radius: 6px; font-weight: bold; background: var(--bg-card); color: var(--text-main);" onclick="event.stopPropagation(); tracingBoard.open('${item.char}');">✍️ Trace</button>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        card.classList.toggle('flipped');
+        AudioSynth.play('pop');
+        
+        if (card.classList.contains('flipped')) {
+          TTS.speak(`${item.char} for ${item.word}`);
+        } else {
+          TTS.speak(item.char);
+        }
+      });
+
+      container.appendChild(card);
+    });
+  },
+
+  toggleAlphabetMode(mode) {
+    const cardsBtn = document.getElementById('alpha-mode-cards');
+    const quizBtn = document.getElementById('alpha-mode-quiz');
+    const cardsGrid = document.getElementById('alpha-cards-container');
+    const quizContainer = document.getElementById('alpha-quiz-container');
+    const resultContainer = document.getElementById('alpha-result-container');
+
+    if (mode === 'cards') {
+      cardsBtn.classList.add('active');
+      quizBtn.classList.remove('active');
+      cardsGrid.style.display = 'grid';
+      quizContainer.style.display = 'none';
+      resultContainer.style.display = 'none';
+      this.resetAlphabetQuiz();
+    } else {
+      cardsBtn.classList.remove('active');
+      quizBtn.classList.add('active');
+      cardsGrid.style.display = 'none';
+      quizContainer.style.display = 'block';
+      resultContainer.style.display = 'none';
+      this.startAlphabetQuiz();
+    }
+  },
+
+  resetAlphabetQuiz() {
+    state.alphaQuizActive = false;
+    state.alphaQuizScore = 0;
+    state.alphaQuizCount = 0;
+    state.alphaCurrentTarget = null;
+  },
+
+  startAlphabetQuiz() {
+    state.alphaQuizActive = true;
+    state.alphaQuizScore = 0;
+    state.alphaQuizCount = 0;
+    document.getElementById('alpha-result-container').classList.remove('active');
+    document.getElementById('alpha-quiz-container').style.display = 'block';
+    this.nextAlphabetQuestion();
+  },
+
+  nextAlphabetQuestion() {
+    if (state.alphaQuizCount >= 10) {
+      this.showAlphabetResults();
+      return;
+    }
+
+    state.alphaQuizCount++;
+    document.getElementById('alpha-score').textContent = state.alphaQuizScore;
+    
+    // Select target randomly
+    const targetIdx = Math.floor(Math.random() * appData.alphabet.length);
+    const target = appData.alphabet[targetIdx];
+    state.alphaCurrentTarget = target;
+
+    const targetDisplay = document.getElementById('alpha-quiz-target');
+    const quizPromptText = document.getElementById('alpha-quiz-prompt-text');
+    const quizInstruction = document.getElementById('alpha-quiz-instruction');
+
+    // Load question layout according to Difficulty Menu selection
+    if (state.alphaDifficulty === 'easy') {
+      // Find letter
+      quizPromptText.textContent = "Find the letter:";
+      quizInstruction.textContent = "Tap the card for the letter:";
+      targetDisplay.textContent = target.char;
+      targetDisplay.style.color = target.color;
+      TTS.speak(`Find the letter ${target.char}`);
+    } else if (state.alphaDifficulty === 'medium') {
+      // Find matching item (Vocabulary)
+      quizPromptText.textContent = "Find the word:";
+      quizInstruction.textContent = "Which emoji matches the word:";
+      targetDisplay.textContent = target.word;
+      targetDisplay.style.color = target.color;
+      TTS.speak(`Find the ${target.word}`);
+    } else {
+      // Hard: Spelling (Spell the word for emoji)
+      quizPromptText.textContent = "Spell the item:";
+      quizInstruction.textContent = "Choose the correct spelling for:";
+      targetDisplay.textContent = target.emoji;
+      TTS.speak(`Spell the word for ${target.word}`);
+    }
+
+    // Generate 4 MC Options
+    let options = [target];
+    while (options.length < 4) {
+      const randOpt = appData.alphabet[Math.floor(Math.random() * appData.alphabet.length)];
+      if (!options.some(opt => opt.char === randOpt.char)) {
+        options.push(randOpt);
+      }
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    // Render option buttons
+    const optionsGrid = document.getElementById('alpha-quiz-options');
+    optionsGrid.innerHTML = '';
+
+    // Hard difficulty: Generate spelling alternatives (misspellings) for the target
+    let spellingOptions = [];
+    if (state.alphaDifficulty === 'hard') {
+      spellingOptions = this.getSpellingOptions(target.word);
+    }
+
+    options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-option-btn';
+      btn.style.borderColor = opt.color;
+
+      if (state.alphaDifficulty === 'easy') {
+        // Options show big letters
+        btn.innerHTML = `<span style="font-size: 2.8rem; font-weight: 800; color: ${opt.color}">${opt.char}</span>`;
+      } else if (state.alphaDifficulty === 'medium') {
+        // Options show emoji + word description
+        btn.innerHTML = `
+          <div style="font-size: 2.2rem;">${opt.emoji}</div>
+          <div style="font-size: 1.1rem; font-weight: bold; color: var(--text-main);">${opt.word}</div>
+        `;
+      } else {
+        // Hard mode: Spellings choices (we display text choices, adjusting styles to prevent wrapping)
+        btn.classList.add('word-option');
+        const wordText = spellingOptions[idx];
+        btn.style.borderColor = target.color;
+        btn.innerHTML = `<span style="font-weight: 800;">${wordText}</span>`;
+      }
+
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        
+        // Prevent double taps
+        optionsGrid.querySelectorAll('.quiz-option-btn').forEach(b => b.disabled = true);
+
+        let isCorrect = false;
+        if (state.alphaDifficulty === 'easy') {
+          isCorrect = (opt.char === target.char);
+        } else if (state.alphaDifficulty === 'medium') {
+          isCorrect = (opt.char === target.char);
+        } else {
+          isCorrect = (spellingOptions[idx] === target.word);
+        }
+
+        if (isCorrect) {
+          btn.classList.add('correct');
+          AudioSynth.play('correct');
+          state.alphaQuizScore++;
+          document.getElementById('alpha-score').textContent = state.alphaQuizScore;
+          
+          confettiEffect.createConfetti(15);
+          
+          const speakPhrase = (state.alphaDifficulty === 'hard') 
+            ? `Correct spelling! ${target.word}!`
+            : `Correct! ${target.char} for ${target.word}`;
+            
+          TTS.speak(speakPhrase, 'en-US', null, () => {
+            setTimeout(() => this.nextAlphabetQuestion(), 1200);
+          });
+        } else {
+          btn.classList.add('wrong');
+          AudioSynth.play('wrong');
+          
+          // Highlight correct option
+          optionsGrid.querySelectorAll('.quiz-option-btn').forEach((b, oIdx) => {
+            let matchesTarget = false;
+            if (state.alphaDifficulty === 'easy' || state.alphaDifficulty === 'medium') {
+              matchesTarget = (options[oIdx].char === target.char);
+            } else {
+              matchesTarget = (spellingOptions[oIdx] === target.word);
+            }
+            if (matchesTarget) {
+              b.classList.add('correct');
+            }
+          });
+
+          const wrongPhrase = (state.alphaDifficulty === 'hard')
+            ? `Oops! That's spelled differently. Correct is ${target.word}.`
+            : `Oops! That's the card for ${opt.word}.`;
+
+          TTS.speak(wrongPhrase, 'en-US', null, () => {
+            setTimeout(() => this.nextAlphabetQuestion(), 1600);
+          });
+        }
+      });
+
+      optionsGrid.appendChild(btn);
+    });
+  },
+
+  // Helper spelling generator for hard quiz
+  getSpellingOptions(word) {
+    let list = [word];
+
+    // Swapped adjacent characters
+    if (word.length > 3) {
+      let chars = word.split('');
+      let idx = 1 + Math.floor(Math.random() * (chars.length - 2));
+      let tmp = chars[idx];
+      chars[idx] = chars[idx+1];
+      chars[idx+1] = tmp;
+      let misspelled = chars.join('');
+      if (misspelled !== word) list.push(misspelled);
+    }
+
+    // Double letter insertion
+    if (list.length < 4 && word.length > 2) {
+      let chars = word.split('');
+      let idx = Math.floor(Math.random() * chars.length);
+      chars.splice(idx, 0, chars[idx]);
+      let misspelled = chars.join('');
+      if (misspelled !== word && !list.includes(misspelled)) {
+        list.push(misspelled);
+      }
+    }
+
+    // Dropped letter
+    if (list.length < 4 && word.length > 3) {
+      let chars = word.split('');
+      let idx = 1 + Math.floor(Math.random() * (chars.length - 2));
+      chars.splice(idx, 1);
+      let misspelled = chars.join('');
+      if (misspelled !== word && !list.includes(misspelled)) {
+        list.push(misspelled);
+      }
+    }
+
+    // Random fallback word options
+    while (list.length < 4) {
+      const fallbackItem = appData.alphabet[Math.floor(Math.random() * appData.alphabet.length)];
+      if (!list.includes(fallbackItem.word)) {
+        list.push(fallbackItem.word);
+      }
+    }
+
+    // Shuffle spelling options list
+    return list.sort(() => Math.random() - 0.5);
+  },
+
+  showAlphabetResults() {
+    document.getElementById('alpha-quiz-container').style.display = 'none';
+    const results = document.getElementById('alpha-result-container');
+    results.classList.add('active');
+    
+    document.getElementById('alpha-final-score').textContent = state.alphaQuizScore;
+    
+    if (state.alphaQuizScore >= 7) {
+      AudioSynth.play('success');
+      confettiEffect.createConfetti(55);
+      TTS.speak(`Superb job! You scored ${state.alphaQuizScore} stars out of ten!`);
+    } else {
+      AudioSynth.play('correct');
+      TTS.speak(`Great effort! You scored ${state.alphaQuizScore} stars. Play again to improve!`);
+    }
+  },
+
+  // --- VARNAMALA MODULE ---
+  renderVarnamalaCards() {
+    const container = document.getElementById('varna-cards-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    appData.varnamala.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'letter-card';
+      card.setAttribute('data-char', item.char);
+
+      card.innerHTML = `
+        <div class="letter-card-inner">
+          <div class="letter-card-front" style="border-color: ${item.color}">
+            <span class="letter-char" style="color: ${item.color}">${item.char}</span>
+          </div>
+          <div class="letter-card-back" style="background-color: ${item.color}15; border-color: ${item.color}">
+            <div class="letter-icon-back" style="font-size: 2.5rem; margin-bottom: 5px;">${item.emoji}</div>
+            <span class="letter-word-back">${item.word}</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">(${item.englishWord})</span>
             <button class="tracing-btn-mini" style="margin-top: 6px; font-size: 0.85rem; padding: 4px 8px; border: 2px solid ${item.color}; border-radius: 6px; font-weight: bold; background: var(--bg-card); color: var(--text-main);" onclick="event.stopPropagation(); tracingBoard.open('${item.char}');">✍️ Trace</button>
           </div>
         </div>
@@ -1355,112 +1592,98 @@ const app = {
         card.classList.toggle('flipped');
         AudioSynth.play('pop');
         
-        const text = card.classList.contains('flipped') 
-          ? (lang.startsWith('hi') ? `${item.char} से ${item.word}` : `${item.char} for ${item.word}`)
-          : item.char;
-          
-        TTS.speak(text, lang);
+        if (card.classList.contains('flipped')) {
+          TTS.speak(`${item.char} से ${item.word}`, 'hi-IN');
+        } else {
+          TTS.speak(item.char, 'hi-IN');
+        }
       });
 
       container.appendChild(card);
     });
   },
 
-  toggleCardsMode(mode) {
-    const cardsBtn = document.getElementById('cards-mode-btn');
-    const quizBtn = document.getElementById('cards-quiz-btn');
-    const cardsGrid = document.getElementById('cards-grid-container');
-    const quizContainer = document.getElementById('cards-quiz-container');
-    const resultContainer = document.getElementById('cards-result-container');
+  toggleVarnamalaMode(mode) {
+    const cardsBtn = document.getElementById('varna-mode-cards');
+    const quizBtn = document.getElementById('varna-mode-quiz');
+    const cardsGrid = document.getElementById('varna-cards-container');
+    const quizContainer = document.getElementById('varna-quiz-container');
+    const resultContainer = document.getElementById('varna-result-container');
 
     if (mode === 'cards') {
-      if (cardsBtn) cardsBtn.classList.add('active');
-      if (quizBtn) quizBtn.classList.remove('active');
-      if (cardsGrid) cardsGrid.style.display = 'grid';
-      if (quizContainer) quizContainer.style.display = 'none';
-      if (resultContainer) resultContainer.style.display = 'none';
-      this.resetCardsQuiz();
+      cardsBtn.classList.add('active');
+      quizBtn.classList.remove('active');
+      cardsGrid.style.display = 'grid';
+      quizContainer.style.display = 'none';
+      resultContainer.style.display = 'none';
+      this.resetVarnamalaQuiz();
     } else {
-      if (cardsBtn) cardsBtn.classList.remove('active');
-      if (quizBtn) quizBtn.classList.add('active');
-      if (cardsGrid) cardsGrid.style.display = 'none';
-      if (quizContainer) quizContainer.style.display = 'block';
-      if (resultContainer) resultContainer.style.display = 'none';
-      this.startCardsQuiz();
+      cardsBtn.classList.remove('active');
+      quizBtn.classList.add('active');
+      cardsGrid.style.display = 'none';
+      quizContainer.style.display = 'block';
+      resultContainer.style.display = 'none';
+      this.startVarnamalaQuiz();
     }
   },
 
-  resetCardsQuiz() {
-    state.cardsQuizActive = false;
-    state.cardsQuizScore = 0;
-    state.cardsQuizCount = 0;
-    state.cardsCurrentTarget = null;
+  resetVarnamalaQuiz() {
+    state.varnaQuizActive = false;
+    state.varnaQuizScore = 0;
+    state.varnaQuizCount = 0;
+    state.varnaCurrentTarget = null;
   },
 
-  startCardsQuiz() {
-    state.cardsQuizActive = true;
-    state.cardsQuizScore = 0;
-    state.cardsQuizCount = 0;
-    const resultContainer = document.getElementById('cards-result-container');
-    const quizContainer = document.getElementById('cards-quiz-container');
-    if (resultContainer) resultContainer.classList.remove('active');
-    if (quizContainer) quizContainer.style.display = 'block';
-    this.nextCardsQuestion();
+  startVarnamalaQuiz() {
+    state.varnaQuizActive = true;
+    state.varnaQuizScore = 0;
+    state.varnaQuizCount = 0;
+    document.getElementById('varna-result-container').classList.remove('active');
+    document.getElementById('varna-quiz-container').style.display = 'block';
+    this.nextVarnamalaQuestion();
   },
 
-  nextCardsQuestion() {
-    const items = appData[state.currentCategory];
-    if (!items || items.length === 0) return;
-
-    if (state.cardsQuizCount >= 10) {
-      this.showCardsResults();
+  nextVarnamalaQuestion() {
+    if (state.varnaQuizCount >= 10) {
+      this.showVarnamalaResults();
       return;
     }
 
-    state.cardsQuizCount++;
-    const scoreEl = document.getElementById('cards-score');
-    if (scoreEl) scoreEl.textContent = state.cardsQuizScore;
+    state.varnaQuizCount++;
+    document.getElementById('varna-score').textContent = state.varnaQuizScore;
     
     // Select target randomly
-    const targetIdx = Math.floor(Math.random() * items.length);
-    const target = items[targetIdx];
-    state.cardsCurrentTarget = target;
+    const targetIdx = Math.floor(Math.random() * appData.varnamala.length);
+    const target = appData.varnamala[targetIdx];
+    state.varnaCurrentTarget = target;
 
-    const targetDisplay = document.getElementById('cards-quiz-target');
-    const quizPromptText = document.getElementById('cards-quiz-prompt-text');
-    const quizInstruction = document.getElementById('cards-quiz-instruction');
+    const targetDisplay = document.getElementById('varna-quiz-target');
+    const quizPromptText = document.getElementById('varna-quiz-prompt-text');
+    const quizInstruction = document.getElementById('varna-quiz-instruction');
 
-    const cat = appData.categories.find(c => c.id === state.currentCategory);
-    const lang = cat ? cat.lang : 'en-US';
-    const isHindi = lang.startsWith('hi');
-
-    if (state.cardsDifficulty === 'easy') {
-      quizPromptText.textContent = isHindi ? "अक्षर ढूंढें (Find the letter):" : "Find the letter:";
-      quizInstruction.textContent = isHindi ? "इस अक्षर के कार्ड को छुएं (Tap the card for):" : "Tap the card for:";
-      if (targetDisplay) {
-        targetDisplay.textContent = target.char;
-        targetDisplay.style.color = target.color;
-      }
-      TTS.speak(isHindi ? `${target.char} ढूंढें` : `Find the letter ${target.char}`, lang);
-    } else if (state.cardsDifficulty === 'medium') {
-      quizPromptText.textContent = isHindi ? "शब्द ढूंढें (Find the word):" : "Find the word:";
-      quizInstruction.textContent = isHindi ? "कौन सा चित्र इस शब्द से मेल खाता है (Which matches the word):" : "Which emoji matches the word:";
-      if (targetDisplay) {
-        targetDisplay.textContent = target.word;
-        targetDisplay.style.color = target.color;
-      }
-      TTS.speak(isHindi ? `${target.word} ढूंढें` : `Find the ${target.word}`, lang);
+    if (state.varnaDifficulty === 'easy') {
+      quizPromptText.textContent = "अक्षर ढूंढें (Find the letter):";
+      quizInstruction.textContent = "इस अक्षर के कार्ड को छुएं (Tap the card for):";
+      targetDisplay.textContent = target.char;
+      targetDisplay.style.color = target.color;
+      TTS.speak(`${target.char} ढूंढें`, 'hi-IN');
+    } else if (state.varnaDifficulty === 'medium') {
+      quizPromptText.textContent = "शब्द ढूंढें (Find the word):";
+      quizInstruction.textContent = "कौन सा चित्र इस शब्द से मेल खाता है (Which matches the word):";
+      targetDisplay.textContent = target.word;
+      targetDisplay.style.color = target.color;
+      TTS.speak(`${target.word} ढूंढें`, 'hi-IN');
     } else {
-      quizPromptText.textContent = isHindi ? "शब्द की वर्तनी (Spell the item):" : "Spell the item:";
-      quizInstruction.textContent = isHindi ? "इस चित्र के लिए सही शब्द चुनें (Choose correct spelling for):" : "Choose the correct spelling for:";
-      if (targetDisplay) targetDisplay.textContent = target.emoji;
-      TTS.speak(isHindi ? `${target.word} की वर्तनी चुनें` : `Spell the word for ${target.word}`, lang);
+      quizPromptText.textContent = "शब्द की वर्तनी (Spell the item):";
+      quizInstruction.textContent = "इस चित्र के लिए सही शब्द चुनें (Choose correct spelling for):";
+      targetDisplay.textContent = target.emoji;
+      TTS.speak(`${target.word} की वर्तनी चुनें`, 'hi-IN');
     }
 
     // Generate 4 MC Options
     let options = [target];
     while (options.length < 4) {
-      const randOpt = items[Math.floor(Math.random() * items.length)];
+      const randOpt = appData.varnamala[Math.floor(Math.random() * appData.varnamala.length)];
       if (!options.some(opt => opt.char === randOpt.char)) {
         options.push(randOpt);
       }
@@ -1468,14 +1691,13 @@ const app = {
     options.sort(() => Math.random() - 0.5);
 
     // Render option buttons
-    const optionsGrid = document.getElementById('cards-quiz-options');
-    if (!optionsGrid) return;
+    const optionsGrid = document.getElementById('varna-quiz-options');
     optionsGrid.innerHTML = '';
 
-    // Hard difficulty: Generate spelling alternatives (misspellings)
+    // Hard difficulty: Generate spelling alternatives (misspellings) for Hindi
     let spellingOptions = [];
-    if (state.cardsDifficulty === 'hard') {
-      spellingOptions = isHindi ? this.getHindiSpellingOptions(target.word) : this.getEnglishSpellingOptions(target.word);
+    if (state.varnaDifficulty === 'hard') {
+      spellingOptions = this.getHindiSpellingOptions(target.word);
     }
 
     options.forEach((opt, idx) => {
@@ -1483,9 +1705,9 @@ const app = {
       btn.className = 'quiz-option-btn';
       btn.style.borderColor = opt.color;
 
-      if (state.cardsDifficulty === 'easy') {
+      if (state.varnaDifficulty === 'easy') {
         btn.innerHTML = `<span style="font-size: 2.8rem; font-weight: 800; color: ${opt.color}">${opt.char}</span>`;
-      } else if (state.cardsDifficulty === 'medium') {
+      } else if (state.varnaDifficulty === 'medium') {
         btn.innerHTML = `
           <div style="font-size: 2.2rem;">${opt.emoji}</div>
           <div style="font-size: 1.1rem; font-weight: bold; color: var(--text-main);">${opt.word}</div>
@@ -1503,7 +1725,7 @@ const app = {
         optionsGrid.querySelectorAll('.quiz-option-btn').forEach(b => b.disabled = true);
 
         let isCorrect = false;
-        if (state.cardsDifficulty === 'easy' || state.cardsDifficulty === 'medium') {
+        if (state.varnaDifficulty === 'easy' || state.varnaDifficulty === 'medium') {
           isCorrect = (opt.char === target.char);
         } else {
           isCorrect = (spellingOptions[idx] === target.word);
@@ -1512,17 +1734,17 @@ const app = {
         if (isCorrect) {
           btn.classList.add('correct');
           AudioSynth.play('correct');
-          state.cardsQuizScore++;
-          if (scoreEl) scoreEl.textContent = state.cardsQuizScore;
+          state.varnaQuizScore++;
+          document.getElementById('varna-score').textContent = state.varnaQuizScore;
           
           confettiEffect.createConfetti(15);
           
-          const speakPhrase = isHindi
-            ? ((state.cardsDifficulty === 'hard') ? `सही उत्तर! ${target.word}!` : `बिल्कुल सही! ${target.char} से ${target.word}`)
-            : ((state.cardsDifficulty === 'hard') ? `Correct spelling! ${target.word}!` : `Correct! ${target.char} for ${target.word}`);
+          const speakPhrase = (state.varnaDifficulty === 'hard')
+            ? `सही उत्तर! ${target.word}!`
+            : `बिल्कुल सही! ${target.char} से ${target.word}`;
             
-          TTS.speak(speakPhrase, lang, null, () => {
-            setTimeout(() => this.nextCardsQuestion(), 1200);
+          TTS.speak(speakPhrase, 'hi-IN', null, () => {
+            setTimeout(() => this.nextVarnamalaQuestion(), 1200);
           });
         } else {
           btn.classList.add('wrong');
@@ -1530,7 +1752,7 @@ const app = {
           
           optionsGrid.querySelectorAll('.quiz-option-btn').forEach((b, oIdx) => {
             let matchesTarget = false;
-            if (state.cardsDifficulty === 'easy' || state.cardsDifficulty === 'medium') {
+            if (state.varnaDifficulty === 'easy' || state.varnaDifficulty === 'medium') {
               matchesTarget = (options[oIdx].char === target.char);
             } else {
               matchesTarget = (spellingOptions[oIdx] === target.word);
@@ -1540,47 +1762,18 @@ const app = {
             }
           });
 
-          const wrongPhrase = isHindi
-            ? ((state.cardsDifficulty === 'hard') ? `गलत जवाब! सही वर्तनी है ${target.word}.` : `ओह! यह ${opt.word} का कार्ड है।`)
-            : ((state.cardsDifficulty === 'hard') ? `Oops! That's spelled differently. Correct is ${target.word}.` : `Oops! That's the card for ${opt.word}.`);
+          const wrongPhrase = (state.varnaDifficulty === 'hard')
+            ? `गलत जवाब! सही वर्तनी है ${target.word}.`
+            : `ओह! यह ${opt.word} का कार्ड है।`;
 
-          TTS.speak(wrongPhrase, lang, null, () => {
-            setTimeout(() => this.nextCardsQuestion(), 1600);
+          TTS.speak(wrongPhrase, 'hi-IN', null, () => {
+            setTimeout(() => this.nextVarnamalaQuestion(), 1600);
           });
         }
       });
 
       optionsGrid.appendChild(btn);
     });
-  },
-
-  getEnglishSpellingOptions(word) {
-    let list = [word];
-    const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
-    while (list.length < 4) {
-      let alt = word;
-      if (word.length > 2) {
-        const charIdx = 1 + Math.floor(Math.random() * (word.length - 2));
-        const activeChar = word[charIdx].toLowerCase();
-        if (vowels.includes(activeChar)) {
-          const replacement = vowels.filter(v => v !== activeChar)[Math.floor(Math.random() * 5)];
-          alt = word.substring(0, charIdx) + replacement + word.substring(charIdx + 1);
-        } else {
-          alt = word.substring(0, charIdx) + activeChar + activeChar + word.substring(charIdx + 1);
-        }
-      } else {
-        alt = word + "s";
-      }
-      alt = alt.trim();
-      if (alt !== word && !list.includes(alt)) {
-        list.push(alt);
-      }
-      if (list.length >= 4) break;
-      if (Math.random() > 0.8) {
-        list.push(word + (list.length === 1 ? 'y' : 's'));
-      }
-    }
-    return list.sort(() => Math.random() - 0.5);
   },
 
   getHindiSpellingOptions(word) {
@@ -1607,45 +1800,26 @@ const app = {
     return list.sort(() => Math.random() - 0.5);
   },
 
-  showCardsResults() {
-    document.getElementById('cards-quiz-container').style.display = 'none';
-    const results = document.getElementById('cards-result-container');
-    results.classList.add('active');
+  showVarnamalaResults() {
+    document.getElementById('varna-quiz-container').style.display = 'none';
+    const resultContainer = document.getElementById('varna-result-container');
+    resultContainer.classList.add('active');
     
-    document.getElementById('cards-final-score').textContent = state.cardsQuizScore;
+    document.getElementById('varna-final-score').textContent = state.varnaQuizScore;
     
-    const cat = appData.categories.find(c => c.id === state.currentCategory);
-    const lang = cat ? cat.lang : 'en-US';
-    const isHindi = lang.startsWith('hi');
-    
-    let praise = "";
-    if (isHindi) {
-      praise = "शानदार! (Fantastic!)";
-      if (state.cardsQuizScore === 10) {
-        praise = "अति उत्तम! (Perfect score!) 🏆";
-        AudioSynth.play('success');
-        confettiEffect.createConfetti(50);
-      } else if (state.cardsQuizScore >= 7) {
-        praise = "बहुत बढ़िया! (Super job!) ⭐";
-        AudioSynth.play('success');
-      } else {
-        AudioSynth.play('tap');
-      }
-      TTS.speak(`${praise} आपने दस में से ${state.cardsQuizScore} अंक प्राप्त किए।`, 'hi-IN');
+    let praise = "शानदार! (Fantastic!)";
+    if (state.varnaQuizScore === 10) {
+      praise = "अति उत्तम! (Perfect score!) 🏆";
+      AudioSynth.play('success');
+      confettiEffect.createConfetti(50);
+    } else if (state.varnaQuizScore >= 7) {
+      praise = "बहुत बढ़िया! (Super job!) ⭐";
+      AudioSynth.play('success');
     } else {
-      praise = "Fantastic!";
-      if (state.cardsQuizScore === 10) {
-        praise = "Perfect score! 🏆";
-        AudioSynth.play('success');
-        confettiEffect.createConfetti(50);
-      } else if (state.cardsQuizScore >= 7) {
-        praise = "Super job! ⭐";
-        AudioSynth.play('success');
-      } else {
-        AudioSynth.play('tap');
-      }
-      TTS.speak(`${praise} You scored ${state.cardsQuizScore} out of ten stars.`, 'en-US');
+      AudioSynth.play('tap');
     }
+    
+    TTS.speak(`${praise} आपने दस में से ${state.varnaQuizScore} अंक प्राप्त किए।`, 'hi-IN');
   },
 
   // --- NUMBERS MODULE ---
@@ -1687,8 +1861,7 @@ const app = {
     if (!item) return;
 
     const bigNum = document.getElementById('number-display-big');
-    bigNum.textContent = item.num +'('+ item.wordMeaning + ')';
-    // bigNum.textContent = item.num;
+    bigNum.textContent = item.num;
     bigNum.style.color = item.color;
 
     const traceBtn = document.getElementById('number-trace-btn');

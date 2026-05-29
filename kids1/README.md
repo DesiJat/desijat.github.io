@@ -21,8 +21,6 @@ npx http-server .
 **Using Python:**
 ```bash
 python3 -m http.server 8000
-# check IP
-node /Users/apple/data/AI_Training/1day/zIp.js
 ```
 
 Once running, open the local URL (e.g. `http://localhost:8080` or `http://localhost:8000`) in your web browser.

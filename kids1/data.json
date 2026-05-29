@@ -1,0 +1,166 @@
+{
+  "alphabet": [
+    { "char": "A", "word": "Apple", "emoji": "🍎", "color": "#ff6b6b" },
+    { "char": "B", "word": "Balloon", "emoji": "🎈", "color": "#4ecdc4" },
+    { "char": "C", "word": "Cat", "emoji": "🐱", "color": "#fecb2f" },
+    { "char": "D", "word": "Dog", "emoji": "🐶", "color": "#ff8e53" },
+    { "char": "E", "word": "Elephant", "emoji": "🐘", "color": "#a29bfe" },
+    { "char": "F", "word": "Fish", "emoji": "🐟", "color": "#74b9ff" },
+    { "char": "G", "word": "Grapes", "emoji": "🍇", "color": "#a55eea" },
+    { "char": "H", "word": "House", "emoji": "🏠", "color": "#20bf6b" },
+    { "char": "I", "word": "Ice cream", "emoji": "🍦", "color": "#fd79a8" },
+    { "char": "J", "word": "Jug", "emoji": "🏺", "color": "#eb3b5a" },
+    { "char": "K", "word": "Kite", "emoji": "🪁", "color": "#fa8231" },
+    { "char": "L", "word": "Lion", "emoji": "🦁", "color": "#f7b731" },
+    { "char": "M", "word": "Monkey", "emoji": "🐵", "color": "#fa8231" },
+    { "char": "N", "word": "Nest", "emoji": "🪹", "color": "#20bf6b" },
+    { "char": "O", "word": "Orange", "emoji": "🍊", "color": "#fd9644" },
+    { "char": "P", "word": "Parrot", "emoji": "🦜", "color": "#26de81" },
+    { "char": "Q", "word": "Queen", "emoji": "👸", "color": "#fc5c9c" },
+    { "char": "R", "word": "Rabbit", "emoji": "🐰", "color": "#cccccc" },
+    { "char": "S", "word": "Sun", "emoji": "☀️", "color": "#fecb2f" },
+    { "char": "T", "word": "Tree", "emoji": "🌳", "color": "#26de81" },
+    { "char": "U", "word": "Umbrella", "emoji": "☔", "color": "#a29bfe" },
+    { "char": "V", "word": "Violin", "emoji": "🎻", "color": "#fa8231" },
+    { "char": "W", "word": "Watch", "emoji": "⌚", "color": "#4b7bec" },
+    { "char": "X", "word": "Xylophone", "emoji": "🎼", "color": "#fc5c9c" },
+    { "char": "Y", "word": "Yacht", "emoji": "⛵", "color": "#2bcbba" },
+    { "char": "Z", "word": "Zebra", "emoji": "🦓", "color": "#778beb" }
+  ],
+  "numbers": [
+    { "num": 1, "word": "One", "emoji": "⭐", "color": "#ff6b6b" },
+    { "num": 2, "word": "Two", "emoji": "🎈", "color": "#4ecdc4" },
+    { "num": 3, "word": "Three", "emoji": "🍎", "color": "#fecb2f" },
+    { "num": 4, "word": "Four", "emoji": "🍓", "color": "#ff8e53" },
+    { "num": 5, "word": "Five", "emoji": "🍭", "color": "#a29bfe" },
+    { "num": 6, "word": "Six", "emoji": "🌸", "color": "#fd79a8" },
+    { "num": 7, "word": "Seven", "emoji": "🐟", "color": "#74b9ff" },
+    { "num": 8, "word": "Eight", "emoji": "🚗", "color": "#20bf6b" },
+    { "num": 9, "word": "Nine", "emoji": "🔔", "color": "#fa8231" },
+    { "num": 10, "word": "Ten", "emoji": "🦁", "color": "#a55eea" }
+  ],
+  "varnamala": [
+  { "char": "अ", "word": "अनार", "englishWord": "Pomegranate", "emoji": "🍎", "color": "#ff6b6b" },
+  { "char": "आ", "word": "आम", "englishWord": "Mango", "emoji": "🥭", "color": "#fecb2f" },
+  { "char": "इ", "word": "इमली", "englishWord": "Tamarind", "emoji": "🌿", "color": "#4ecdc4" },
+  { "char": "ई", "word": "ईख", "englishWord": "Sugarcane", "emoji": "🎋", "color": "#ff8e53" },
+  { "char": "उ", "word": "उल्लू", "englishWord": "Owl", "emoji": "🦉", "color": "#a29bfe" },
+  { "char": "ऊ", "word": "ऊन", "englishWord": "Wool", "emoji": "🧶", "color": "#74b9ff" },
+  { "char": "ऋ", "word": "ऋषि", "englishWord": "Sage", "emoji": "🧘", "color": "#20bf6b" },
+  { "char": "ए", "word": "एड़ी", "englishWord": "Heel", "emoji": "🦶", "color": "#fd79a8" },
+  { "char": "ऐ", "word": "ऐनक", "englishWord": "Glasses", "emoji": "👓", "color": "#eb3b5a" },
+  { "char": "ओ", "word": "ओखली", "englishWord": "Mortar", "emoji": "🥣", "color": "#fa8231" },
+  { "char": "औ", "word": "औरत", "englishWord": "Woman", "emoji": "👩", "color": "#a55eea" },
+  { "char": "अं", "word": "अंगूर", "englishWord": "Grapes", "emoji": "🍇", "color": "#6c5ce7" },
+  { "char": "अः", "word": "दुःख", "englishWord": "Sadness", "emoji": "😢", "color": "#636e72" },
+
+  { "char": "क", "word": "कबूतर", "englishWord": "Pigeon", "emoji": "🕊️", "color": "#ff6b6b" },
+  { "char": "ख", "word": "खरगोश", "englishWord": "Rabbit", "emoji": "🐰", "color": "#4ecdc4" },
+  { "char": "ग", "word": "गमला", "englishWord": "Flowerpot", "emoji": "🪴", "color": "#fecb2f" },
+  { "char": "घ", "word": "घर", "englishWord": "House", "emoji": "🏠", "color": "#ff8e53" },
+  { "char": "ङ", "word": "ङम", "englishWord": "Rare Letter", "emoji": "🔤", "color": "#95a5a6" },
+
+  { "char": "च", "word": "चम्मच", "englishWord": "Spoon", "emoji": "🥄", "color": "#a29bfe" },
+  { "char": "छ", "word": "छतरी", "englishWord": "Umbrella", "emoji": "☂️", "color": "#74b9ff" },
+  { "char": "ज", "word": "जहाज", "englishWord": "Ship", "emoji": "🚢", "color": "#20bf6b" },
+  { "char": "झ", "word": "झंडा", "englishWord": "Flag", "emoji": "🚩", "color": "#fd79a8" },
+  { "char": "ञ", "word": "ञानी", "englishWord": "Wise Person", "emoji": "🧠", "color": "#b2bec3" },
+
+  { "char": "ट", "word": "टमाटर", "englishWord": "Tomato", "emoji": "🍅", "color": "#eb3b5a" },
+  { "char": "ठ", "word": "ठठेरा", "englishWord": "Coppersmith", "emoji": "🔨", "color": "#fa8231" },
+  { "char": "ड", "word": "डमरू", "englishWord": "Damru Drum", "emoji": "🪘", "color": "#a55eea" },
+  { "char": "ढ", "word": "ढोलक", "englishWord": "Drum", "emoji": "🥁", "color": "#ff6b6b" },
+  { "char": "ण", "word": "णख", "englishWord": "Nail", "emoji": "💅", "color": "#7f8c8d" },
+
+  { "char": "त", "word": "तरबूज", "englishWord": "Watermelon", "emoji": "🍉", "color": "#4ecdc4" },
+  { "char": "थ", "word": "थर्मस", "englishWord": "Thermos", "emoji": "🧴", "color": "#fecb2f" },
+  { "char": "द", "word": "दवात", "englishWord": "Inkpot", "emoji": "🫙", "color": "#ff8e53" },
+  { "char": "ध", "word": "धनुष", "englishWord": "Bow", "emoji": "🏹", "color": "#a29bfe" },
+  { "char": "न", "word": "नल", "englishWord": "Tap", "emoji": "🚰", "color": "#74b9ff" },
+
+  { "char": "प", "word": "पतंग", "englishWord": "Kite", "emoji": "🪁", "color": "#20bf6b" },
+  { "char": "फ", "word": "फल", "englishWord": "Fruit", "emoji": "🍎", "color": "#fd79a8" },
+  { "char": "ब", "word": "बत्तख", "englishWord": "Duck", "emoji": "🦆", "color": "#eb3b5a" },
+  { "char": "भ", "word": "भालू", "englishWord": "Bear", "emoji": "🐻", "color": "#fa8231" },
+  { "char": "म", "word": "मछली", "englishWord": "Fish", "emoji": "🐟", "color": "#a55eea" },
+
+  { "char": "य", "word": "यज्ञ", "englishWord": "Sacred Fire", "emoji": "🔥", "color": "#ff6b6b" },
+  { "char": "र", "word": "रथ", "englishWord": "Chariot", "emoji": "🛞", "color": "#4ecdc4" },
+  { "char": "ल", "word": "लट्टू", "englishWord": "Spinning Top", "emoji": "🪀", "color": "#fecb2f" },
+  { "char": "व", "word": "वन", "englishWord": "Forest", "emoji": "🌲", "color": "#ff8e53" },
+
+  { "char": "श", "word": "शेर", "englishWord": "Lion", "emoji": "🦁", "color": "#a29bfe" },
+  { "char": "ष", "word": "षटकोण", "englishWord": "Hexagon", "emoji": "⬡", "color": "#74b9ff" },
+  { "char": "स", "word": "सेब", "englishWord": "Apple", "emoji": "🍎", "color": "#20bf6b" },
+  { "char": "ह", "word": "हाथी", "englishWord": "Elephant", "emoji": "🐘", "color": "#fd79a8" },
+
+  { "char": "क्ष", "word": "क्षत्रिय", "englishWord": "Warrior", "emoji": "⚔️", "color": "#e17055" },
+  { "char": "त्र", "word": "त्रिशूल", "englishWord": "Trident", "emoji": "🔱", "color": "#0984e3" },
+  { "char": "ज्ञ", "word": "ज्ञानी", "englishWord": "Wise Person", "emoji": "📚", "color": "#6c5ce7" }
+],
+  "rhymes": [
+    {
+      "id": "fish",
+      "titleHi": "मछली जल की रानी है",
+      "titleEn": "Machhli Jal Ki Rani Hai",
+      "emoji": "🐠",
+      "lyrics": [
+        { "hi": "मछली जल की रानी है,", "en": "Machhli jal ki rani hai,", "tr": "The fish is the queen of the water," },
+        { "hi": "जीवन उसका पानी है।", "en": "Jeevan uska paani hai.", "tr": "Her life is water itself." },
+        { "hi": "हाथ लगाओ तो डर जाएगी,", "en": "Haath lagao to dar jayegi,", "tr": "Touch her, and she will get scared," },
+        { "hi": "बाहर निकालो तो मर जाएगी।", "en": "Baahar nikalo to mar jayegi.", "tr": "Take her out, and she will die." }
+      ]
+    },
+    {
+      "id": "moon",
+      "titleHi": "चंदा मामा दूर के",
+      "titleEn": "Chanda Mama Door Ke",
+      "emoji": "🌙",
+      "lyrics": [
+        { "hi": "चंदा मामा दूर के,", "en": "Chanda mama door ke,", "tr": "Uncle Moon lives far away," },
+        { "hi": "पुए पकाएं बूर के।", "en": "Puye pakayein boor ke.", "tr": "He cooks sweet cakes." },
+        { "hi": "आप खाएं थाली में,", "en": "Aap khayein thaali mein,", "tr": "He eats them from a plate," },
+        { "hi": "मुन्ने को दें प्याली में।", "en": "Munne ko dein pyaali mein.", "tr": "And gives it to the baby in a cup." },
+        { "hi": "प्याली गई टूट, मामा गए रूठ!", "en": "Pyaali gayi toot, mama gaye rooth!", "tr": "The cup broke, and Uncle Moon got angry!" }
+      ]
+    },
+    {
+      "id": "butterfly",
+      "titleHi": "तितली उड़ी",
+      "titleEn": "Titli Udi",
+      "emoji": "🦋",
+      "lyrics": [
+        { "hi": "तितली उड़ी, बस पर चढ़ी,", "en": "Titli udi, bus par chadi,", "tr": "The butterfly flew and got on the bus," },
+        { "hi": "सीट ना मिली तो रोने लगी।", "en": "Seat na mili to rone lagi.", "tr": "She did not find a seat, so she started crying." },
+        { "hi": "ड्राइवर ने बोला आजा मेरे पास,", "en": "Driver ne bola aaja mere paas,", "tr": "The driver said, \"Come sit near me,\"" },
+        { "hi": "तितली बोली हट बदमाश,", "en": "Titli boli hat badmaash,", "tr": "The butterfly replied, \"Go away, naughty,\"" },
+        { "hi": "मेरा घर है पास!", "en": "Mera ghar hai paas!", "tr": "My house is close by!\"" }
+      ]
+    },
+    {
+      "id": "horse",
+      "titleHi": "लकड़ी की काठी",
+      "titleEn": "Lakdi Ki Kathi",
+      "emoji": "🐎",
+      "lyrics": [
+        { "hi": "लकड़ी की काठी, काठी पे घोड़ा,", "en": "Lakdi ki kathi, kathi pe ghoda,", "tr": "The wooden saddle on the rocking horse," },
+        { "hi": "घोड़े की दुम पे जो मारा हथौड़ा,", "en": "Ghode ki dum pe jo maara hathauda,", "tr": "We struck a hammer on the tail of the horse," },
+        { "hi": "दौड़ा दौड़ा दौड़ा घोड़ा दुम उठा के दौड़ा!", "en": "Dauda dauda dauda ghoda dum utha ke dauda!", "tr": "The horse ran, ran, ran, raising its tail!" }
+      ]
+    }
+  ],
+  "quizzes": {
+    "easy": {
+      "name": "Easy",
+      "description": "Find the matching single item (e.g. Find 'A' or '1')."
+    },
+    "medium": {
+      "name": "Medium",
+      "description": "Match the word to the emoji, or count item collections."
+    },
+    "hard": {
+      "name": "Hard",
+      "description": "Spell the word or solve simple addition equations."
+    }
+  }
+}
