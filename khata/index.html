@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Financial Khata Management</title>
+  
+  <!-- Font and icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Lock screen overlay -->
+  <div id="lockScreen" class="lock-screen" style="display: none;">
+    <div class="lock-card card-glass">
+      <div class="brand">
+        <div class="brand-icon">₹</div>
+        <div class="brand-name">Family Khata</div>
+      </div>
+      <p id="lockScreenMessage" style="font-size: 14px; color: var(--text-secondary);">Enter Security PIN to unlock</p>
+      
+      <div class="pin-display">
+        <div class="pin-dot" id="dot1"></div>
+        <div class="pin-dot" id="dot2"></div>
+        <div class="pin-dot" id="dot3"></div>
+        <div class="pin-dot" id="dot4"></div>
+      </div>
+
+      <div class="keypad">
+        <button class="keypad-btn">1</button>
+        <button class="keypad-btn">2</button>
+        <button class="keypad-btn">3</button>
+        <button class="keypad-btn">4</button>
+        <button class="keypad-btn">5</button>
+        <button class="keypad-btn">6</button>
+        <button class="keypad-btn">7</button>
+        <button class="keypad-btn">8</button>
+        <button class="keypad-btn">9</button>
+        <button class="keypad-btn" id="keypadClear" style="font-size: 14px;">CLR</button>
+        <button class="keypad-btn">0</button>
+        <button class="keypad-btn" id="keypadDelete" style="font-size: 14px;">DEL</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-icon">₹</div>
+        <div class="brand-name">Family Khata</div>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item active" data-view="dashboard">
+          <a><i>📊</i> Dashboard</a>
+        </li>
+        <li class="nav-item" data-view="members">
+          <a><i>👥</i> Family Members</a>
+        </li>
+        <li class="nav-item" data-view="internal-khata">
+          <a><i>🏠</i> Family Ledger</a>
+        </li>
+        <li class="nav-item" data-view="external-khata">
+          <a><i>🤝</i> External Khata</a>
+        </li>
+        <li class="nav-item" data-view="budget">
+          <a><i>🎯</i> Budget Planner</a>
+        </li>
+        <li class="nav-item" data-view="loans">
+          <a><i>🏦</i> Loan Center</a>
+        </li>
+        <li class="nav-item" data-view="reports">
+          <a><i>📈</i> Reports & Analytics</a>
+        </li>
+        <li class="nav-item" data-view="settings">
+          <a><i>⚙️</i> Settings</a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="user-badge">
+          <div class="avatar" id="familyInitial">F</div>
+          <div>
+            <div style="font-weight: 700; font-size: 13px;" id="sidebarFamilyName">Family Khata</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Secure Offline</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Body -->
+    <main class="main-wrapper">
+      
+      <!-- Top header bar -->
+      <header class="header-top">
+        <button class="menu-btn" id="menuToggle">☰</button>
+        
+        <div class="welcome-msg">
+          <h1 id="viewTitle">Dashboard</h1>
+          <p id="viewSubtitle">Welcome back to your financial control center.</p>
+        </div>
+
+        <div class="actions-bar">
+          <button class="btn btn-secondary" id="globalAddTxBtn">+ Quick Transaction</button>
+          <button class="btn btn-primary" id="lockAppBtn">🔒 Lock App</button>
+        </div>
+      </header>
+
+      <!-- VIEW: Dashboard -->
+      <section id="view-dashboard" class="app-view">
+        <!-- Stat widgets -->
+        <div class="dashboard-grid">
+          <div class="card-glass stat-card">
+            <div class="stat-icon savings">₹</div>
+            <div class="stat-info">
+              <div class="stat-label">Net Balance</div>
+              <div class="stat-value" id="dashNetBalance">₹0.00</div>
+            </div>
+          </div>
+          <div class="card-glass stat-card">
+            <div class="stat-icon income">↑</div>
+            <div class="stat-info">
+              <div class="stat-label">Monthly Income</div>
+              <div class="stat-value" id="dashIncome">₹0.00</div>
+            </div>
+          </div>
+          <div class="card-glass stat-card">
+            <div class="stat-icon expenses">↓</div>
+            <div class="stat-info">
+              <div class="stat-label">Monthly Expenses</div>
+              <div class="stat-value" id="dashExpenses">₹0.00</div>
+            </div>
+          </div>
+          <div class="card-glass stat-card">
+            <div class="stat-icon loans">⇅</div>
+            <div class="stat-info">
+              <div class="stat-label">Net Loans</div>
+              <div class="stat-value" id="dashLoans">₹0.00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Split Grid -->
+        <div class="layout-split">
+          <!-- Left side: Recent Transactions -->
+          <div class="card-glass">
+            <div class="header-top" style="margin-bottom: 16px;">
+              <h3 style="font-weight: 700;">Recent Transactions</h3>
+              <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" id="dashViewAllLedger">View Ledger</button>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody id="dashRecentTxTableBody">
+                  <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No transactions recorded yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right side: Notifications, Dues & Budgets -->
+          <div class="card-glass">
+            <h3 style="font-weight: 700; margin-bottom: 16px;">System Alerts</h3>
+            <div class="alerts-list" id="dashAlertsList">
+              <div style="text-align: center; color: var(--text-muted); padding: 12px;">All balances and budgets healthy.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Members -->
+      <section id="view-members" class="app-view" style="display: none;">
+        <div class="header-top" style="margin-bottom: 24px;">
+          <h2>Family Members Profiles</h2>
+          <button class="btn btn-primary" id="addMemberBtn">+ Add Member</button>
+        </div>
+        <div class="members-grid" id="membersGridContainer">
+          <!-- Dynamically filled member profile cards -->
+        </div>
+      </section>
+
+      <!-- VIEW: Family Ledger (Internal Khata) -->
+      <section id="view-internal-khata" class="app-view" style="display: none;">
+        <div class="card-glass" style="margin-bottom: 24px; padding: 16px;">
+          <!-- Filter tools -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 120px; gap: 12px; align-items: end;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Search Keywords</label>
+              <input type="text" id="filterSearch" class="form-input" placeholder="Search entries...">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Transaction Type</label>
+              <select id="filterType" class="form-input">
+                <option value="">All Types</option>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Category</label>
+              <select id="filterCategory" class="form-input">
+                <option value="">All Categories</option>
+                <!-- Categories filled dynamically -->
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Member</label>
+              <select id="filterMember" class="form-input">
+                <option value="">All Members</option>
+                <!-- Members filled dynamically -->
+              </select>
+            </div>
+            <button class="btn btn-secondary" id="resetFiltersBtn">Reset</button>
+          </div>
+        </div>
+
+        <div class="card-glass">
+          <div class="header-top" style="margin-bottom: 16px;">
+            <h3>Family Transaction Log</h3>
+            <button class="btn btn-primary" id="addTransactionBtn">+ Log Transaction</button>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Member</th>
+                  <th>Type</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="internalKhataTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: External Khata -->
+      <section id="view-external-khata" class="app-view" style="display: none;">
+        <div class="header-top" style="margin-bottom: 24px;">
+          <h2>External Accounts</h2>
+          <button class="btn btn-primary" id="addExternalAccountBtn">+ Add External Account</button>
+        </div>
+        
+        <div class="layout-split">
+          <!-- Accounts List -->
+          <div class="card-glass">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Contact</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="externalAccountsTableBody">
+                  <!-- Filled dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Selected Ledger Details -->
+          <div class="card-glass" id="externalLedgerCard">
+            <h3 id="extLedgerTitle" style="margin-bottom: 8px;">Select an Account</h3>
+            <p id="extLedgerSubtitle" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Click view on any account to load its transaction history.</p>
+            
+            <div id="extLedgerActions" style="display: none; margin-bottom: 16px;">
+              <button class="btn btn-secondary btn-sm" id="extAddCreditBtn">+ Lend / Income</button>
+              <button class="btn btn-danger btn-sm" id="extAddDebitBtn">- Borrow / Pay</button>
+            </div>
+            
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="extLedgerTableBody">
+                  <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No account selected.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Budget Planner -->
+      <section id="view-budget" class="app-view" style="display: none;">
+        <div class="layout-split">
+          <!-- Category Budget Limits -->
+          <div class="card-glass">
+            <h3 style="margin-bottom: 20px;">Category Budgets Setup</h3>
+            <form id="budgetForm">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" id="budgetInputGrid">
+                <!-- Inputs loaded dynamically -->
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">Save Budget Configurations</button>
+            </form>
+          </div>
+
+          <!-- Budget Utilization Bar -->
+          <div class="card-glass">
+            <h3 style="margin-bottom: 20px;">Budget Allocation & Spending</h3>
+            <div id="budgetBarsContainer" style="display: flex; flex-direction: column; gap: 20px;">
+              <!-- Progress Bars -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Loan Center -->
+      <section id="view-loans" class="app-view" style="display: none;">
+        <div class="header-top" style="margin-bottom: 24px;">
+          <h2>Loans Portfolio</h2>
+          <button class="btn btn-primary" id="addLoanBtn">+ New Loan Entry</button>
+        </div>
+
+        <div class="card-glass">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Person/Bank</th>
+                  <th>Type</th>
+                  <th>Principal</th>
+                  <th>Interest</th>
+                  <th>EMI</th>
+                  <th>Paid Amount</th>
+                  <th>Remaining</th>
+                  <th>Due Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="loansTableBody">
+                <!-- Dynamically filled -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Reports & Analytics -->
+      <section id="view-reports" class="app-view" style="display: none;">
+        <!-- Filters -->
+        <div class="card-glass" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <div class="form-group" style="margin: 0;">
+                <select id="reportYearSelect" class="form-input">
+                  <option value="2026">2026</option>
+                  <option value="2025">2025</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <select id="reportMonthSelect" class="form-input">
+                  <option value="all">Yearly Cumulative</option>
+                  <option value="0">January</option>
+                  <option value="1">February</option>
+                  <option value="2">March</option>
+                  <option value="3">April</option>
+                  <option value="4">May</option>
+                  <option value="5">June</option>
+                  <option value="6">July</option>
+                  <option value="7">August</option>
+                  <option value="8">September</option>
+                  <option value="9">October</option>
+                  <option value="10">November</option>
+                  <option value="11">December</option>
+                </select>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+              <button class="btn btn-secondary" id="printReportBtn">🖨️ Print PDF Report</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytical Charts Grid -->
+        <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+          <div class="card-glass">
+            <h4 style="margin-bottom: 16px; font-weight: 700; text-align: center;">Expense Breakdown (Categories)</h4>
+            <canvas id="expensesPieChart" style="width: 100%; height: 260px;"></canvas>
+          </div>
+          <div class="card-glass">
+            <h4 style="margin-bottom: 16px; font-weight: 700; text-align: center;">Income vs Expenses Comparison</h4>
+            <canvas id="incomeExpenseBarChart" style="width: 100%; height: 260px;"></canvas>
+          </div>
+          <div class="card-glass">
+            <h4 style="margin-bottom: 16px; font-weight: 700; text-align: center;">6-Month Saving Trend</h4>
+            <canvas id="savingsLineChart" style="width: 100%; height: 260px;"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Settings -->
+      <section id="view-settings" class="app-view" style="display: none;">
+        <div class="layout-split">
+          <!-- Setup Config -->
+          <div class="card-glass">
+            <h3 style="margin-bottom: 20px;">Family Core Configurations</h3>
+            <form id="settingsForm">
+              <div class="form-group">
+                <label class="form-label">Family Name / Brand</label>
+                <input type="text" id="settFamilyName" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Currency Symbol</label>
+                <select id="settCurrency" class="form-input">
+                  <option value="₹">INR (₹)</option>
+                  <option value="$">USD ($)</option>
+                  <option value="€">EUR (€)</option>
+                  <option value="£">GBP (£)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">App Appearance Theme</label>
+                <select id="settTheme" class="form-input">
+                  <option value="light">Light Mode</option>
+                  <option value="dark">Dark Mode</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">Save Base Settings</button>
+            </form>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 24px 0;">
+
+            <h3>Update Security PIN</h3>
+            <form id="pinUpdateForm" style="margin-top: 12px;">
+              <div class="form-group">
+                <label class="form-label">New 4-Digit PIN</label>
+                <input type="password" id="settNewPin" class="form-input" maxlength="4" placeholder="Enter 4 digit PIN">
+              </div>
+              <button type="submit" class="btn btn-danger" style="width: 100%;">Set Pin Lock</button>
+            </form>
+          </div>
+
+          <!-- Backup & Google Sheets Link -->
+          <div class="card-glass">
+            <h3 style="margin-bottom: 20px;">Backup & Dynamic Sheet API Sync</h3>
+            <div class="form-group">
+              <label class="form-label">Google Sheets API url (Sync Mode)</label>
+              <input type="text" id="settSheetsUrl" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="settUseSheets" style="width: 18px; height: 18px;">
+              <label for="settUseSheets" style="font-size: 13px; font-weight: 500;">Enable Google Sheets Sync</label>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 12px;" id="saveSheetsSyncBtn">Update API Connection</button>
+            <button class="btn btn-success" style="width: 100%; margin-bottom: 24px;" id="initializeSheetsDbBtn">⚙️ Initialize Sheets Database</button>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 24px 0;">
+
+            <h3>Local Database Backups</h3>
+            <div style="display: flex; gap: 12px; margin-top: 12px;">
+              <button class="btn btn-secondary" id="exportBackupBtn">📥 Export JSON Backup</button>
+              <button class="btn btn-secondary" id="triggerImportBtn">📤 Import Backup</button>
+              <input type="file" id="importFileInput" style="display: none;" accept=".json">
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== MODAL DIALOGS ==================== -->
+  
+  <!-- MODAL: Member Form -->
+  <div id="memberModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="memberModalTitle">Add Family Member</h3>
+        <button class="modal-close" onclick="closeModal('memberModal')">×</button>
+      </div>
+      <form id="memberForm">
+        <input type="hidden" id="memberId">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="memberName" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Relation</label>
+          <input type="text" id="memberRelation" class="form-input" placeholder="e.g. Spouse, Son, Father" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Phone</label>
+          <input type="tel" id="memberPhone" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monthly Target Contribution</label>
+          <input type="number" id="memberContribution" class="form-input" value="0">
+        </div>
+        <div class="form-group" id="openingBalanceGroup">
+          <label class="form-label">Opening Account Balance</label>
+          <input type="number" id="memberBalance" class="form-input" value="0">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Save Member</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Transaction Form -->
+  <div id="txModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="txModalTitle">Add Transaction</h3>
+        <button class="modal-close" onclick="closeModal('txModal')">×</button>
+      </div>
+      <form id="txForm">
+        <input type="hidden" id="txId">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" id="txDate" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transaction Type</label>
+          <select id="txType" class="form-input" required>
+            <option value="Income">Income (Deposited into pool)</option>
+            <option value="Expense">Expense (Withdrawn/Spent)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="txCategory" class="form-input" required>
+            <option value="Salary">Salary</option>
+            <option value="Business Income">Business Income</option>
+            <option value="Rent Income">Rent Income</option>
+            <option value="Food">Food</option>
+            <option value="Education">Education</option>
+            <option value="Electricity">Electricity</option>
+            <option value="Water">Water</option>
+            <option value="Internet">Internet</option>
+            <option value="Medical">Medical</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other Category</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Associated Family Member</label>
+          <select id="txMemberId" class="form-input" required>
+            <!-- Filled dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          <input type="number" id="txAmount" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Description</label>
+          <input type="text" id="txDescription" class="form-input" placeholder="Describe the purpose">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Record Transaction</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: External Account Form -->
+  <div id="extAccModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">New External Ledger Account</h3>
+        <button class="modal-close" onclick="closeModal('extAccModal')">×</button>
+      </div>
+      <form id="extAccForm">
+        <div class="form-group">
+          <label class="form-label">Name / Shop Name</label>
+          <input type="text" id="extName" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Category</label>
+          <select id="extType" class="form-input">
+            <option value="Friend">Friend</option>
+            <option value="Relative">Relative</option>
+            <option value="Shop">Shop</option>
+            <option value="Vendor">Vendor</option>
+            <option value="Customer">Customer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Number</label>
+          <input type="tel" id="extPhone" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <input type="text" id="extAddress" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opening Balance</label>
+          <input type="number" id="extOpeningBalance" class="form-input" value="0" placeholder="Positive if they owe you, negative if you owe them">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Create External Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: External Transaction (Credit / Debit) -->
+  <div id="extTxModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="extTxTitle">Log External Transaction</h3>
+        <button class="modal-close" onclick="closeModal('extTxModal')">×</button>
+      </div>
+      <form id="extTxForm">
+        <input type="hidden" id="extTxAccountId">
+        <input type="hidden" id="extTxType"> <!-- Credit or Debit -->
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" id="extTxDate" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          <input type="number" id="extTxAmount" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Description</label>
+          <input type="text" id="extTxNotes" class="form-input" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Record Ledger Entry</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Loan Form -->
+  <div id="loanModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="loanModalTitle">New Loan Profile</h3>
+        <button class="modal-close" onclick="closeModal('loanModal')">×</button>
+      </div>
+      <form id="loanForm">
+        <input type="hidden" id="loanId">
+        <div class="form-group">
+          <label class="form-label">Debtor / Creditor Person</label>
+          <input type="text" id="loanPerson" class="form-input" placeholder="Name of Person or Bank" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Loan Type</label>
+          <select id="loanTypeSelect" class="form-input" required>
+            <option value="Given">Given (We lent out money)</option>
+            <option value="Taken">Taken (We borrowed money)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Principal Amount</label>
+          <input type="number" id="loanAmount" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Interest Rate (% Simple)</label>
+          <input type="number" id="loanInterest" class="form-input" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monthly EMI Amount</label>
+          <input type="number" id="loanEmi" class="form-input" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Due Date</label>
+          <input type="date" id="loanDueDate" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" id="loanNotes" class="form-input">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Save Loan</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Loan EMI Repayment Form -->
+  <div id="repayModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Loan Payment</h3>
+        <button class="modal-close" onclick="closeModal('repayModal')">×</button>
+      </div>
+      <form id="repayForm">
+        <input type="hidden" id="repayLoanId">
+        <div class="form-group">
+          <label class="form-label">Repayment Date</label>
+          <input type="date" id="repayDate" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount Paid</label>
+          <input type="number" id="repayAmount" class="form-input" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Repayment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Global scripts loading using type=module -->
+  <script type="module" src="app.js"></script>
+  
+  <script>
+    // Global scope helper function so modals can use simple onclick inline attributes
+    window.closeModal = function(modalId) {
+      document.getElementById(modalId).classList.remove("active");
+    }
+  </script>
+
+</body>
+</html>
