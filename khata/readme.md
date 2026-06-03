@@ -324,3 +324,8 @@ curl 'https://script.google.com/macros/s/AKfycbzbCP4D7Q5yCVwWKbU-s-bD76egoTXk_93
   -H 'x-browser-year: 2026' \
   -H 'x-client-data: CKmdygEIlaHLAQiGoM0B' \
   --data-raw '{"action":"create","sheet":"members","data":{"id":1,"name":"sandeep","relation":"bro","phone":"0088987979","photo":"","contribution":10000,"balance":1000,"createdAt":"2026-06-02T06:55:11.173Z","updatedAt":"2026-06-02T06:55:11.173Z"},"columns":["id","name","relation","phone","photo","contribution","balance","createdAt","updatedAt"]}'
+
+
+  ```sh
+  python3 -m http.server 8000
+  ```

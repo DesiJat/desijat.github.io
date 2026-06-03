@@ -659,6 +659,12 @@
       <form id="loanForm">
         <input type="hidden" id="loanId">
         <div class="form-group">
+          <label class="form-label">Associated Family Member</label>
+          <select id="loanMemberId" class="form-input" required>
+            <!-- Filled dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
           <label class="form-label">Debtor / Creditor Person</label>
           <input type="text" id="loanPerson" class="form-input" placeholder="Name of Person or Bank" required>
         </div>
@@ -713,6 +719,34 @@
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Repayment</button>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Loan Details & History View -->
+  <div id="loanDetailsModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="loanDetailsTitle">Loan Ledger Details</h3>
+        <button class="modal-close" onclick="closeModal('loanDetailsModal')">×</button>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; font-size: 13px;" id="loanDetailsGrid">
+        <!-- Filled dynamically -->
+      </div>
+      
+      <h4 style="margin-bottom: 12px; font-weight: 700;">Repayment Ledger History</h4>
+      <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Payment Date</th>
+              <th>Amount Settled</th>
+            </tr>
+          </thead>
+          <tbody id="loanRepaymentHistoryTableBody">
+            <!-- Filled dynamically -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 

@@ -176,6 +176,7 @@
   "loans": [
     {
       "id": 1,
+      "memberId": 1,
       "person": "HDFC Home Loan",
       "loanType": "Taken",
       "amount": 2500000,
@@ -184,15 +185,13 @@
       "dueDate": "2026-06-05",
       "paidAmount": 48000,
       "notes": "Home construction EMI plan",
-      "paymentHistory": [
-        { "date": "2026-04-05", "amount": 24000 },
-        { "date": "2026-05-05", "amount": 24000 }
-      ],
+      "paymentHistory": "[{\"date\":\"2026-04-05\",\"amount\":24000},{\"date\":\"2026-05-05\",\"amount\":24000}]",
       "createdAt": "2026-06-02T12:00:00.000Z",
       "updatedAt": "2026-06-02T12:00:00.000Z"
     },
     {
       "id": 2,
+      "memberId": 2,
       "person": "Sanjay Sharma (Friend)",
       "loanType": "Given",
       "amount": 50000,
@@ -201,9 +200,7 @@
       "dueDate": "2026-06-12",
       "paidAmount": 10000,
       "notes": "Friendly business support loan",
-      "paymentHistory": [
-        { "date": "2026-05-12", "amount": 10000 }
-      ],
+      "paymentHistory": "[{\"date\":\"2026-05-12\",\"amount\":10000}]",
       "createdAt": "2026-06-02T12:00:00.000Z",
       "updatedAt": "2026-06-02T12:00:00.000Z"
     }

@@ -59,16 +59,18 @@ class StorageManager {
   getLocal(key, decrypt = true) {
     const raw = localStorage.getItem(`khata_${key}`);
     if (!raw) return null;
+    
+    let processed = raw;
     if (decrypt) {
-      const decrypted = this.decrypt(raw);
-      try {
-        return JSON.parse(decrypted);
-      } catch (e) {
-        return null;
+      const trimmed = raw.trim();
+      // If it starts with JSON character brackets, it is plain-text, skip decrypt
+      if (!(trimmed.startsWith("{") || trimmed.startsWith("["))) {
+        processed = this.decrypt(raw);
       }
     }
+    
     try {
-      return JSON.parse(raw);
+      return JSON.parse(processed);
     } catch (e) {
       return null;
     }
@@ -112,11 +114,16 @@ class StorageManager {
 
     // Write to Sheets in the background (non-blocking)
     if (this.useSheets && this.sheetsUrl) {
+      // Strip server-managed fields before sending to Sheets
+      const { id, createdAt, updatedAt, ...sheetsData } = record;
+      console.log(`<=============>${table} data start<=============>`)
+      console.log(JSON.stringify(sheetsData));
+      console.log(`<=============>${table} data end<=============>`)
       this.sheetsRequest({
         action: "create",
         sheet: table,
-        data: record,
-        columns: Object.keys(record)
+        data: sheetsData,
+        columns: Object.keys(sheetsData)
       }).catch(err => console.error("Background sheet sync failed:", err));
     }
     return record;

@@ -30,18 +30,18 @@ async function initDemoData() {
 
   // 1. Base Configuration
   storage.saveLocal("config", {
-    familyName: "Our Family",
+    familyName: "Sharma Family",
     currency: "₹",
     theme: "light",
-    useSheets: false,
-    sheetsUrl: "",
+    useSheets: true,
+    sheetsUrl: "https://script.google.com/macros/s/AKfycbzbCP4D7Q5yCVwWKbU-s-bD76egoTXk_93QgQZsuV0TgJ9g8J92nZlYsRhGRlyf5rDqIw/exec",
     securePin: storage.encrypt("1234") // Default PIN is 1234
   }, false);
 
   // 2. Members
-  await members.addMember({ name: "Dad (Admin)", relation: "Father", phone: "9876543210", contribution: 50000, balance: 12000 });
-  await members.addMember({ name: "Mom", relation: "Mother", phone: "8765432109", contribution: 10000, balance: 5000 });
-  await members.addMember({ name: "Alex", relation: "Son", phone: "7654321098", contribution: 5000, balance: 800 });
+  const dad = await members.addMember({ name: "Dad (Admin)", relation: "Father", phone: "9876543210", contribution: 50000, balance: 12000, parentId: 0 });
+  const mom = await members.addMember({ name: "Mom", relation: "Mother", phone: "8765432109", contribution: 10000, balance: 5000, parentId: 1 });
+  const alex = await members.addMember({ name: "Alex", relation: "Son", phone: "7654321098", contribution: 5000, balance: 800, parentId: 1 });
 
   // 3. Budgets
   await budgets.setBudget("Food", 15000);
@@ -55,10 +55,8 @@ async function initDemoData() {
   const friend = await transactions.addExternalAccount({ name: "Neighbor John", type: "Friend", phone: "9812739123", address: "House 24, Delhi", openingBalance: 4000 }); // They owe us 4000
 
   // 5. Internal Transactions
-  // Let's get actual ids of the created users
-  const userList = await members.getMembers();
-  const dadId = userList[0].id;
-  const momId = userList[1].id;
+  const dadId = dad.id;
+  const momId = mom.id;
   
   await transactions.addTransaction({ date: "2026-05-15", type: "Income", category: "Salary", memberId: dadId, amount: 65000, description: "Software Dev Consulting salary" });
   await transactions.addTransaction({ date: "2026-05-20", type: "Expense", category: "Food", memberId: momId, amount: 4800, description: "Monthly groceries shopping" });
@@ -66,8 +64,14 @@ async function initDemoData() {
   await transactions.addTransaction({ date: "2026-06-01", type: "Income", category: "Rent Income", memberId: momId, amount: 15000, description: "First floor rent" });
 
   // 6. External Loan Entries
-  await loans.addLoan({ person: "SBI Bank", loanType: "Taken", amount: 120000, interest: 8.5, emi: 6000, dueDate: "2026-06-10", notes: "Car finance loan" });
-  const relativeLoan = await loans.addLoan({ person: "Uncle Harry", loanType: "Given", amount: 20000, interest: 5, emi: 2000, dueDate: "2026-06-15", notes: "Emergency business help" });
+  // await loans.addLoan({ person: "SBI Bank",memberId:1, loanType: "Taken", amount: 120000, interest: 8.5, emi: 6000, dueDate: "2026-06-10", notes: "Car finance loan","paymentHistory": [
+  //       { memberId:2,"date": "2026-04-05", "amount": 24000 },
+  //       { memberId:2,"date": "2026-05-05", "amount": 24000 }
+  //     ] });
+  const relativeLoan = await loans.addLoan({ person: "Uncle Harry", memberId:1,loanType: "Given", amount: 20000, interest: 5, emi: 2000, dueDate: "2026-06-15", notes: "Emergency business help","paymentHistory": [
+        { memberId:2,"date": "2026-04-05", "amount": 24000 },
+        { memberId:2,"date": "2026-05-05", "amount": 24000 }
+      ] });
   
   // Add some payment history to Loan
   await loans.addRepayment(relativeLoan.id, 4000, "2026-05-20");
@@ -384,6 +388,7 @@ async function renderBudget() {
 // Render Loans View
 async function renderLoans() {
   const list = await loans.getLoans();
+  const userList = await members.getMembers();
   const tbody = document.getElementById("loansTableBody");
   tbody.innerHTML = "";
 
@@ -391,10 +396,12 @@ async function renderLoans() {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No active loans recorded.</td></tr>`;
   } else {
     list.forEach(l => {
+      const member = userList.find(m => Number(m.id) === Number(l.memberId));
+      const memberName = member ? member.name : "Unassociated";
       const remaining = loans.getRemainingBalance(l);
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><strong>${l.person}</strong></td>
+        <td><strong>${l.person}</strong><br><span style="font-size:11px; color:var(--text-muted);">Member: ${memberName}</span></td>
         <td><span class="badge ${l.loanType === 'Given' ? 'badge-income' : 'badge-expense'}">${l.loanType}</span></td>
         <td>${state.activeCurrency}${l.amount.toLocaleString()}</td>
         <td>${l.interest}%</td>
@@ -403,6 +410,7 @@ async function renderLoans() {
         <td style="font-weight:700;">${state.activeCurrency}${remaining.toLocaleString()}</td>
         <td>${l.dueDate}</td>
         <td>
+          <button class="btn btn-secondary btn-sm" onclick="window.viewLoanDetails(${l.id})" style="padding: 4px 8px;">View</button>
           <button class="btn btn-secondary btn-sm" onclick="window.logLoanRepayment(${l.id})" style="padding: 4px 8px;">Repay</button>
           <button class="btn btn-danger btn-sm" onclick="window.deleteLoan(${l.id})" style="padding: 4px 8px;">×</button>
         </td>
@@ -529,6 +537,56 @@ window.deleteExternalAccount = async function(id) {
     showToast("External account deleted.", "success");
     renderCurrentView();
   }
+};
+
+window.viewLoanDetails = async function(id) {
+  const loanList = await loans.getLoans();
+  const userList = await members.getMembers();
+  const l = loanList.find(item => Number(item.id) === Number(id));
+  if (!l) return;
+
+  const member = userList.find(m => Number(m.id) === Number(l.memberId));
+  const memberName = member ? member.name : "Unassociated";
+  const remaining = loans.getRemainingBalance(l);
+
+  // Populate title
+  document.getElementById("loanDetailsTitle").textContent = `${l.person} Loan Details`;
+
+  // Populate metadata grid
+  const grid = document.getElementById("loanDetailsGrid");
+  grid.innerHTML = `
+    <div><strong>Associated Member:</strong><br>${memberName}</div>
+    <div><strong>Loan Type:</strong><br>${l.loanType === 'Given' ? 'Lent Out (Given)' : 'Borrowed (Taken)'}</div>
+    <div><strong>Principal Amount:</strong><br>${state.activeCurrency}${l.amount.toLocaleString()}</div>
+    <div><strong>Interest Rate:</strong><br>${l.interest}% Simple</div>
+    <div><strong>Monthly EMI Amount:</strong><br>${state.activeCurrency}${l.emi.toLocaleString()}</div>
+    <div><strong>Due Date:</strong><br>${l.dueDate}</div>
+    <div><strong>Total Paid Amount:</strong><br>${state.activeCurrency}${l.paidAmount.toLocaleString()}</div>
+    <div><strong>Outstanding Balance:</strong><br>${state.activeCurrency}${remaining.toLocaleString()}</div>
+    <div style="grid-column: span 2;"><strong>Notes:</strong><br>${l.notes || "None"}</div>
+  `;
+
+  // Populate repayment history table
+  const tbody = document.getElementById("loanRepaymentHistoryTableBody");
+  tbody.innerHTML = "";
+  const history = Array.isArray(l.paymentHistory) ? l.paymentHistory : [];
+
+  if (history.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--text-muted);">No payments recorded yet.</td></tr>`;
+  } else {
+    // Sort history by date descending
+    const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+    sortedHistory.forEach(h => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${h.date}</td>
+        <td style="font-weight: 700; color: var(--success);">${state.activeCurrency}${Number(h.amount).toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById("loanDetailsModal").classList.add("active");
 };
 
 window.logLoanRepayment = function(id) {
@@ -712,6 +770,7 @@ function bindFormSubmissions() {
   // Loan Add Save
   document.getElementById("loanForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const memberId = document.getElementById("loanMemberId").value;
     const person = document.getElementById("loanPerson").value;
     const loanType = document.getElementById("loanTypeSelect").value;
     const amount = document.getElementById("loanAmount").value;
@@ -720,7 +779,7 @@ function bindFormSubmissions() {
     const dueDate = document.getElementById("loanDueDate").value;
     const notes = document.getElementById("loanNotes").value;
 
-    await loans.addLoan({ person, loanType, amount, interest, emi, dueDate, notes });
+    await loans.addLoan({ memberId, person, loanType, amount, interest, emi, dueDate, notes });
     showToast("Loan profile saved.", "success");
     window.closeModal("loanModal");
     renderCurrentView();
@@ -820,8 +879,16 @@ function bindQuickActions() {
     document.getElementById("extTxModal").classList.add("active");
   });
 
-  document.getElementById("addLoanBtn").addEventListener("click", () => {
+  document.getElementById("addLoanBtn").addEventListener("click", async () => {
+    const list = await members.getMembers();
+    const select = document.getElementById("loanMemberId");
+    select.innerHTML = "";
+    list.forEach(m => {
+      select.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+    });
+
     document.getElementById("loanForm").reset();
+    document.getElementById("loanId").value = "";
     document.getElementById("loanDueDate").value = new Date().toISOString().split("T")[0];
     document.getElementById("loanModal").classList.add("active");
   });

@@ -6,12 +6,29 @@ import { storage } from "./storage.js";
 
 class LoanManager {
   async getLoans() {
-    return await storage.read("loans") || [];
+    const list = await storage.read("loans") || [];
+    return list.map(loan => {
+      if (typeof loan.paymentHistory === "string" && loan.paymentHistory.trim() !== "") {
+        try {
+          loan.paymentHistory = JSON.parse(loan.paymentHistory);
+        } catch (e) {
+          loan.paymentHistory = [];
+        }
+      } else if (!Array.isArray(loan.paymentHistory)) {
+        loan.paymentHistory = [];
+      }
+      return loan;
+    });
   }
 
   async addLoan(loanData) {
-    // Schema: { person, loanType (Given/Taken), amount, interest (%), emi, dueDate, paidAmount, notes }
+    let history = loanData.paymentHistory || [];
+    if (Array.isArray(history)) {
+      history = JSON.stringify(history);
+    }
+    // Schema: { memberId, person, loanType (Given/Taken), amount, interest (%), emi, dueDate, paidAmount, notes }
     const payload = {
+      memberId: loanData.memberId ? Number(loanData.memberId) : null,
       person: loanData.person,
       loanType: loanData.loanType, // Given or Taken
       amount: Number(loanData.amount) || 0,
@@ -20,13 +37,17 @@ class LoanManager {
       dueDate: loanData.dueDate || "",
       paidAmount: Number(loanData.paidAmount) || 0,
       notes: loanData.notes || "",
-      paymentHistory: loanData.paymentHistory || [] // Array of { date, amount, method }
+      paymentHistory: history
     };
     return await storage.create("loans", payload);
   }
 
   async updateLoan(id, loanData) {
-    return await storage.update("loans", id, loanData);
+    const payload = { ...loanData };
+    if (payload.paymentHistory && Array.isArray(payload.paymentHistory)) {
+      payload.paymentHistory = JSON.stringify(payload.paymentHistory);
+    }
+    return await storage.update("loans", id, payload);
   }
 
   async deleteLoan(id) {
@@ -40,7 +61,7 @@ class LoanManager {
 
     const paid = Number(loan.paidAmount) || 0;
     const newPaidAmount = paid + Number(paymentAmount);
-    const history = loan.paymentHistory || [];
+    const history = Array.isArray(loan.paymentHistory) ? loan.paymentHistory : [];
     history.push({ date, amount: Number(paymentAmount) });
 
     return await this.updateLoan(id, {
