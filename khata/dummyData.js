@@ -209,6 +209,7 @@ async function runDemo() {
   ],
   "members": [
     {
+      "parents_id":0,
       "name": "Rajesh Verma",
       "relation": "Father (Head)",
       "phone": "9876501234",
@@ -217,6 +218,7 @@ async function runDemo() {
       "balance": 24500,
     },
     {
+      "parents_id":1,
       "name": "Sunita Verma",
       "relation": "Mother",
       "phone": "9876505678",
@@ -225,6 +227,7 @@ async function runDemo() {
       "balance": 8200,
     },
     {
+      "parents_id":1,
       "name": "Amit Verma",
       "relation": "Son",
       "phone": "9876509999",
@@ -368,40 +371,14 @@ async function runDemo() {
 
     for (let j = 0; j < seedData[tableName].length; j++) {
       const dataToAdd = seedData[tableName][j];
-      // update and calulated interest_total
-      // if (tableName === "ExternalLoans") {
-      //   const { original_principal = 0, interest_rate_percent = 0, duration_months = 0, interest_basis } = dataToAdd;
-      //   const years = interest_basis === "Monthly" ? duration_months : duration_months / 12;
-      //   dataToAdd.interest_total = original_principal * (interest_rate_percent / 100) * years;
-      //   dataToAdd.tobe_paid = (+original_principal + +dataToAdd.interest_total);
-      //   dataToAdd.paid = 0;
-      // }
-
-      // if (tableName === "LoanRepayments") {
-      //   const { loan_id, amount = 0 } = dataToAdd;
-      //   const loanDetails = await db.read("ExternalLoans", {
-      //     where: [
-      //       { field: "id", operator: "=", value: loan_id }
-      //     ]
-      //   });
-      //   let loanStatus = null;
-      //   if (loanDetails.data.length > 0) {
-      //     const { tobe_paid, status, paid } = loanDetails.data[0];
-      //     dataToAdd['before_paid'] = paid;
-      //     dataToAdd['paid'] = (+paid + +amount);
-
-      //     if (status != 'Active' || paid >= tobe_paid) {
-      //       console.log('loan already settled');
-      //       continue
-      //     }
-      //     if (dataToAdd['paid'] > tobe_paid) {
-      //       const restAmount = tobe_paid - paid;
-      //       console.log(`Only amount is rest ${restAmount}`);
-      //       continue
-      //     }
-      //     // console.log(loanDetails.data)
-      //     loanStatus = dataToAdd['paid'] >= tobe_paid ? 'Settled' : 'Active'
-      //   }
+      const allKeys=Object.keys(dataToAdd);
+      let dataToAddFormated={};
+      for (let index = 0; index < allKeys.length; index++) {
+        const element = allKeys[index];
+        const keyVal = typeof dataToAdd[element] === "object" ? JSON.stringify(dataToAdd[element] || []) : dataToAdd[element]
+        dataToAddFormated[element]=keyVal
+      }
+      // console.log(Object.keys(dataToAdd));
       //   const order = ["date", "loan_id", "user_id", "account_id", "before_paid", "amount", "paid"];
 
       //   const dataToAddOrder = Object.fromEntries(
@@ -412,7 +389,8 @@ async function runDemo() {
       //   await db.update("ExternalLoans", loan_id, { paid: dataToAdd['paid'], status: loanStatus })
       // }
       
-      await db.create(tableName, dataToAdd);
+      // await db.create(tableName, dataToAdd);
+      await db.create(tableName, dataToAddFormated);
     }
 
   }
