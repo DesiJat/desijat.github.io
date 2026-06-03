@@ -1,0 +1,211 @@
+{
+  "config": [
+    {
+      "id": 1,
+      "familyName": "Verma Family Finance",
+      "currency": "₹",
+      "theme": "dark",
+      "useSheets": true,
+      "sheetsUrl": "https://script.google.com/macros/s/AKfycbzbCP4D7Q5yCVwWKbU-s-bD76egoTXk_93QgQZsuV0TgJ9g8J92nZlYsRhGRlyf5rDqIw/exec",
+      "securePin": "RkJCQkJDQg==",
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    }
+  ],
+  "members": [
+    {
+      "id": 1,
+      "name": "Rajesh Verma",
+      "relation": "Father (Head)",
+      "phone": "9876501234",
+      "photo": "",
+      "contribution": 60000,
+      "balance": 24500,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "name": "Sunita Verma",
+      "relation": "Mother",
+      "phone": "9876505678",
+      "photo": "",
+      "contribution": 15000,
+      "balance": 8200,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "name": "Amit Verma",
+      "relation": "Son",
+      "phone": "9876509999",
+      "photo": "",
+      "contribution": 8000,
+      "balance": 1500,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": 1,
+      "date": "2026-06-01",
+      "type": "Income",
+      "category": "Salary",
+      "memberId": 1,
+      "externalAccountId": null,
+      "amount": 75000,
+      "description": "Monthly Corporate Salary Credit",
+      "status": "Completed",
+      "dueDate": "",
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "date": "2026-06-01",
+      "type": "Income",
+      "category": "Rent Income",
+      "memberId": 2,
+      "externalAccountId": null,
+      "amount": 18000,
+      "description": "Commercial Shop Floor Rent",
+      "status": "Completed",
+      "dueDate": "",
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "date": "2026-06-02",
+      "type": "Expense",
+      "category": "Food",
+      "memberId": 2,
+      "externalAccountId": null,
+      "amount": 6200,
+      "description": "Weekly organic wholesale groceries purchase",
+      "status": "Completed",
+      "dueDate": "",
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "date": "2026-06-02",
+      "type": "Expense",
+      "category": "Electricity",
+      "memberId": 1,
+      "externalAccountId": null,
+      "amount": 4800,
+      "description": "DHBVN Power Bill - Main House",
+      "status": "Completed",
+      "dueDate": "",
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "date": "2026-06-02",
+      "type": "Expense",
+      "category": "Medical",
+      "memberId": 3,
+      "externalAccountId": null,
+      "amount": 2500,
+      "description": "Annual dental checkup and scaling",
+      "status": "Completed",
+      "dueDate": "",
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    }
+  ],
+  "external_accounts": [
+    {
+      "id": 1,
+      "name": "Gupta Kirana Store",
+      "phone": "9812345678",
+      "address": "Gali No 2, Model Town, Hissar",
+      "type": "Shop",
+      "openingBalance": -3400,
+      "currentBalance": -3400,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "name": "Ramesh Kumar (Contractor)",
+      "phone": "9896011223",
+      "address": "Sector 14, Hissar",
+      "type": "Customer",
+      "openingBalance": 15000,
+      "currentBalance": 15000,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    }
+  ],
+  "budgets": [
+    {
+      "id": 1,
+      "category": "Food",
+      "limit": 12000,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "category": "Education",
+      "limit": 20000,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "category": "Electricity",
+      "limit": 8000,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "category": "Medical",
+      "limit": 5000,
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    }
+  ],
+  "loans": [
+    {
+      "id": 1,
+      "person": "HDFC Home Loan",
+      "loanType": "Taken",
+      "amount": 2500000,
+      "interest": 8.1,
+      "emi": 24000,
+      "dueDate": "2026-06-05",
+      "paidAmount": 48000,
+      "notes": "Home construction EMI plan",
+      "paymentHistory": [
+        { "date": "2026-04-05", "amount": 24000 },
+        { "date": "2026-05-05", "amount": 24000 }
+      ],
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "person": "Sanjay Sharma (Friend)",
+      "loanType": "Given",
+      "amount": 50000,
+      "interest": 6.0,
+      "emi": 5000,
+      "dueDate": "2026-06-12",
+      "paidAmount": 10000,
+      "notes": "Friendly business support loan",
+      "paymentHistory": [
+        { "date": "2026-05-12", "amount": 10000 }
+      ],
+      "createdAt": "2026-06-02T12:00:00.000Z",
+      "updatedAt": "2026-06-02T12:00:00.000Z"
+    }
+  ]
+}

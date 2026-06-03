@@ -87,7 +87,11 @@ class StorageManager {
     try {
       const response = await fetch(this.sheetsUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        mode: "cors",
+        // Avoid OPTIONS preflight by omitting Content-Type: application/json
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
         body: JSON.stringify(payload)
       });
       return await response.json();
@@ -106,14 +110,14 @@ class StorageManager {
     list.push(record);
     this.saveLocal(table, list);
 
-    // Write to Sheets if enabled
+    // Write to Sheets in the background (non-blocking)
     if (this.useSheets && this.sheetsUrl) {
-      await this.sheetsRequest({
+      this.sheetsRequest({
         action: "create",
         sheet: table,
         data: record,
         columns: Object.keys(record)
-      });
+      }).catch(err => console.error("Background sheet sync failed:", err));
     }
     return record;
   }
@@ -145,7 +149,8 @@ class StorageManager {
       this.saveLocal(table, list);
 
       if (this.useSheets && this.sheetsUrl) {
-        await this.sheetsRequest({ action: "update", sheet: table, id: id, data: data });
+        this.sheetsRequest({ action: "update", sheet: table, id: id, data: data })
+          .catch(err => console.error("Background sheet sync failed:", err));
       }
       return true;
     }
@@ -158,7 +163,8 @@ class StorageManager {
     this.saveLocal(table, filtered);
 
     if (this.useSheets && this.sheetsUrl) {
-      await this.sheetsRequest({ action: "delete", sheet: table, id: id });
+      this.sheetsRequest({ action: "delete", sheet: table, id: id })
+        .catch(err => console.error("Background sheet sync failed:", err));
     }
     return true;
   }

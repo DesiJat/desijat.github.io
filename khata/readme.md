@@ -302,3 +302,25 @@ This prompt is detailed enough to get an AI coding assistant to generate a near-
 # for referance files
 client2App.js
 server2App.gs
+
+
+curl 'https://script.google.com/macros/s/AKfycbzbCP4D7Q5yCVwWKbU-s-bD76egoTXk_93QgQZsuV0TgJ9g8J92nZlYsRhGRlyf5rDqIw/exec' \
+  -H 'accept: */*' \
+  -H 'accept-language: en-GB,en-US;q=0.9,en;q=0.8' \
+  -H 'content-type: text/plain;charset=utf-8' \
+  -H 'origin: http://localhost:8000' \
+  -H 'priority: u=1, i' \
+  -H 'referer: http://localhost:8000/' \
+  -H 'sec-ch-ua: "Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: cross-site' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36' \
+  -H 'x-browser-channel: stable' \
+  -H 'x-browser-copyright: Copyright 2026 Google LLC. All Rights Reserved.' \
+  -H 'x-browser-validation: DFscXLDsHH1VQnRCDDL79rC1sbU=' \
+  -H 'x-browser-year: 2026' \
+  -H 'x-client-data: CKmdygEIlaHLAQiGoM0B' \
+  --data-raw '{"action":"create","sheet":"members","data":{"id":1,"name":"sandeep","relation":"bro","phone":"0088987979","photo":"","contribution":10000,"balance":1000,"createdAt":"2026-06-02T06:55:11.173Z","updatedAt":"2026-06-02T06:55:11.173Z"},"columns":["id","name","relation","phone","photo","contribution","balance","createdAt","updatedAt"]}'

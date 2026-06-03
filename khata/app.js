@@ -236,7 +236,7 @@ async function renderMembers() {
     // Quick ledger summary helper
     card.innerHTML = `
       <div class="member-avatar-lg">
-        ${m.photo ? `<img src="${m.photo}">` : m.name[0].toUpperCase()}
+        ${m.photo ? `<img src="${m.photo}">` : (m.name || "M")[0].toUpperCase()}
       </div>
       <h3 style="font-weight: 700;">${m.name}</h3>
       <p style="color: var(--text-secondary); font-size: 13px; margin: 4px 0 12px 0;">${m.relation}</p>
