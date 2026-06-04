@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import 'providers.dart';
 import 'models.dart';
 import 'storage_service.dart';
@@ -23,15 +21,15 @@ BoxDecoration glassDecoration(BuildContext context, {Color? customColor}) {
 
   return BoxDecoration(
     color: isLight 
-        ? (customColor ?? Colors.white.withOpacity(0.75)) 
-        : (customColor ?? const Color(0xFF1E293B).withOpacity(0.7)),
+        ? (customColor ?? Colors.white.withValues(alpha: 0.75)) 
+        : (customColor ?? const Color(0xFF1E293B).withValues(alpha: 0.7)),
     borderRadius: BorderRadius.circular(16),
     border: Border.all(
-      color: isLight ? Colors.black.withOpacity(0.08) : Colors.white.withOpacity(0.08),
+      color: isLight ? Colors.black.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.08),
     ),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.04),
+        color: Colors.black.withValues(alpha: 0.04),
         blurRadius: 10,
         offset: const Offset(0, 4),
       )
@@ -193,9 +191,9 @@ class _AuthLockViewState extends State<AuthLockView> with SingleTickerProviderSt
             );
             if (!success && mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Credentials invalid or database unreachable"), backgroundColor: Colors.red),
+                const SnackBar(content: Text("Phone or password incorrect. Register first if new."), backgroundColor: Colors.red),
               );
-            } else {
+            } else if (mounted) {
               context.read<LedgerProvider>().fetchAllData();
             }
           },
@@ -235,9 +233,9 @@ class _AuthLockViewState extends State<AuthLockView> with SingleTickerProviderSt
             );
             if (!success && mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Phone number already exists"), backgroundColor: Colors.red),
+                const SnackBar(content: Text("Phone number already registered. Try logging in."), backgroundColor: Colors.red),
               );
-            } else {
+            } else if (mounted) {
               context.read<LedgerProvider>().fetchAllData();
             }
           },
@@ -260,7 +258,7 @@ class _AuthLockViewState extends State<AuthLockView> with SingleTickerProviderSt
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white.withOpacity(0.04),
+            fillColor: Colors.white.withValues(alpha: 0.04),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -570,7 +568,6 @@ class _LedgerViewState extends State<LedgerView> {
   final _categoryController = TextEditingController();
   String _txType = 'Expense';
   int? _selectedMember;
-  int? _selectedAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -1303,7 +1300,6 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final isEPaper = auth.theme == 'e-paper';
 
     return ListView(
       padding: const EdgeInsets.all(16.0),

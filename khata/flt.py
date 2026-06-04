@@ -1054,3 +1054,41 @@ for path, content in files.items():
     with open(full_path, "w", encoding="utf-8") as f:
         f.write(content)
     print(f"Created file: {full_path}")
+
+"""
+flutter run -d chrome
+flutter build web --release
+flutter devices
+
+flutter run
+flutter run -d <device_id>
+flutter build apk --release
+flutter build appbundle --release
+flutter pub get
+
+
+flutter analyze
+flutter test
+flutter pub get
+
+
+cd /Users/apple/data/desijat.github.io/khata/KhataSheetApp
+
+# Web (Chrome)
+flutter run -d chrome
+
+# Android (USB debug enabled)
+flutter run -d <android-device-id>
+
+# List all connected devices
+flutter devices
+
+# Or serve the built web bundle locally
+cd build/web && python3 -m http.server 8080
+
+
+cd /Users/apple/data/desijat.github.io/khata/KhataSheetApp/build/web
+python3 -m http.server 8080
+# Open: http://localhost:8080
+"""
+

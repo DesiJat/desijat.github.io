@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
-import 'models.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'crypto_utils.dart';
 
 class StorageService {
@@ -26,14 +26,34 @@ class StorageService {
   }
 
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
+    if (kIsWeb) {
+      // Use simple web factory — sqflite_sw.js + sqlite3.wasm are in web/
+      databaseFactory = createDatabaseFactoryFfiWeb();
+    } else if (!kIsWeb && _isDesktop()) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+
+    String path;
+    if (kIsWeb) {
+      path = filePath;
+    } else {
+      final dbPath = await getDatabasesPath();
+      path = join(dbPath, filePath);
+    }
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: _createDB,
     );
+  }
+
+  bool _isDesktop() {
+    if (kIsWeb) return false;
+    return defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.macOS;
   }
 
   Future _createDB(Database db, int version) async {
