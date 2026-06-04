@@ -1025,7 +1025,7 @@ async function bootstrap() {
   }
 
   // Pre-seed demo user workspace
-  await initDemoData();
+  // await initDemoData();
   
   initNavigation();
   bindFormSubmissions();
