@@ -264,6 +264,8 @@ async function renderMembers() {
   document.getElementById("membersPrevBtn").disabled = pag.page === 1;
   document.getElementById("membersNextBtn").disabled = pag.page === totalPages;
 
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+
   paginatedList.forEach(m => {
     const card = document.createElement("div");
     card.className = "card-glass member-card";
@@ -284,10 +286,12 @@ async function renderMembers() {
         <span style="font-weight: 700; color: var(--primary)">${state.activeCurrency}${Number(m.balance).toLocaleString()}</span>
       </div>
       
+      ${isAdmin ? `
       <div style="display: flex; gap: 8px; width: 100%;">
         <button class="btn btn-secondary btn-sm" onclick="window.editMember(${m.id})" style="flex: 1; padding: 6px;">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="window.deleteMember(${m.id})" style="padding: 6px;">×</button>
       </div>
+      ` : ''}
     `;
     container.appendChild(card);
   });
@@ -342,6 +346,8 @@ async function renderInternalKhata() {
   document.getElementById("internalKhataPrevBtn").disabled = pag.page === 1;
   document.getElementById("internalKhataNextBtn").disabled = pag.page === totalPages;
 
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+
   if (paginatedList.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No matching transactions found.</td></tr>`;
   } else {
@@ -357,7 +363,7 @@ async function renderInternalKhata() {
         <td>${t.description}</td>
         <td><span class="badge badge-completed">${t.status}</span></td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="window.deleteTransaction(${t.id})" style="padding: 4px 8px;">Delete</button>
+          ${isAdmin ? `<button class="btn btn-secondary btn-sm" onclick="window.deleteTransaction(${t.id})" style="padding: 4px 8px;">Delete</button>` : ''}
         </td>
       `;
       tbody.appendChild(tr);
@@ -371,6 +377,8 @@ async function renderExternalKhata() {
   const tbody = document.getElementById("externalAccountsTableBody");
   tbody.innerHTML = "";
 
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+
   accounts.forEach(a => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -382,7 +390,7 @@ async function renderExternalKhata() {
       </td>
       <td>
         <button class="btn btn-secondary btn-sm" onclick="window.loadExternalLedger(${a.id})" style="padding: 4px 8px;">View Ledger</button>
-        <button class="btn btn-danger btn-sm" onclick="window.deleteExternalAccount(${a.id})" style="padding: 4px 8px;">×</button>
+        ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="window.deleteExternalAccount(${a.id})" style="padding: 4px 8px;">×</button>` : ''}
       </td>
     `;
     tbody.appendChild(tr);
@@ -398,6 +406,12 @@ async function renderBudget() {
   inputGrid.innerHTML = "";
   barContainer.innerHTML = "";
 
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+  const submitBtn = document.querySelector("#budgetForm button[type='submit']");
+  if (submitBtn) {
+    submitBtn.style.display = isAdmin ? "block" : "none";
+  }
+
   const categories = ["Food", "Education", "Electricity", "Water", "Internet", "Medical", "Transportation", "Entertainment", "Other"];
   
   categories.forEach(cat => {
@@ -407,7 +421,7 @@ async function renderBudget() {
     field.className = "form-group";
     field.innerHTML = `
       <label class="form-label">${cat} Budget Limit</label>
-      <input type="number" name="limit-${cat}" class="form-input" value="${limitObj.limit}">
+      <input type="number" name="limit-${cat}" class="form-input" value="${limitObj.limit}" ${isAdmin ? '' : 'disabled'}>
     `;
     inputGrid.appendChild(field);
 
@@ -449,6 +463,8 @@ async function renderLoans() {
   document.getElementById("loansPrevBtn").disabled = pag.page === 1;
   document.getElementById("loansNextBtn").disabled = pag.page === totalPages;
 
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+
   if (paginatedList.length === 0) {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No active loans recorded.</td></tr>`;
   } else {
@@ -469,7 +485,7 @@ async function renderLoans() {
         <td>
           <button class="btn btn-secondary btn-sm" onclick="window.viewLoanDetails(${l.id})" style="padding: 4px 8px;">View</button>
           <button class="btn btn-secondary btn-sm" onclick="window.logLoanRepayment(${l.id})" style="padding: 4px 8px;">Repay</button>
-          <button class="btn btn-danger btn-sm" onclick="window.deleteLoan(${l.id})" style="padding: 4px 8px;">×</button>
+          ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="window.deleteLoan(${l.id})" style="padding: 4px 8px;">×</button>` : ''}
         </td>
       `;
       tbody.appendChild(tr);
@@ -520,10 +536,30 @@ async function renderSettings() {
   document.getElementById("settSheetsUrl").value = config.sheetsUrl || "";
   document.getElementById("settJwtSecret").value = config.jwtSecret || "";
   document.getElementById("settUseSheets").checked = !!config.useSheets;
+
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+  document.getElementById("settFamilyName").disabled = !isAdmin;
+  document.getElementById("settCurrency").disabled = !isAdmin;
+  document.getElementById("settSheetsUrl").disabled = !isAdmin;
+  document.getElementById("settJwtSecret").disabled = !isAdmin;
+  document.getElementById("settUseSheets").disabled = !isAdmin;
+
+  const submitBtn = document.querySelector("#settingsForm button[type='submit']");
+  if (submitBtn) submitBtn.style.display = isAdmin ? "block" : "none";
+
+  const saveSyncBtn = document.getElementById("saveSheetsSyncBtn");
+  if (saveSyncBtn) saveSyncBtn.style.display = isAdmin ? "inline-block" : "none";
+
+  const initDbBtn = document.getElementById("initializeSheetsDbBtn");
+  if (initDbBtn) initDbBtn.style.display = isAdmin ? "inline-block" : "none";
 }
 
 // Global Modals controllers
 window.editMember = async function(id) {
+  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+    showToast("Only Admin has authority to update members.", "danger");
+    return;
+  }
   const list = await members.getMembers();
   const m = list.find(item => Number(item.id) === Number(id));
   if (!m) return;
@@ -541,6 +577,10 @@ window.editMember = async function(id) {
 };
 
 window.deleteMember = async function(id) {
+  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+    showToast("Only Admin has authority to delete members.", "danger");
+    return;
+  }
   if (confirm("Are you sure you want to delete this family member?")) {
     await members.deleteMember(id);
     showToast("Family member deleted successfully.", "success");
@@ -549,6 +589,10 @@ window.deleteMember = async function(id) {
 };
 
 window.deleteTransaction = async function(id) {
+  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+    showToast("Only Admin has authority to delete transactions.", "danger");
+    return;
+  }
   if (confirm("Are you sure you want to delete this transaction entry?")) {
     await transactions.deleteTransaction(id);
     showToast("Transaction deleted.", "success");
@@ -608,6 +652,10 @@ window.loadExternalLedger = async function(id) {
 };
 
 window.deleteExternalAccount = async function(id) {
+  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+    showToast("Only Admin has authority to delete external accounts.", "danger");
+    return;
+  }
   if (confirm("Delete this external account? All transaction links will remain but account details are wiped.")) {
     await transactions.deleteExternalAccount(id);
     showToast("External account deleted.", "success");
@@ -679,6 +727,10 @@ window.logLoanRepayment = async function(id) {
 };
 
 window.deleteLoan = async function(id) {
+  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+    showToast("Only Admin has authority to delete loans.", "danger");
+    return;
+  }
   if (confirm("Delete this loan transaction profile?")) {
     await loans.deleteLoan(id);
     showToast("Loan profile deleted.", "success");
@@ -700,6 +752,11 @@ function bindFormSubmissions() {
   // Config save
   document.getElementById("settingsForm").addEventListener("submit", (e) => {
     e.preventDefault();
+    const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+    if (!isAdmin) {
+      showToast("Only Admin has authority to update settings.", "danger");
+      return;
+    }
     const familyName = document.getElementById("settFamilyName").value;
     const currency = document.getElementById("settCurrency").value;
     const theme = document.getElementById("settTheme").value;
@@ -774,6 +831,11 @@ function bindFormSubmissions() {
     const balance = document.getElementById("memberBalance").value;
 
     try {
+      const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+      if (id && !isAdmin) {
+        showToast("Only Admin has authority to update members.", "danger");
+        return;
+      }
       if (id) {
         await members.updateMember(id, { name, relation, phone, email, password, contribution });
         showToast("Member details updated.", "success");
@@ -889,6 +951,11 @@ function bindFormSubmissions() {
   // Budget Setup Limits
   document.getElementById("budgetForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+    if (!isAdmin) {
+      showToast("Only Admin has authority to update budgets.", "danger");
+      return;
+    }
     const inputs = document.querySelectorAll("#budgetInputGrid input");
     for (const input of inputs) {
       const category = input.name.replace("limit-", "");
@@ -919,7 +986,7 @@ function bindQuickActions() {
 
   document.getElementById("lockAppBtn").addEventListener("click", () => {
     auth.logout();
-    checkAuthLock();
+    window.location.reload();
   });
 
   document.getElementById("addMemberBtn").addEventListener("click", () => {

@@ -9,8 +9,22 @@ class AuthManager {
   constructor() {
     this.sessionTimeoutMs = 15 * 60 * 1000; // 15 Minutes session timeout
     this.lastActivityTime = Date.now();
-    this.isAuthenticated = false;
-    this.currentUser = null;
+    
+    // Restore session on bootstrap
+    const savedUser = storage.getLocal("currentUser");
+    if (savedUser) {
+      this.isAuthenticated = true;
+      this.currentUser = savedUser;
+      storage.currentFamilyId = Number(savedUser.parent_id) === 0 ? Number(savedUser.id) : Number(savedUser.parent_id);
+      
+      const config = storage.getLocal("config") || {};
+      if (config.sheetsUrl) storage.sheetsUrl = config.sheetsUrl;
+      if (config.jwtSecret) storage.jwtSecret = config.jwtSecret;
+      if (config.useSheets !== undefined) storage.useSheets = config.useSheets;
+    } else {
+      this.isAuthenticated = false;
+      this.currentUser = null;
+    }
   }
 
   // Check if any admin users exist in local storage to guide registration vs login
@@ -108,6 +122,7 @@ class AuthManager {
     this.isAuthenticated = true;
     this.currentUser = adminUser;
     storage.currentFamilyId = adminUser.familyId;
+    storage.saveLocal("currentUser", adminUser, false);
     this.resetTimer();
 
     return { success: true, user: adminUser };
@@ -179,6 +194,7 @@ class AuthManager {
       storage.currentFamilyId = Number(user.parent_id) === 0 ? Number(user.id) : Number(user.parent_id);
       
       this.resetTimer();
+      storage.saveLocal("currentUser", user, false);
       return { success: true, user };
     }
     
@@ -189,6 +205,7 @@ class AuthManager {
     this.isAuthenticated = false;
     this.currentUser = null;
     storage.currentFamilyId = null;
+    localStorage.clear();
   }
 
   resetTimer() {
@@ -196,14 +213,7 @@ class AuthManager {
   }
 
   checkSessionTimeout(onTimeoutCallback) {
-    if (!this.isAuthenticated) return false;
-    
-    const inactiveDuration = Date.now() - this.lastActivityTime;
-    if (inactiveDuration >= this.sessionTimeoutMs) {
-      this.logout();
-      if (onTimeoutCallback) onTimeoutCallback();
-      return true;
-    }
+    // Inactivity timeout disabled per user request: "no need to login until it logout"
     return false;
   }
 }
