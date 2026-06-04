@@ -18,6 +18,8 @@ This document provides a comprehensive, A-to-Z specification for building a cros
 
 ## 2. Database Models & Schema Specifications
 
+*   **Decimal Precision:** All `Double` fields (including balances, contributions, principal amounts, EMI values, interest rates, and repayment logs) must allow optional decimal inputs up to 2 decimal places (equivalent to `step="0.01"` HTML5 validation) for precise financial accounting.
+
 ### 2.1 Config Schema (`config` table)
 Stores general application configurations:
 *   `familyName` (String): Name of the family workspace (e.g., "Verma Family Finance").
@@ -131,6 +133,11 @@ When a write action occurs in Flutter:
 2. Trigger the HTTP sync request asynchronously (non-blocking).
 3. If the Sheets response returns `success: false` or throws an error (e.g. duplicate email/phone check fails on server side), **revert** the changes in the local SQLite database.
 4. Dispatch a global state event to alert the UI and display a red Snackbar notification indicating: `"Sync Error: [Error Message]. Local changes reverted."`.
+
+### 3.4 Cryptographic Sign Fallback (Non-Secure Contexts)
+*   **Context Safety Check:** In web and sandboxed platforms, native crypto APIs (e.g. `SubtleCrypto`) are only available in secure contexts (HTTPS or localhost).
+*   **IP Address Fallback:** If the application is accessed over an insecure context (such as a local IP address using `http://`), the app must fall back to a self-contained, pure JavaScript/Dart HMAC-SHA256 signer.
+*   **State Isolation:** The SHA-256 compression variables (initial hash buffers and round constants) must be initialized fresh on every invocation of the fallback hash function. Caching or reusing buffer states across hashing passes is strictly prohibited to avoid signature failures.
 
 ---
 
