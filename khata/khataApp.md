@@ -225,3 +225,171 @@ Build a responsive UI that adapts to desktop screens (Windows/Linux), web browse
 2. **Page Limit Selector:** Display a dropdown selector option on each list view to update the limit to `10`, `50`, or `100` records per page. Changing the size resets the active page index to `1`.
 3. **Boundary Control Navigation:** Provide Prev and Next buttons. Disable navigation controls when viewing boundary limits (e.g., page 1 disables Prev, final page disables Next).
 4. **Search and Filter Reset:** Changing search parameters, categories, or filtering constraints on the ledger must automatically reset the list's active page back to `1` before displaying results.
+
+---
+
+## 6. Google Sheets API Reference & Integration Scripts
+
+This section provides complete specifications and fully working JavaScript implementation scripts for communicating with the `server2App.gs` Google Sheets Web App backend. All requests are authenticated via JWT payloads.
+
+### 6.1 Core Request Sender Script
+
+This helper function handles signing JWT payloads and posting them to the Apps Script endpoint. It uses the Web Crypto API, falling back to a pure JS signature calculation if running in insecure environments:
+
+```javascript
+async function executeSheetsApiRequest(action, sheet, data = null, extraParams = {}) {
+  const SHEETS_URL = "https://script.google.com/macros/s/AKfycbyIesDi6qGtfrrVYMEnjLwX1HaOuwHzS5SXutH_5HNyFjikcclvuc1hIfmjWPEDiRYZ/exec";
+  const JWT_SECRET = "your-very-secure-family-khata-secret-key-2026";
+
+  // Base64url helper
+  const base64url = (str) => {
+    return btoa(str).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+  };
+
+  // Build JWT Claims (Admin Role is parentId = 0)
+  const now = Math.floor(Date.now() / 1000);
+  const tokenPayload = {
+    sub: "1",          // Logged-in member ID
+    familyId: 1,       // Family workspace ID
+    parentId: 0,       // 0 for Admin, non-zero for regular members
+    iat: now,
+    exp: now + 3600
+  };
+
+  const headerEncoded = base64url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+  const payloadEncoded = base64url(JSON.stringify(tokenPayload));
+  const tokenInput = headerEncoded + "." + payloadEncoded;
+  
+  let signatureEncoded = "";
+
+  if (typeof crypto !== "undefined" && crypto.subtle) {
+    // Native Web Crypto API
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw", enc.encode(JWT_SECRET),
+      { name: "HMAC", hash: { name: "SHA-256" } },
+      false, ["sign"]
+    );
+    const signature = await crypto.subtle.sign("HMAC", key, enc.encode(tokenInput));
+    signatureEncoded = base64url(String.fromCharCode.apply(null, new Uint8Array(signature)));
+  } else {
+    // Pure JS Fallback (For insecure contexts/HTTP IPs)
+    const signatureHex = hmac_sha256_pure(JWT_SECRET, tokenInput);
+    const bytes = new Uint8Array(signatureHex.match(/.{1,2}/g).map(b => parseInt(b, 16)));
+    let signatureString = "";
+    for (let i = 0; i < bytes.length; i++) {
+      signatureString += String.fromCharCode(bytes[i]);
+    }
+    signatureEncoded = base64url(signatureString);
+  }
+
+  const token = tokenInput + "." + signatureEncoded;
+
+  // Build request wrapper
+  const requestBody = {
+    token: token,
+    action: action,
+    sheet: sheet,
+    ...extraParams
+  };
+  if (data) requestBody.data = data;
+
+  const response = await fetch(SHEETS_URL, {
+    method: "POST",
+    mode: "cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(requestBody)
+  });
+  return await response.json();
+}
+```
+
+### 6.2 Create Record Endpoint (`action: "create"`)
+Inserts a new row with automatic metadata attribution (`createdAt`, `updatedAt` and unique incremented integer `id`).
+
+*   **Example Call:**
+    ```javascript
+    executeSheetsApiRequest("create", "transactions", {
+      date: "2026-06-04",
+      type: "Expense",
+      category: "Food",
+      memberId: 1,
+      amount: 450.50,
+      description: "Organic groceries purchase",
+      status: "Completed"
+    }).then(response => console.log("Created Record Response:", response));
+    ```
+*   **Response Payload:**
+    ```json
+    { "success": true, "id": 45, "data": { "id": 45, "date": "2026-06-04", ... } }
+    ```
+
+### 6.3 Read Records Endpoint (`action: "read"`)
+Fetches entries from a sheet. Supports dynamic `where` criteria filters, limits, and field queries.
+
+*   **Example Call:**
+    ```javascript
+    executeSheetsApiRequest("read", "transactions", null, {
+      where: [
+        { field: "category", operator: "=", value: "Food" },
+        { field: "type", operator: "=", value: "Expense" }
+      ],
+      limit: 50
+    }).then(response => console.log("Filtered Transactions:", response.data));
+    ```
+*   **Response Payload:**
+    ```json
+    { "success": true, "data": [ { "id": 12, "category": "Food", "type": "Expense", ... } ] }
+    ```
+
+### 6.4 Update Record Endpoint (`action: "update"`)
+Modifies an existing record identified by its unique `id` key. 
+> [!IMPORTANT]
+> This mutation action is strictly restricted. The signed JWT must contain `parentId: 0` to authorize successfully.
+
+*   **Example Call:**
+    ```javascript
+    executeSheetsApiRequest("update", "members", {
+      name: "Rajesh Verma (Modified)",
+      contribution: 18000
+    }, {
+      id: 1 // Target record ID
+    }).then(response => console.log("Update Response:", response));
+    ```
+*   **Response Payload:**
+    ```json
+    { "success": true, "data": { "id": 1, "name": "Rajesh Verma (Modified)", ... } }
+    ```
+
+### 6.5 Delete Record Endpoint (`action: "delete"`)
+Deletes a row by its unique `id` key.
+> [!IMPORTANT]
+> This mutation action is strictly restricted. The signed JWT must contain `parentId: 0` to authorize successfully.
+
+*   **Example Call:**
+    ```javascript
+    executeSheetsApiRequest("delete", "loans", null, {
+      id: 4 // Target loan ID
+    }).then(response => console.log("Delete Response:", response));
+    ```
+*   **Response Payload:**
+    ```json
+    { "success": true, "message": "Record deleted successfully" }
+    ```
+
+### 6.6 Bulk Sync Endpoint (`action: "bulkUpdate"`)
+Syncs a bulk array of data rows directly to write offline cache updates.
+> [!IMPORTANT]
+> This mutation action is strictly restricted. The signed JWT must contain `parentId: 0` to authorize successfully.
+
+*   **Example Call:**
+    ```javascript
+    executeSheetsApiRequest("bulkUpdate", "budgets", [
+      { "id": 1, "category": "Food", "limit": 15000 },
+      { "id": 2, "category": "Medical", "limit": 8000 }
+    ]).then(response => console.log("Bulk Update Response:", response));
+    ```
+*   **Response Payload:**
+    ```json
+    { "success": true, "message": "Bulk write complete" }
+    ```
