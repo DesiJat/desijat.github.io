@@ -20,7 +20,13 @@ class AuthManager {
   }
 
   // Register a new Admin & Family tenant
-  async registerFamily(familyName, adminName, phone, password, email = "") {
+  async registerFamily(familyName, adminName, phone, password, email = "", customSheetsUrl = "") {
+    // If a custom Sheets URL is provided, override default storage configuration
+    if (customSheetsUrl.trim() !== "") {
+      storage.sheetsUrl = customSheetsUrl.trim();
+      storage.useSheets = true;
+    }
+
     // Force a fresh sync of the global members list from Google Sheets before validation
     if (storage.useSheets && storage.sheetsUrl && navigator.onLine) {
       try {
@@ -104,7 +110,19 @@ class AuthManager {
   }
 
   // Login existing Admin or family member
-  async login(phone, password) {
+  async login(phone, password, customSheetsUrl = "") {
+    // If a custom Sheets URL is provided, override default storage configuration
+    if (customSheetsUrl.trim() !== "") {
+      storage.sheetsUrl = customSheetsUrl.trim();
+      storage.useSheets = true;
+
+      // Persist the override locally
+      const config = storage.getLocal("config") || {};
+      config.sheetsUrl = storage.sheetsUrl;
+      config.useSheets = storage.useSheets;
+      storage.saveLocal("config", config, false);
+    }
+
     // Force a fresh sync of the global members list from Google Sheets before login
     if (storage.useSheets && storage.sheetsUrl && navigator.onLine) {
       try {

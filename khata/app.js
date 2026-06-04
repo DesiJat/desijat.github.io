@@ -646,8 +646,9 @@ function bindFormSubmissions() {
     e.preventDefault();
     const phone = document.getElementById("loginPhone").value;
     const pass = document.getElementById("loginPassword").value;
+    const customSheetsUrl = document.getElementById("loginSheetsUrl").value;
 
-    const result = await auth.login(phone, pass);
+    const result = await auth.login(phone, pass, customSheetsUrl);
     if (result.success) {
       showToast(`Welcome back, ${result.user.name}!`, "success");
       
@@ -670,8 +671,9 @@ function bindFormSubmissions() {
     const phone = document.getElementById("regPhone").value;
     const email = document.getElementById("regEmail").value;
     const pass = document.getElementById("regPassword").value;
+    const customSheetsUrl = document.getElementById("regSheetsUrl").value;
 
-    const result = await auth.registerFamily(fam, admin, phone, pass, email);
+    const result = await auth.registerFamily(fam, admin, phone, pass, email, customSheetsUrl);
     if (result.success) {
       showToast("Workspace Registered & Logged In!", "success");
       checkAuthLock();
