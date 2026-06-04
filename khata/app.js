@@ -428,7 +428,7 @@ async function renderBudget() {
     field.className = "form-group";
     field.innerHTML = `
       <label class="form-label">${cat} Budget Limit</label>
-      <input type="number" name="limit-${cat}" class="form-input" value="${limitObj.limit}" ${isAdmin ? '' : 'disabled'}>
+      <input type="number" name="limit-${cat}" class="form-input" value="${limitObj.limit}" ${isAdmin ? '' : 'disabled'} step="0.01">
     `;
     inputGrid.appendChild(field);
 
