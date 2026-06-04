@@ -53,32 +53,43 @@ class StorageManager {
     const encodedPayload = base64url(JSON.stringify(payload));
     const tokenInput = encodedHeader + "." + encodedPayload;
 
-    const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      enc.encode(this.jwtSecret),
-      { name: "HMAC", hash: { name: "SHA-256" } },
-      false,
-      ["sign"]
-    );
+    if (typeof crypto !== "undefined" && crypto.subtle) {
+      try {
+        const enc = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+          "raw",
+          enc.encode(this.jwtSecret),
+          { name: "HMAC", hash: { name: "SHA-256" } },
+          false,
+          ["sign"]
+        );
 
-    const signature = await crypto.subtle.sign(
-      "HMAC",
-      key,
-      enc.encode(tokenInput)
-    );
+        const signature = await crypto.subtle.sign(
+          "HMAC",
+          key,
+          enc.encode(tokenInput)
+        );
 
-    const signatureArray = new Uint8Array(signature);
-    let signatureString = "";
-    for (let i = 0; i < signatureArray.length; i++) {
-      signatureString += String.fromCharCode(signatureArray[i]);
+        const signatureArray = new Uint8Array(signature);
+        let signatureString = "";
+        for (let i = 0; i < signatureArray.length; i++) {
+          signatureString += String.fromCharCode(signatureArray[i]);
+        }
+        return tokenInput + "." + base64url(signatureString);
+      } catch (e) {
+        console.warn("Subtle crypto sign failed. Trying pure JS fallback.", e);
+      }
     }
-    const encodedSignature = btoa(signatureString)
-      .replace(/=/g, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_");
 
-    return tokenInput + "." + encodedSignature;
+    // Pure JS Fallback for insecure contexts (e.g. HTTP IP address access)
+    console.warn("Web Crypto API (crypto.subtle) is not available. Falling back to pure JavaScript HMAC-SHA256.");
+    const signatureHex = hmac_sha256_pure(this.jwtSecret, tokenInput);
+    const bytes = new Uint8Array(signatureHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+    let signatureString = "";
+    for (let i = 0; i < bytes.length; i++) {
+      signatureString += String.fromCharCode(bytes[i]);
+    }
+    return tokenInput + "." + base64url(signatureString);
   }
 
   // Base64 helper for compatibility
@@ -372,3 +383,132 @@ class StorageManager {
 }
 
 export const storage = new StorageManager();
+
+/* ==========================================
+   Pure JS Fallback HMAC-SHA256 Implementation
+   ========================================== */
+
+function sha256_pure(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  const lengthProperty = "length";
+  let i, j;
+  let result = "";
+
+  const words = [];
+  const asciiLength = ascii[lengthProperty] * 8;
+
+  // Initialize initial hash values (fractional parts of the square roots of the first 8 primes)
+  const hash = [
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+  ];
+
+  // Table of round constants (fractional parts of the cube roots of the first 64 primes)
+  const k = [];
+  const isPrime = function(n) {
+    for (let factor = 2; factor * factor <= n; factor++) {
+      if (n % factor === 0) return false;
+    }
+    return true;
+  };
+
+  const getFractionalBits = function(n) {
+    return ((n - Math.floor(n)) * maxWord) | 0;
+  };
+
+  let candidate = 2;
+  let kCounter = 0;
+  while (kCounter < 64) {
+    if (isPrime(candidate)) {
+      k[kCounter] = getFractionalBits(mathPow(candidate, 1 / 3));
+      kCounter++;
+    }
+    candidate++;
+  }
+
+  ascii += "\x80";
+  while (ascii[lengthProperty] % 64 - 56) ascii += "\x00";
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    j = ascii.charCodeAt(i);
+    if (j >> 8) return; // supports ASCII only
+    words[i >> 2] |= j << ((3 - i % 4) * 8);
+  }
+  words[words[lengthProperty]] = ((asciiLength / maxWord) | 0);
+  words[words[lengthProperty]] = (asciiLength | 0);
+
+  for (j = 0; j < words[lengthProperty]; ) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash.slice(0);
+
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const s0 = rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3);
+      const s1 = rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10);
+      const ch = (hash[4] & hash[5]) ^ (~hash[4] & hash[6]);
+      const maj = (hash[0] & hash[1]) ^ (hash[0] & hash[2]) ^ (hash[1] & hash[2]);
+      const temp1 = hash[7] + (rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25)) + ch + k[i] + (w[i] = (i < 16 ? w[i] : (w[i - 16] + s0 + w[i - 7] + s1) | 0));
+      const temp2 = (rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22)) + maj;
+
+      hash[7] = hash[6];
+      hash[6] = hash[5];
+      hash[5] = hash[4];
+      hash[4] = (hash[3] + temp1) | 0;
+      hash[3] = hash[2];
+      hash[2] = hash[1];
+      hash[1] = hash[0];
+      hash[0] = (temp1 + temp2) | 0;
+    }
+
+    for (i = 0; i < 8; i++) {
+      hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+  }
+
+  for (i = 0; i < 8; i++) {
+    let val = hash[i];
+    if (val < 0) val += maxWord;
+    let hex = val.toString(16);
+    while (hex[lengthProperty] < 8) hex = "0" + hex;
+    result += hex;
+  }
+  return result;
+}
+
+function hmac_sha256_pure(key, message) {
+  let keyBytes = new TextEncoder().encode(key);
+  const messageBytes = new TextEncoder().encode(message);
+
+  if (keyBytes.length > 64) {
+    const hashedKeyHex = sha256_pure(String.fromCharCode.apply(null, keyBytes));
+    keyBytes = new Uint8Array(hashedKeyHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+  }
+
+  const paddedKey = new Uint8Array(64);
+  paddedKey.set(keyBytes);
+
+  const ipad = new Uint8Array(64);
+  const opad = new Uint8Array(64);
+  for (let i = 0; i < 64; i++) {
+    ipad[i] = paddedKey[i] ^ 0x36;
+    opad[i] = paddedKey[i] ^ 0x5c;
+  }
+
+  const innerInput = new Uint8Array(64 + messageBytes.length);
+  innerInput.set(ipad);
+  innerInput.set(messageBytes, 64);
+  const innerInputStr = String.fromCharCode.apply(null, innerInput);
+  const innerHashHex = sha256_pure(innerInputStr);
+  const innerHashBytes = new Uint8Array(innerHashHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+
+  const outerInput = new Uint8Array(64 + innerHashBytes.length);
+  outerInput.set(opad);
+  outerInput.set(innerHashBytes, 64);
+  const outerInputStr = String.fromCharCode.apply(null, outerInput);
+
+  return sha256_pure(outerInputStr);
+}
