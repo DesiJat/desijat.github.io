@@ -4,7 +4,7 @@
   **********************************************************/
 // https://docs.google.com/spreadsheets/d/1AaLaziFauR72kus_MlQv5afEkC5SIAH6Tbm4f3GqY7Q/edit?gid=0#gid=0
 const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbzbCP4D7Q5yCVwWKbU-s-bD76egoTXk_93QgQZsuV0TgJ9g8J92nZlYsRhGRlyf5rDqIw/exec";
+  "https://script.google.com/macros/s/AKfycbyIesDi6qGtfrrVYMEnjLwX1HaOuwHzS5SXutH_5HNyFjikcclvuc1hIfmjWPEDiRYZ/exec";
 
 /**********************************************************
 

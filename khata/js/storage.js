@@ -52,11 +52,25 @@ class StorageManager {
   constructor() {
     this.encryptionKey = "FamilyKhataKey123";
     this.useSheets = true;
-    this.sheetsUrl = "https://script.google.com/macros/s/AKfycbzbCP4D7Q5yCVwWKbU-s-bD76egoTXk_93QgQZsuV0TgJ9g8J92nZlYsRhGRlyf5rDqIw/exec";
+    this.sheetsUrl = "https://script.google.com/macros/s/AKfycbyIesDi6qGtfrrVYMEnjLwX1HaOuwHzS5SXutH_5HNyFjikcclvuc1hIfmjWPEDiRYZ/exec";
     this.currentFamilyId = null; // Active family workspace context
     
     // Load config from LocalStorage if present (can override defaults)
-    const config = JSON.parse(localStorage.getItem("khata_config") || "{}");
+    let config = {};
+    try {
+      const raw = localStorage.getItem("khata_config");
+      if (raw) {
+        if (raw.trim().startsWith("{")) {
+          config = JSON.parse(raw);
+        } else {
+          // If it looks like ciphertext, try decrypting first
+          config = JSON.parse(this.decrypt(raw) || "{}");
+        }
+      }
+    } catch (e) {
+      config = {};
+    }
+
     if (config.sheetsUrl) {
       this.sheetsUrl = config.sheetsUrl;
     }

@@ -634,7 +634,7 @@ function bindFormSubmissions() {
     config.familyName = familyName;
     config.currency = currency;
     config.theme = theme;
-    storage.saveLocal("config", config);
+    storage.saveLocal("config", config, false);
     
     document.documentElement.setAttribute("data-theme", theme);
     showToast("Settings updated successfully.", "success");
@@ -946,6 +946,23 @@ function bindQuickActions() {
         showToast("Restoration failed. Verify JSON structure.", "danger");
       }
     });
+  });
+
+  document.getElementById("saveSheetsSyncBtn").addEventListener("click", () => {
+    const url = document.getElementById("settSheetsUrl").value.trim();
+    const useSheets = document.getElementById("settUseSheets").checked;
+
+    const config = storage.getLocal("config") || {};
+    config.sheetsUrl = url;
+    config.useSheets = useSheets;
+    storage.saveLocal("config", config, false);
+
+    // Update active storage instance settings
+    storage.sheetsUrl = url;
+    storage.useSheets = useSheets;
+
+    showToast("Google Sheets sync configurations updated.", "success");
+    renderCurrentView();
   });
 
   document.getElementById("initializeSheetsDbBtn").addEventListener("click", async () => {
