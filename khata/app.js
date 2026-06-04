@@ -130,11 +130,15 @@ function initNavigation() {
       const el = document.getElementById(`view-${targetView}`);
       if (el) el.style.display = "block";
       
-      state.currentView = targetView;
-      renderCurrentView();
-      
       if (window.innerWidth <= 768) {
         document.getElementById("sidebar").classList.remove("active");
+      }
+
+      state.currentView = targetView;
+      try {
+        renderCurrentView();
+      } catch (err) {
+        console.error("Error rendering view " + targetView, err);
       }
     });
   });
