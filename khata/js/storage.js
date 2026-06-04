@@ -5,6 +5,49 @@
  * Extends capabilities to support SaaS multi-family isolation using familyId.
  */
 
+const JWT_SECRET = "your-very-secure-family-khata-secret-key-2026";
+
+async function generateJwt(payload) {
+  const header = { alg: "HS256", typ: "JWT" };
+  const base64url = (str) => {
+    return btoa(str)
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+  };
+
+  const encodedHeader = base64url(JSON.stringify(header));
+  const encodedPayload = base64url(JSON.stringify(payload));
+  const tokenInput = encodedHeader + "." + encodedPayload;
+
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(JWT_SECRET),
+    { name: "HMAC", hash: { name: "SHA-256" } },
+    false,
+    ["sign"]
+  );
+
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    enc.encode(tokenInput)
+  );
+
+  const signatureArray = new Uint8Array(signature);
+  let signatureString = "";
+  for (let i = 0; i < signatureArray.length; i++) {
+    signatureString += String.fromCharCode(signatureArray[i]);
+  }
+  const encodedSignature = btoa(signatureString)
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+
+  return tokenInput + "." + encodedSignature;
+}
+
 class StorageManager {
   constructor() {
     this.encryptionKey = "FamilyKhataKey123";
@@ -89,6 +132,25 @@ class StorageManager {
   async sheetsRequest(payload) {
     if (!this.sheetsUrl) return { success: false, error: "No Sheets Web App URL provided." };
     try {
+      // Generate and attach a JWT token
+      let tokenPayload = {
+        sub: "guest",
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600
+      };
+      
+      const { auth } = await import("./auth.js");
+      if (auth && auth.currentUser) {
+        tokenPayload = {
+          sub: String(auth.currentUser.id),
+          familyId: this.currentFamilyId,
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + 3600
+        };
+      }
+      
+      payload.token = await generateJwt(tokenPayload);
+
       const response = await fetch(this.sheetsUrl, {
         method: "POST",
         mode: "cors",
@@ -118,6 +180,12 @@ class StorageManager {
       createdAt: new Date().toISOString(), 
       updatedAt: new Date().toISOString() 
     };
+
+    // If a user is logged in, attach memberId of the creator
+    const { auth } = await import("./auth.js");
+    if (auth && auth.currentUser) {
+      record.memberId = record.memberId || auth.currentUser.id;
+    }
     
     list.push(record);
     this.saveLocal(table, list);
@@ -131,6 +199,18 @@ class StorageManager {
         sheet: table,
         data: sheetsData,
         columns: Object.keys(sheetsData)
+      }).then(res => {
+        if (res && res.success === false) {
+          console.warn("Server rejected write operation:", res.error);
+          // Rollback local write
+          const currentList = this.getLocal(table) || [];
+          const rollbackList = currentList.filter(item => Number(item.id) !== Number(record.id));
+          this.saveLocal(table, rollbackList);
+          
+          // Dispatch custom event to notify UI
+          const event = new CustomEvent("sync-rollback", { detail: { table, error: res.error } });
+          window.dispatchEvent(event);
+        }
       }).catch(err => console.error("Background sheet sync failed:", err));
     }
     return record;
@@ -167,11 +247,27 @@ class StorageManager {
     const list = this.getLocal(table) || [];
     const index = list.findIndex(item => Number(item.id) === Number(id));
     if (index !== -1) {
+      const originalRecord = { ...list[index] };
       list[index] = { ...list[index], ...data, updatedAt: new Date().toISOString() };
       this.saveLocal(table, list);
 
       if (this.useSheets && this.sheetsUrl) {
         this.sheetsRequest({ action: "update", sheet: table, id: id, data: data })
+          .then(res => {
+            if (res && res.success === false) {
+              console.warn("Server rejected update operation:", res.error);
+              // Rollback local update
+              const currentList = this.getLocal(table) || [];
+              const currIndex = currentList.findIndex(item => Number(item.id) === Number(id));
+              if (currIndex !== -1) {
+                currentList[currIndex] = originalRecord;
+                this.saveLocal(table, currentList);
+              }
+              // Dispatch custom event to notify UI
+              const event = new CustomEvent("sync-rollback", { detail: { table, error: res.error } });
+              window.dispatchEvent(event);
+            }
+          })
           .catch(err => console.error("Background sheet sync failed:", err));
       }
       return true;

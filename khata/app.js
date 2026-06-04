@@ -1005,6 +1005,12 @@ async function bootstrap() {
   initNavigation();
   bindFormSubmissions();
   bindQuickActions();
+
+  // Listen for background sync rollback events
+  window.addEventListener("sync-rollback", (e) => {
+    showToast(`Sync Error: ${e.detail.error || "Operation failed. Rolled back local changes."}`, "danger");
+    renderCurrentView();
+  });
   
   setInterval(() => {
     auth.checkSessionTimeout(() => {

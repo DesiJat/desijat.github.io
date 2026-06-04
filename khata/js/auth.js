@@ -21,11 +21,33 @@ class AuthManager {
 
   // Register a new Admin & Family tenant
   async registerFamily(familyName, adminName, phone, password, email = "") {
-    // 1. Check if phone already exists
-    const list = await storage.getLocal("members") || [];
-    const exists = list.some(m => m.phone === phone);
-    if (exists) {
-      return { success: false, error: "Phone number already registered." };
+    // Force a fresh sync of the global members list from Google Sheets before validation
+    if (storage.useSheets && storage.sheetsUrl && navigator.onLine) {
+      try {
+        const response = await storage.sheetsRequest({ action: "read", sheet: "members", limit: 2000 });
+        if (response.success && response.data) {
+          storage.saveLocal("members", response.data);
+        }
+      } catch (e) {
+        console.warn("Could not sync global members for registration, using cache.", e);
+      }
+    }
+
+    const list = storage.getLocal("members") || [];
+    
+    // Check if phone or email already exists
+    if (phone) {
+      const phoneExists = list.some(m => String(m.phone).trim() === String(phone).trim());
+      if (phoneExists) {
+        return { success: false, error: "Phone number already exists!" };
+      }
+    }
+
+    if (email) {
+      const emailExists = list.some(m => String(m.email).trim().toLowerCase() === String(email).trim().toLowerCase());
+      if (emailExists) {
+        return { success: false, error: "Email address already exists!" };
+      }
     }
 
     // 2. Generate a temporary ID to isolate this admin initially (will set parent_id = 0)
@@ -83,8 +105,20 @@ class AuthManager {
 
   // Login existing Admin or family member
   async login(phone, password) {
-    const list = await storage.getLocal("members") || [];
-    const user = list.find(m => m.phone === phone && m.password === password);
+    // Force a fresh sync of the global members list from Google Sheets before login
+    if (storage.useSheets && storage.sheetsUrl && navigator.onLine) {
+      try {
+        const response = await storage.sheetsRequest({ action: "read", sheet: "members", limit: 2000 });
+        if (response.success && response.data) {
+          storage.saveLocal("members", response.data);
+        }
+      } catch (e) {
+        console.warn("Could not sync global members for login validation, using cache.", e);
+      }
+    }
+
+    const list = storage.getLocal("members") || [];
+    const user = list.find(m => String(m.phone).trim() === String(phone).trim() && m.password === password);
     
     if (user) {
       this.isAuthenticated = true;

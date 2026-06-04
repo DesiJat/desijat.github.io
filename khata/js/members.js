@@ -12,27 +12,39 @@ class MemberManager {
   }
 
   // Helper validation check
-  validateUniqueness(memberData, id = null) {
+  async validateUniqueness(memberData, id = null) {
+    // Force a fresh sync of the global members list from Google Sheets for validation
+    if (storage.useSheets && storage.sheetsUrl && navigator.onLine) {
+      try {
+        const response = await storage.sheetsRequest({ action: "read", sheet: "members", limit: 2000 });
+        if (response.success && response.data) {
+          storage.saveLocal("members", response.data);
+        }
+      } catch (e) {
+        console.warn("Could not sync global members for validation, using cache.", e);
+      }
+    }
+
     const list = storage.getLocal("members") || [];
     
     if (memberData.phone) {
-      const phoneExists = list.some(m => m.phone === memberData.phone && Number(m.id) !== Number(id));
+      const phoneExists = list.some(m => String(m.phone).trim() === String(memberData.phone).trim() && Number(m.id) !== Number(id));
       if (phoneExists) {
-        throw new Error("Phone number already registered to another user.");
+        throw new Error("Phone number already exists!");
       }
     }
 
     if (memberData.email) {
-      const emailExists = list.some(m => m.email === memberData.email && Number(m.id) !== Number(id));
+      const emailExists = list.some(m => String(m.email).trim().toLowerCase() === String(memberData.email).trim().toLowerCase() && Number(m.id) !== Number(id));
       if (emailExists) {
-        throw new Error("Email address already registered to another user.");
+        throw new Error("Email address already exists!");
       }
     }
   }
 
   async addMember(memberData) {
     // 1. Validate phone/email uniqueness globally
-    this.validateUniqueness(memberData);
+    await this.validateUniqueness(memberData);
 
     const activeAdminId = auth.currentUser ? auth.currentUser.id : 0;
     const activeFamilyId = storage.currentFamilyId;
@@ -54,7 +66,7 @@ class MemberManager {
 
   async updateMember(id, memberData) {
     // 1. Validate phone/email uniqueness globally
-    this.validateUniqueness(memberData, id);
+    await this.validateUniqueness(memberData, id);
 
     return await storage.update("members", id, memberData);
   }

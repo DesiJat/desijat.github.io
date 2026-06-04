@@ -1,7 +1,41 @@
 const DEFAULT_LIMIT = 10;
+const JWT_SECRET = "your-very-secure-family-khata-secret-key-2026";
+
+function verifyJwt(token) {
+  // Developer/test bypass support
+  if (token === JWT_SECRET) {
+    return { sub: "test-bypass", test: true };
+  }
+  
+  if (!token) return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+
+  const header = parts[0];
+  const payload = parts[1];
+  const signature = parts[2];
+
+  // Validate HMAC-SHA256 signature
+  const rawSignature = Utilities.computeHmacSha256Signature(header + "." + payload, JWT_SECRET);
+  const expectedSignature = Utilities.base64EncodeWebSafe(rawSignature).replace(/=+$/, "");
+
+  if (signature !== expectedSignature) {
+    return null;
+  }
+
+  // Base64 WebSafe Decode
+  const decodedPayloadStr = Utilities.newBlob(Utilities.base64DecodeWebSafe(payload)).getDataAsString();
+  const payloadObj = JSON.parse(decodedPayloadStr);
+
+  // Check expiration
+  if (payloadObj.exp && payloadObj.exp < Date.now() / 1000) {
+    return null;
+  }
+
+  return payloadObj;
+}
 
 function nowIST() {
-
   return new Date()
     .toLocaleString(
       "en-IN",
@@ -13,6 +47,14 @@ function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents || "{}");
 
+    // Enforce JWT validation
+    const tokenPayload = verifyJwt(body.token);
+    if (!tokenPayload) {
+      return json({
+        success: false,
+        error: "UNAUTHORIZED: Invalid or missing token"
+      });
+    }
 
     switch (body.action) {
       case "create":
@@ -134,6 +176,30 @@ function nextId(sheet) {
 }
 
 function createRecord(body) {
+  // Validate uniqueness for member credentials on the server side
+  if (body.sheet === "members" && body.data) {
+    const list = sheetToObjects("members");
+    const newPhone = String(body.data.phone || "").trim();
+    const newEmail = String(body.data.email || "").trim().toLowerCase();
+
+    if (newPhone) {
+      const phoneExists = list.some(function(m) {
+        return String(m.phone || "").trim() === newPhone;
+      });
+      if (phoneExists) {
+        return { success: false, error: "Phone number already exists!" };
+      }
+    }
+
+    if (newEmail) {
+      const emailExists = list.some(function(m) {
+        return String(m.email || "").trim().toLowerCase() === newEmail;
+      });
+      if (emailExists) {
+        return { success: false, error: "Email address already exists!" };
+      }
+    }
+  }
 
   const now = nowIST();
 
@@ -459,6 +525,30 @@ function readRecords(body) {
 }
 
 function updateRecord(body) {
+  // Validate uniqueness for member credentials on the server side for update
+  if (body.sheet === "members" && body.data) {
+    const list = sheetToObjects("members");
+    const newPhone = String(body.data.phone || "").trim();
+    const newEmail = String(body.data.email || "").trim().toLowerCase();
+
+    if (newPhone) {
+      const phoneExists = list.some(function(m) {
+        return String(m.id) !== String(body.id) && String(m.phone || "").trim() === newPhone;
+      });
+      if (phoneExists) {
+        return { success: false, error: "Phone number already exists!" };
+      }
+    }
+
+    if (newEmail) {
+      const emailExists = list.some(function(m) {
+        return String(m.id) !== String(body.id) && String(m.email || "").trim().toLowerCase() === newEmail;
+      });
+      if (emailExists) {
+        return { success: false, error: "Email address already exists!" };
+      }
+    }
+  }
 
   const sheet =
     getSheet(body.sheet);
