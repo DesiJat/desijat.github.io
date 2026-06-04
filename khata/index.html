@@ -227,6 +227,22 @@
         <div class="members-grid" id="membersGridContainer">
           <!-- Dynamically filled member profile cards -->
         </div>
+        <div class="pagination-container" id="membersPagination" style="margin-top: 20px;">
+          <div class="pagination-limit">
+            Show 
+            <select class="pagination-select" id="membersPageSize">
+              <option value="10">10</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            per page
+          </div>
+          <div class="pagination-nav">
+            <button class="btn btn-secondary btn-sm" id="membersPrevBtn">‹ Prev</button>
+            <span class="pagination-info" id="membersPageInfo">Page 1 of 1</span>
+            <button class="btn btn-secondary btn-sm" id="membersNextBtn">Next ›</button>
+          </div>
+        </div>
       </section>
 
       <!-- VIEW: Family Ledger (Internal Khata) -->
@@ -288,6 +304,22 @@
               </tbody>
             </table>
           </div>
+          <div class="pagination-container" id="internalKhataPagination" style="margin-top: 20px;">
+            <div class="pagination-limit">
+              Show 
+              <select class="pagination-select" id="internalKhataPageSize">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              per page
+            </div>
+            <div class="pagination-nav">
+              <button class="btn btn-secondary btn-sm" id="internalKhataPrevBtn">‹ Prev</button>
+              <span class="pagination-info" id="internalKhataPageInfo">Page 1 of 1</span>
+              <button class="btn btn-secondary btn-sm" id="internalKhataNextBtn">Next ›</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -344,6 +376,22 @@
                 </tbody>
               </table>
             </div>
+            <div class="pagination-container" id="extLedgerPagination" style="margin-top: 20px;">
+              <div class="pagination-limit">
+                Show 
+                <select class="pagination-select" id="extLedgerPageSize">
+                  <option value="10">10</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                per page
+              </div>
+              <div class="pagination-nav">
+                <button class="btn btn-secondary btn-sm" id="extLedgerPrevBtn">‹ Prev</button>
+                <span class="pagination-info" id="extLedgerPageInfo">Page 1 of 1</span>
+                <button class="btn btn-secondary btn-sm" id="extLedgerNextBtn">Next ›</button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -399,6 +447,22 @@
                 <!-- Dynamically filled -->
               </tbody>
             </table>
+          </div>
+          <div class="pagination-container" id="loansPagination" style="margin-top: 20px;">
+            <div class="pagination-limit">
+              Show 
+              <select class="pagination-select" id="loansPageSize">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              per page
+            </div>
+            <div class="pagination-nav">
+              <button class="btn btn-secondary btn-sm" id="loansPrevBtn">‹ Prev</button>
+              <span class="pagination-info" id="loansPageInfo">Page 1 of 1</span>
+              <button class="btn btn-secondary btn-sm" id="loansNextBtn">Next ›</button>
+            </div>
           </div>
         </div>
       </section>

@@ -17,7 +17,13 @@ import { exporter } from "./js/export.js";
 const state = {
   currentView: "dashboard",
   currentExternalAccountId: null,
-  activeCurrency: "₹"
+  activeCurrency: "₹",
+  pagination: {
+    members: { page: 1, limit: 10 },
+    internalKhata: { page: 1, limit: 10 },
+    extLedger: { page: 1, limit: 10 },
+    loans: { page: 1, limit: 10 }
+  }
 };
 
 // Seed sample data if empty
@@ -242,7 +248,23 @@ async function renderMembers() {
   const container = document.getElementById("membersGridContainer");
   container.innerHTML = "";
 
-  list.forEach(m => {
+  // Pagination calculations
+  const pag = state.pagination.members;
+  const total = list.length;
+  const totalPages = Math.ceil(total / pag.limit) || 1;
+  if (pag.page > totalPages) pag.page = totalPages;
+  if (pag.page < 1) pag.page = 1;
+
+  const start = (pag.page - 1) * pag.limit;
+  const paginatedList = list.slice(start, start + pag.limit);
+
+  // Update DOM pagination info
+  document.getElementById("membersPageSize").value = pag.limit;
+  document.getElementById("membersPageInfo").textContent = `Page ${pag.page} of ${totalPages}`;
+  document.getElementById("membersPrevBtn").disabled = pag.page === 1;
+  document.getElementById("membersNextBtn").disabled = pag.page === totalPages;
+
+  paginatedList.forEach(m => {
     const card = document.createElement("div");
     card.className = "card-glass member-card";
     card.innerHTML = `
@@ -304,10 +326,26 @@ async function renderInternalKhata() {
     return true;
   });
 
-  if (filtered.length === 0) {
+  // Pagination calculations
+  const pag = state.pagination.internalKhata;
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / pag.limit) || 1;
+  if (pag.page > totalPages) pag.page = totalPages;
+  if (pag.page < 1) pag.page = 1;
+
+  const start = (pag.page - 1) * pag.limit;
+  const paginatedList = filtered.slice(start, start + pag.limit);
+
+  // Update DOM pagination info
+  document.getElementById("internalKhataPageSize").value = pag.limit;
+  document.getElementById("internalKhataPageInfo").textContent = `Page ${pag.page} of ${totalPages}`;
+  document.getElementById("internalKhataPrevBtn").disabled = pag.page === 1;
+  document.getElementById("internalKhataNextBtn").disabled = pag.page === totalPages;
+
+  if (paginatedList.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No matching transactions found.</td></tr>`;
   } else {
-    filtered.forEach(t => {
+    paginatedList.forEach(t => {
       const member = userList.find(m => Number(m.id) === Number(t.memberId));
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -395,10 +433,26 @@ async function renderLoans() {
   const tbody = document.getElementById("loansTableBody");
   tbody.innerHTML = "";
 
-  if (list.length === 0) {
+  // Pagination calculations
+  const pag = state.pagination.loans;
+  const total = list.length;
+  const totalPages = Math.ceil(total / pag.limit) || 1;
+  if (pag.page > totalPages) pag.page = totalPages;
+  if (pag.page < 1) pag.page = 1;
+
+  const start = (pag.page - 1) * pag.limit;
+  const paginatedList = list.slice(start, start + pag.limit);
+
+  // Update DOM pagination info
+  document.getElementById("loansPageSize").value = pag.limit;
+  document.getElementById("loansPageInfo").textContent = `Page ${pag.page} of ${totalPages}`;
+  document.getElementById("loansPrevBtn").disabled = pag.page === 1;
+  document.getElementById("loansNextBtn").disabled = pag.page === totalPages;
+
+  if (paginatedList.length === 0) {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No active loans recorded.</td></tr>`;
   } else {
-    list.forEach(l => {
+    paginatedList.forEach(l => {
       const member = userList.find(m => Number(m.id) === Number(l.memberId));
       const memberName = member ? member.name : "Unassociated";
       const remaining = loans.getRemainingBalance(l);
@@ -503,6 +557,9 @@ window.deleteTransaction = async function(id) {
 };
 
 window.loadExternalLedger = async function(id) {
+  if (Number(state.currentExternalAccountId) !== Number(id)) {
+    state.pagination.extLedger.page = 1;
+  }
   state.currentExternalAccountId = id;
   const accounts = await transactions.getExternalAccounts();
   const acc = accounts.find(a => Number(a.id) === Number(id));
@@ -515,13 +572,29 @@ window.loadExternalLedger = async function(id) {
   const txList = await transactions.getTransactions();
   const extTxs = txList.filter(t => Number(t.externalAccountId) === Number(id));
   
+  // Pagination calculations
+  const pag = state.pagination.extLedger;
+  const total = extTxs.length;
+  const totalPages = Math.ceil(total / pag.limit) || 1;
+  if (pag.page > totalPages) pag.page = totalPages;
+  if (pag.page < 1) pag.page = 1;
+
+  const start = (pag.page - 1) * pag.limit;
+  const paginatedList = extTxs.slice(start, start + pag.limit);
+
+  // Update DOM pagination info
+  document.getElementById("extLedgerPageSize").value = pag.limit;
+  document.getElementById("extLedgerPageInfo").textContent = `Page ${pag.page} of ${totalPages}`;
+  document.getElementById("extLedgerPrevBtn").disabled = pag.page === 1;
+  document.getElementById("extLedgerNextBtn").disabled = pag.page === totalPages;
+
   const tbody = document.getElementById("extLedgerTableBody");
   tbody.innerHTML = "";
 
-  if (extTxs.length === 0) {
+  if (paginatedList.length === 0) {
     tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No entries yet. Opening Balance: ${state.activeCurrency}${acc.openingBalance}</td></tr>`;
   } else {
-    extTxs.forEach(t => {
+    paginatedList.forEach(t => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${t.date}</td>
@@ -912,17 +985,97 @@ function bindQuickActions() {
   });
 
   // Filter dynamic updates
-  document.getElementById("filterSearch").addEventListener("input", renderInternalKhata);
-  document.getElementById("filterType").addEventListener("change", renderInternalKhata);
-  document.getElementById("filterCategory").addEventListener("change", renderInternalKhata);
-  document.getElementById("filterMember").addEventListener("change", renderInternalKhata);
+  const triggerInternalKhataFilter = () => {
+    state.pagination.internalKhata.page = 1;
+    renderInternalKhata();
+  };
+  document.getElementById("filterSearch").addEventListener("input", triggerInternalKhataFilter);
+  document.getElementById("filterType").addEventListener("change", triggerInternalKhataFilter);
+  document.getElementById("filterCategory").addEventListener("change", triggerInternalKhataFilter);
+  document.getElementById("filterMember").addEventListener("change", triggerInternalKhataFilter);
   
   document.getElementById("resetFiltersBtn").addEventListener("click", () => {
     document.getElementById("filterSearch").value = "";
     document.getElementById("filterType").value = "";
     document.getElementById("filterCategory").value = "";
     document.getElementById("filterMember").value = "";
+    state.pagination.internalKhata.page = 1;
     renderInternalKhata();
+  });
+
+  // Pagination event listeners
+  // 1. Members pagination
+  document.getElementById("membersPageSize").addEventListener("change", (e) => {
+    state.pagination.members.limit = Number(e.target.value);
+    state.pagination.members.page = 1;
+    renderMembers();
+  });
+  document.getElementById("membersPrevBtn").addEventListener("click", () => {
+    if (state.pagination.members.page > 1) {
+      state.pagination.members.page--;
+      renderMembers();
+    }
+  });
+  document.getElementById("membersNextBtn").addEventListener("click", () => {
+    state.pagination.members.page++;
+    renderMembers();
+  });
+
+  // 2. Family Ledger (Internal Khata) pagination
+  document.getElementById("internalKhataPageSize").addEventListener("change", (e) => {
+    state.pagination.internalKhata.limit = Number(e.target.value);
+    state.pagination.internalKhata.page = 1;
+    renderInternalKhata();
+  });
+  document.getElementById("internalKhataPrevBtn").addEventListener("click", () => {
+    if (state.pagination.internalKhata.page > 1) {
+      state.pagination.internalKhata.page--;
+      renderInternalKhata();
+    }
+  });
+  document.getElementById("internalKhataNextBtn").addEventListener("click", () => {
+    state.pagination.internalKhata.page++;
+    renderInternalKhata();
+  });
+
+  // 3. External Ledger pagination
+  document.getElementById("extLedgerPageSize").addEventListener("change", (e) => {
+    state.pagination.extLedger.limit = Number(e.target.value);
+    state.pagination.extLedger.page = 1;
+    if (state.currentExternalAccountId) {
+      window.loadExternalLedger(state.currentExternalAccountId);
+    }
+  });
+  document.getElementById("extLedgerPrevBtn").addEventListener("click", () => {
+    if (state.pagination.extLedger.page > 1) {
+      state.pagination.extLedger.page--;
+      if (state.currentExternalAccountId) {
+        window.loadExternalLedger(state.currentExternalAccountId);
+      }
+    }
+  });
+  document.getElementById("extLedgerNextBtn").addEventListener("click", () => {
+    state.pagination.extLedger.page++;
+    if (state.currentExternalAccountId) {
+      window.loadExternalLedger(state.currentExternalAccountId);
+    }
+  });
+
+  // 4. Loans pagination
+  document.getElementById("loansPageSize").addEventListener("change", (e) => {
+    state.pagination.loans.limit = Number(e.target.value);
+    state.pagination.loans.page = 1;
+    renderLoans();
+  });
+  document.getElementById("loansPrevBtn").addEventListener("click", () => {
+    if (state.pagination.loans.page > 1) {
+      state.pagination.loans.page--;
+      renderLoans();
+    }
+  });
+  document.getElementById("loansNextBtn").addEventListener("click", () => {
+    state.pagination.loans.page++;
+    renderLoans();
   });
 
   document.getElementById("reportYearSelect").addEventListener("change", renderReports);
