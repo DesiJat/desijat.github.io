@@ -305,22 +305,29 @@ async function renderInternalKhata() {
   tbody.innerHTML = "";
 
   const catSelect = document.getElementById("filterCategory");
+  const memberSelect = document.getElementById("filterMember");
+
+  // Save current values before rebuilding options
+  const savedCatVal = catSelect.value;
+  const savedMemberVal = memberSelect.value;
+
   const defaultCats = ["Salary", "Business Income", "Rent Income", "Food", "Education", "Electricity", "Water", "Internet", "Medical", "Transportation", "Entertainment", "Other"];
   catSelect.innerHTML = `<option value="">All Categories</option>`;
   defaultCats.forEach(c => {
     catSelect.innerHTML += `<option value="${c}">${c}</option>`;
   });
+  catSelect.value = savedCatVal;
 
-  const memberSelect = document.getElementById("filterMember");
   memberSelect.innerHTML = `<option value="">All Members</option>`;
   userList.forEach(m => {
     memberSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
   });
+  memberSelect.value = savedMemberVal;
 
   const searchVal = document.getElementById("filterSearch").value.toLowerCase();
   const typeVal = document.getElementById("filterType").value;
-  const catVal = document.getElementById("filterCategory").value;
-  const memberVal = document.getElementById("filterMember").value;
+  const catVal = catSelect.value;
+  const memberVal = memberSelect.value;
 
   const filtered = txList.filter(t => {
     if (searchVal && !t.description.toLowerCase().includes(searchVal) && !t.category.toLowerCase().includes(searchVal)) return false;
