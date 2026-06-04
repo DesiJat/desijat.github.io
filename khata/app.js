@@ -464,6 +464,7 @@ async function renderSettings() {
   document.getElementById("settCurrency").value = config.currency || "₹";
   document.getElementById("settTheme").value = config.theme || "light";
   document.getElementById("settSheetsUrl").value = config.sheetsUrl || "";
+  document.getElementById("settJwtSecret").value = config.jwtSecret || "";
   document.getElementById("settUseSheets").checked = !!config.useSheets;
 }
 
@@ -647,8 +648,9 @@ function bindFormSubmissions() {
     const phone = document.getElementById("loginPhone").value;
     const pass = document.getElementById("loginPassword").value;
     const customSheetsUrl = document.getElementById("loginSheetsUrl").value;
+    const customJwtSecret = document.getElementById("loginJwtSecret").value;
 
-    const result = await auth.login(phone, pass, customSheetsUrl);
+    const result = await auth.login(phone, pass, customSheetsUrl, customJwtSecret);
     if (result.success) {
       showToast(`Welcome back, ${result.user.name}!`, "success");
       
@@ -672,8 +674,9 @@ function bindFormSubmissions() {
     const email = document.getElementById("regEmail").value;
     const pass = document.getElementById("regPassword").value;
     const customSheetsUrl = document.getElementById("regSheetsUrl").value;
+    const customJwtSecret = document.getElementById("regJwtSecret").value;
 
-    const result = await auth.registerFamily(fam, admin, phone, pass, email, customSheetsUrl);
+    const result = await auth.registerFamily(fam, admin, phone, pass, email, customSheetsUrl, customJwtSecret);
     if (result.success) {
       showToast("Workspace Registered & Logged In!", "success");
       checkAuthLock();
@@ -952,15 +955,18 @@ function bindQuickActions() {
 
   document.getElementById("saveSheetsSyncBtn").addEventListener("click", () => {
     const url = document.getElementById("settSheetsUrl").value.trim();
+    const jwtSecret = document.getElementById("settJwtSecret").value.trim();
     const useSheets = document.getElementById("settUseSheets").checked;
 
     const config = storage.getLocal("config") || {};
     config.sheetsUrl = url;
+    config.jwtSecret = jwtSecret;
     config.useSheets = useSheets;
     storage.saveLocal("config", config, false);
 
     // Update active storage instance settings
     storage.sheetsUrl = url;
+    storage.jwtSecret = jwtSecret;
     storage.useSheets = useSheets;
 
     showToast("Google Sheets sync configurations updated.", "success");

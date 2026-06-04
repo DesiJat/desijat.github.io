@@ -20,11 +20,14 @@ class AuthManager {
   }
 
   // Register a new Admin & Family tenant
-  async registerFamily(familyName, adminName, phone, password, email = "", customSheetsUrl = "") {
+  async registerFamily(familyName, adminName, phone, password, email = "", customSheetsUrl = "", customJwtSecret = "") {
     // If a custom Sheets URL is provided, override default storage configuration
     if (customSheetsUrl.trim() !== "") {
       storage.sheetsUrl = customSheetsUrl.trim();
       storage.useSheets = true;
+    }
+    if (customJwtSecret.trim() !== "") {
+      storage.jwtSecret = customJwtSecret.trim();
     }
 
     // Force a fresh sync of the global members list from Google Sheets before validation
@@ -98,6 +101,7 @@ class AuthManager {
       theme: "light",
       useSheets: storage.useSheets,
       sheetsUrl: storage.sheetsUrl,
+      jwtSecret: storage.jwtSecret,
     }, false);
 
     // Automate login
@@ -110,33 +114,63 @@ class AuthManager {
   }
 
   // Login existing Admin or family member
-  async login(phone, password, customSheetsUrl = "") {
+  async login(phone, password, customSheetsUrl = "", customJwtSecret = "") {
     // If a custom Sheets URL is provided, override default storage configuration
     if (customSheetsUrl.trim() !== "") {
       storage.sheetsUrl = customSheetsUrl.trim();
       storage.useSheets = true;
+    }
+    if (customJwtSecret.trim() !== "") {
+      storage.jwtSecret = customJwtSecret.trim();
+    }
 
+    if (customSheetsUrl.trim() !== "" || customJwtSecret.trim() !== "") {
       // Persist the override locally
       const config = storage.getLocal("config") || {};
       config.sheetsUrl = storage.sheetsUrl;
+      config.jwtSecret = storage.jwtSecret;
       config.useSheets = storage.useSheets;
       storage.saveLocal("config", config, false);
     }
 
-    // Force a fresh sync of the global members list from Google Sheets before login
+    let user = null;
+
+    // Authenticate against Google Sheets (online check with where filter)
     if (storage.useSheets && storage.sheetsUrl && navigator.onLine) {
       try {
-        const response = await storage.sheetsRequest({ action: "read", sheet: "members", limit: 2000 });
-        if (response.success && response.data) {
-          storage.saveLocal("members", response.data);
+        const response = await storage.sheetsRequest({
+          action: "read",
+          sheet: "members",
+          where: [
+            { field: "phone", operator: "=", value: String(phone).trim() },
+            { field: "password", operator: "=", value: password }
+          ],
+          limit: 1
+        });
+        
+        if (response.success && response.data && response.data.length > 0) {
+          user = response.data[0];
+          
+          // Sync authenticated user into local cache
+          const localList = storage.getLocal("members") || [];
+          const idx = localList.findIndex(m => Number(m.id) === Number(user.id));
+          if (idx !== -1) {
+            localList[idx] = user;
+          } else {
+            localList.push(user);
+          }
+          storage.saveLocal("members", localList);
         }
       } catch (e) {
-        console.warn("Could not sync global members for login validation, using cache.", e);
+        console.warn("Could not authenticate online, falling back to local cache.", e);
       }
     }
 
-    const list = storage.getLocal("members") || [];
-    const user = list.find(m => String(m.phone).trim() === String(phone).trim() && m.password === password);
+    // Offline or network error fallback: Check LocalStorage cache
+    if (!user) {
+      const list = storage.getLocal("members") || [];
+      user = list.find(m => String(m.phone).trim() === String(phone).trim() && m.password === password);
+    }
     
     if (user) {
       this.isAuthenticated = true;

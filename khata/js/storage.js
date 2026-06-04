@@ -5,54 +5,12 @@
  * Extends capabilities to support SaaS multi-family isolation using familyId.
  */
 
-const JWT_SECRET = "your-very-secure-family-khata-secret-key-2026";
-
-async function generateJwt(payload) {
-  const header = { alg: "HS256", typ: "JWT" };
-  const base64url = (str) => {
-    return btoa(str)
-      .replace(/=/g, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_");
-  };
-
-  const encodedHeader = base64url(JSON.stringify(header));
-  const encodedPayload = base64url(JSON.stringify(payload));
-  const tokenInput = encodedHeader + "." + encodedPayload;
-
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(JWT_SECRET),
-    { name: "HMAC", hash: { name: "SHA-256" } },
-    false,
-    ["sign"]
-  );
-
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    enc.encode(tokenInput)
-  );
-
-  const signatureArray = new Uint8Array(signature);
-  let signatureString = "";
-  for (let i = 0; i < signatureArray.length; i++) {
-    signatureString += String.fromCharCode(signatureArray[i]);
-  }
-  const encodedSignature = btoa(signatureString)
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-
-  return tokenInput + "." + encodedSignature;
-}
-
 class StorageManager {
   constructor() {
     this.encryptionKey = "FamilyKhataKey123";
     this.useSheets = true;
     this.sheetsUrl = "https://script.google.com/macros/s/AKfycbyIesDi6qGtfrrVYMEnjLwX1HaOuwHzS5SXutH_5HNyFjikcclvuc1hIfmjWPEDiRYZ/exec";
+    this.jwtSecret = "your-very-secure-family-khata-secret-key-2026";
     this.currentFamilyId = null; // Active family workspace context
     
     // Load config from LocalStorage if present (can override defaults)
@@ -74,9 +32,53 @@ class StorageManager {
     if (config.sheetsUrl) {
       this.sheetsUrl = config.sheetsUrl;
     }
+    if (config.jwtSecret) {
+      this.jwtSecret = config.jwtSecret;
+    }
     if (Object.prototype.hasOwnProperty.call(config, "useSheets")) {
       this.useSheets = !!config.useSheets;
     }
+  }
+
+  async generateJwt(payload) {
+    const header = { alg: "HS256", typ: "JWT" };
+    const base64url = (str) => {
+      return btoa(str)
+        .replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+    };
+
+    const encodedHeader = base64url(JSON.stringify(header));
+    const encodedPayload = base64url(JSON.stringify(payload));
+    const tokenInput = encodedHeader + "." + encodedPayload;
+
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(this.jwtSecret),
+      { name: "HMAC", hash: { name: "SHA-256" } },
+      false,
+      ["sign"]
+    );
+
+    const signature = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      enc.encode(tokenInput)
+    );
+
+    const signatureArray = new Uint8Array(signature);
+    let signatureString = "";
+    for (let i = 0; i < signatureArray.length; i++) {
+      signatureString += String.fromCharCode(signatureArray[i]);
+    }
+    const encodedSignature = btoa(signatureString)
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+
+    return tokenInput + "." + encodedSignature;
   }
 
   // Base64 helper for compatibility
@@ -163,7 +165,7 @@ class StorageManager {
         };
       }
       
-      payload.token = await generateJwt(tokenPayload);
+      payload.token = await this.generateJwt(tokenPayload);
 
       const response = await fetch(this.sheetsUrl, {
         method: "POST",
