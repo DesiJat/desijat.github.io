@@ -107,6 +107,7 @@ All network API operations with Google Sheets must be authorized by a JSON Web T
 *   **Payload Claims:**
     *   `sub` (String): Logged-in user member ID.
     *   `familyId` (Integer): Logged-in user family workspace ID.
+    *   `parentId` (Integer): Parent ID of the active user (`0` for Admin, matching `parent_id` in member model).
     *   `iat` (Integer): Current timestamp (seconds).
     *   `exp` (Integer): Expiration timestamp (`iat + 3600`).
 *   **Secret Key:** Dynamically read from the local config state (`config.jwtSecret`).
@@ -151,12 +152,23 @@ When a write action occurs in Flutter:
     *   If returned data is valid, update/save the member record locally and proceed.
 4. If offline or HTTP fails:
     *   Fall back to local SQLite cache lookup to match phone and password.
-5. On success: Sets `isAuthenticated = true`, `currentFamilyId = adminUser.familyId`, and opens the Dashboard.
+5. On success: Sets `isAuthenticated = true`, `currentFamilyId = adminUser.familyId`, saves `currentUser` in local storage for indefinite session persistence, and opens the Dashboard.
 
 ### 4.2 Registration Flow
 1. User enters `Family Name`, `Admin Name`, `Phone`, `Password`, `Email`, and optional custom `Sheets URL` and `JWT Secret`.
 2. Generate admin record locally with `parent_id: 0` and `familyId` set to its own user ID.
-3. Push database row to Sheets in the background.
+3. Save `currentUser` in local storage, and push the database row to Sheets in the background.
+
+### 4.3 Session Persistence & Timeout Behavior
+1. **Persistent Sign-In:** The logged-in member session is saved in local encrypted storage. On application launch, if a valid user session is detected, the app automatically bypasses the lock/login screen.
+2. **Inactivity Lock Disabled:** The automatic inactivity timer is disabled. Users remain authenticated indefinitely until they explicitly log out.
+3. **Logout & Cache Purging:** Logging out must clear all local databases, cached preferences, configuration overrides, and tokens (`localStorage.clear()` equivalent), resetting the app to a clean, non-configured state, and returning the user to the login screen.
+
+### 4.4 Role-Based Permissions (Admin Only Actions)
+1. **Role Verification:** A user is designated as an Admin if `parent_id == 0`. Other members have `parent_id != 0`.
+2. **Update & Delete Restrictions:** Only Admin users are authorized to update or delete records (Members, Ledger transactions, External accounts, and Loans). Non-admin users are restricted to **read and add-only** permissions (they can log new transactions, add external accounts, register new members, or register new loans and repayments, but cannot edit or delete any existing profiles or logs).
+3. **UI Adjustments:** Edit and delete buttons are hidden from non-admin views. Settings page controls and budget setup limit inputs are disabled (with submit/save controls hidden) for non-admin accounts.
+4. **Security Enforcement:** All client-side mutation methods must include a safety guard verifying the active user's admin role before executing updates or deletions.
 
 ---
 
@@ -165,7 +177,7 @@ When a write action occurs in Flutter:
 Build a responsive UI that adapts to desktop screens (Windows/Linux) and mobile screens (Android/iOS) using a premium **Glassmorphism Theme** with Outfit/Inter typography, smooth micro-animations, and visual indicator cards.
 
 ### 5.1 Auth Lock Screen
-*   Login Tab: Phone, password, and expandable "Advanced Sheet Settings" dropdown containing Sheets URL and JWT Secret.
+*   Login Tab: Phone, password, and expandable "Advanced Sheet Settings" dropdown containing Sheets URL and JWT Secret. Designed to fit clean on mobile screens with scroll safety constraints.
 *   Register Tab: Family details, admin credentials, and Sheets connection configurations.
 
 ### 5.2 Dashboard
@@ -175,19 +187,19 @@ Build a responsive UI that adapts to desktop screens (Windows/Linux) and mobile 
 
 ### 5.3 Members Management
 *   Displays a list of family members with relations, contributions, and account balances.
-*   Include forms to add family members (generating email/password logins).
+*   Include forms to add family members (generating email/password logins). Edit/delete options are hidden if the logged-in user is not an Admin.
 
 ### 5.4 Double-Entry Ledger
-*   List view of all transactions with filtering (by category, type, date range, or member).
+*   List view of all transactions with filtering (by category, type, date range, or member) and pagination.
 *   Form modals to log income/expense, linking transactions to family members and Cash/Bank accounts.
 
 ### 5.5 Budget Cap Tracker
-*   Linear Progress bars showing spent amounts vs Cap limits for categories (e.g. Groceries, Entertainment). Show warnings when spent is > 90%.
+*   Linear Progress bars showing spent amounts vs Cap limits for categories (e.g. Groceries, Entertainment). Show warnings when spent is > 90%. Inputs and save buttons are disabled for non-admins.
 
 ### 5.6 Debt & Loan Center
-*   List tracking of third-party loans (Given/Taken).
+*   List tracking of third-party loans (Given/Taken) with pagination.
 *   Details view showing remaining simple interest calculations.
-*   "Log Payment" modal to record partial EMI repayments (which adds a log item containing `{date, amount, memberId}` to the loan's `paymentHistory` list and updates `paidAmount`).
+*   "Log Repayment" modal to record partial repayments. Delete button is hidden for non-admins.
 
 ### 5.7 Visual Reports
 *   Render clean canvas charts (via `fl_chart` package):
@@ -197,6 +209,12 @@ Build a responsive UI that adapts to desktop screens (Windows/Linux) and mobile 
 
 ### 5.8 Configuration & Backups
 *   Options to adjust currency symbols and toggle themes (Light/Dark).
-*   Input fields for Sheet sync URL and JWT secret keys.
+*   Input fields for Sheet sync URL and JWT secret keys (hidden/disabled for non-admins).
 *   **Sync Button:** Triggers `initializeSheetsSchema()` setting up empty sheet table headers dynamically on Google Drive.
 *   **Backup Buttons:** Export local cache to an encrypted JSON backup file, and import a JSON database backup.
+
+### 5.9 Global List Pagination Specifications
+1. **Default Record Size:** Paginate all list views (Members, Ledger, Accounts, and Loans) with a default size of `10` records per page.
+2. **Page Limit Selector:** Display a dropdown selector option on each list view to update the limit to `10`, `50`, or `100` records per page. Changing the size resets the active page index to `1`.
+3. **Boundary Control Navigation:** Provide Prev and Next buttons. Disable navigation controls when viewing boundary limits (e.g., page 1 disables Prev, final page disables Next).
+4. **Search and Filter Reset:** Changing search parameters, categories, or filtering constraints on the ledger must automatically reset the list's active page back to `1` before displaying results.
