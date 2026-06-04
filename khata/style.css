@@ -505,10 +505,12 @@ body {
 }
 
 .lock-card {
-  max-width: 320px;
+  max-width: 450px;
   width: 90%;
   text-align: center;
   padding: 36px 24px;
+  overflow-y: auto;
+  max-height: 95vh;
 }
 
 .pin-display {
@@ -710,5 +712,20 @@ body {
 
 .pagination-info {
   font-weight: 500;
+}
+
+/* Responsiveness Enhancements */
+@media (max-width: 600px) {
+  #budgetInputGrid, #loanDetailsGrid {
+    grid-template-columns: 1fr !important;
+  }
+  #loanDetailsGrid > div[style*="grid-column: span 2"] {
+    grid-column: span 1 !important;
+  }
+  .pagination-container {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
 }
 
