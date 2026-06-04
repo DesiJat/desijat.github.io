@@ -13,36 +13,57 @@
 </head>
 <body>
 
-  <!-- Lock screen overlay -->
-  <div id="lockScreen" class="lock-screen" style="display: none;">
-    <div class="lock-card card-glass">
-      <div class="brand">
+  <!-- SaaS Authenticator / Lock screen overlay -->
+  <div id="lockScreen" class="lock-screen" style="display: none; overflow-y: auto; padding: 20px;">
+    <div class="lock-card card-glass" style="max-width: 420px; width: 100%; border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow);">
+      <div class="brand" style="justify-content: center; margin-bottom: 24px;">
         <div class="brand-icon">₹</div>
-        <div class="brand-name">Family Khata</div>
+        <div class="brand-name">Family Khata SaaS</div>
       </div>
-      <p id="lockScreenMessage" style="font-size: 14px; color: var(--text-secondary);">Enter Security PIN to unlock</p>
       
-      <div class="pin-display">
-        <div class="pin-dot" id="dot1"></div>
-        <div class="pin-dot" id="dot2"></div>
-        <div class="pin-dot" id="dot3"></div>
-        <div class="pin-dot" id="dot4"></div>
+      <!-- Authentication Tabs -->
+      <div style="display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+        <button class="btn btn-secondary" id="tabLoginBtn" style="flex: 1; padding: 8px;">Sign In</button>
+        <button class="btn btn-secondary" id="tabRegisterBtn" style="flex: 1; padding: 8px; background: transparent; color: var(--text-secondary);">New Family</button>
       </div>
 
-      <div class="keypad">
-        <button class="keypad-btn">1</button>
-        <button class="keypad-btn">2</button>
-        <button class="keypad-btn">3</button>
-        <button class="keypad-btn">4</button>
-        <button class="keypad-btn">5</button>
-        <button class="keypad-btn">6</button>
-        <button class="keypad-btn">7</button>
-        <button class="keypad-btn">8</button>
-        <button class="keypad-btn">9</button>
-        <button class="keypad-btn" id="keypadClear" style="font-size: 14px;">CLR</button>
-        <button class="keypad-btn">0</button>
-        <button class="keypad-btn" id="keypadDelete" style="font-size: 14px;">DEL</button>
-      </div>
+      <!-- Form: Login -->
+      <form id="authLoginForm">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Phone Number (Mobile)</label>
+          <input type="tel" id="loginPhone" class="form-input" placeholder="e.g. 9876543210" required>
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="Enter password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Login to Dashboard</button>
+      </form>
+
+      <!-- Form: Register Family Workspace -->
+      <form id="authRegisterForm" style="display: none;">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Family Name / Org</label>
+          <input type="text" id="regFamilyName" class="form-input" placeholder="e.g. Sharma Family Workspace" required>
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Head of Family (Admin Name)</label>
+          <input type="text" id="regAdminName" class="form-input" placeholder="e.g. Rajesh Sharma" required>
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Admin Phone Number</label>
+          <input type="tel" id="regPhone" class="form-input" placeholder="e.g. 9876543210" required>
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Admin Email (Optional)</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="e.g. rajesh@workmail.com">
+        </div>
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Password</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="Create secure password" required>
+        </div>
+        <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 10px;">Register & Boot SaaS</button>
+      </form>
     </div>
   </div>
 
@@ -512,7 +533,15 @@
         </div>
         <div class="form-group">
           <label class="form-label">Contact Phone</label>
-          <input type="tel" id="memberPhone" class="form-input">
+          <input type="tel" id="memberPhone" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Login Email</label>
+          <input type="email" id="memberEmail" class="form-input" placeholder="e.g. mom@family.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Login Password</label>
+          <input type="password" id="memberPassword" class="form-input" placeholder="Create login password" required>
         </div>
         <div class="form-group">
           <label class="form-label">Monthly Target Contribution</label>
@@ -710,6 +739,12 @@
       <form id="repayForm">
         <input type="hidden" id="repayLoanId">
         <div class="form-group">
+          <label class="form-label">Paid By (Family Member)</label>
+          <select id="repayMemberId" class="form-input" required>
+            <!-- Filled dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
           <label class="form-label">Repayment Date</label>
           <input type="date" id="repayDate" class="form-input" required>
         </div>
@@ -739,6 +774,7 @@
           <thead>
             <tr>
               <th>Payment Date</th>
+              <th>Paid By</th>
               <th>Amount Settled</th>
             </tr>
           </thead>

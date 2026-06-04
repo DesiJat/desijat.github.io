@@ -1,44 +1,108 @@
 /**
  * Auth Manager Module - js/auth.js
- * Handles Local PIN Lock, Session Timeout, and Encryption key configs.
+ * Handles Phone & Password SaaS logins, Registering new families,
+ * session timeouts, and credentials encryption.
  */
 import { storage } from "./storage.js";
 
 class AuthManager {
   constructor() {
-    this.sessionTimeoutMs = 5 * 60 * 1000; // 5 Minutes default session timeout
+    this.sessionTimeoutMs = 15 * 60 * 1000; // 15 Minutes session timeout
     this.lastActivityTime = Date.now();
     this.isAuthenticated = false;
+    this.currentUser = null;
   }
 
-  isPinSet() {
-    const config = storage.getLocal("config") || {};
-    return !!config.securePin;
+  // Check if any admin users exist in local storage to guide registration vs login
+  async hasRegisteredUsers() {
+    const list = await storage.getLocal("members") || [];
+    return list.length > 0;
   }
 
-  setPin(newPin) {
-    const config = storage.getLocal("config") || {};
-    // Encrypt the PIN using storage helper before saving
-    config.securePin = storage.encrypt(newPin);
-    storage.saveLocal("config", config);
-    return true;
-  }
-
-  verifyPin(pin) {
-    const config = storage.getLocal("config") || {};
-    if (!config.securePin) return false;
-    
-    const decryptedPin = storage.decrypt(config.securePin);
-    if (decryptedPin === pin) {
-      this.isAuthenticated = true;
-      this.resetTimer();
-      return true;
+  // Register a new Admin & Family tenant
+  async registerFamily(familyName, adminName, phone, password, email = "") {
+    // 1. Check if phone already exists
+    const list = await storage.getLocal("members") || [];
+    const exists = list.some(m => m.phone === phone);
+    if (exists) {
+      return { success: false, error: "Phone number already registered." };
     }
-    return false;
+
+    // 2. Generate a temporary ID to isolate this admin initially (will set parent_id = 0)
+    const newId = list.length ? Math.max(...list.map(item => Number(item.id) || 0)) + 1 : 1;
+    
+    // An Admin has parent_id = 0, and their familyId matches their own generated user ID.
+    const adminUser = {
+      id: newId,
+      name: adminName,
+      relation: "Father (Admin)",
+      phone: phone,
+      email: email,
+      password: password, // plain password for simple local SaaS checks
+      parent_id: 0,
+      familyId: newId, // Self-anchored family tenant
+      photo: "",
+      contribution: 0,
+      balance: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Save directly to storage members table bypass filter
+    list.push(adminUser);
+    storage.saveLocal("members", list);
+
+    // Sync to Sheets in the background
+    if (storage.useSheets && storage.sheetsUrl) {
+      const { id, createdAt, updatedAt, ...sheetsData } = adminUser;
+      storage.sheetsRequest({
+        action: "create",
+        sheet: "members",
+        data: sheetsData,
+        columns: Object.keys(sheetsData)
+      }).catch(err => console.error("Background sync admin creation failed:", err));
+    }
+
+    // Initialize custom family configuration locally
+    storage.saveLocal("config", {
+      familyName: familyName,
+      currency: "₹",
+      theme: "light",
+      useSheets: storage.useSheets,
+      sheetsUrl: storage.sheetsUrl,
+    }, false);
+
+    // Automate login
+    this.isAuthenticated = true;
+    this.currentUser = adminUser;
+    storage.currentFamilyId = adminUser.familyId;
+    this.resetTimer();
+
+    return { success: true, user: adminUser };
+  }
+
+  // Login existing Admin or family member
+  async login(phone, password) {
+    const list = await storage.getLocal("members") || [];
+    const user = list.find(m => m.phone === phone && m.password === password);
+    
+    if (user) {
+      this.isAuthenticated = true;
+      this.currentUser = user;
+      // If user has parent_id = 0 (Admin), their familyId is their own ID. Otherwise it is their parent_id
+      storage.currentFamilyId = Number(user.parent_id) === 0 ? Number(user.id) : Number(user.parent_id);
+      
+      this.resetTimer();
+      return { success: true, user };
+    }
+    
+    return { success: false, error: "Invalid phone number or password." };
   }
 
   logout() {
     this.isAuthenticated = false;
+    this.currentUser = null;
+    storage.currentFamilyId = null;
   }
 
   resetTimer() {
@@ -46,7 +110,7 @@ class AuthManager {
   }
 
   checkSessionTimeout(onTimeoutCallback) {
-    if (!this.isPinSet() || !this.isAuthenticated) return false;
+    if (!this.isAuthenticated) return false;
     
     const inactiveDuration = Date.now() - this.lastActivityTime;
     if (inactiveDuration >= this.sessionTimeoutMs) {

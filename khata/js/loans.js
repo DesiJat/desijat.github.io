@@ -54,7 +54,7 @@ class LoanManager {
     return await storage.delete("loans", id);
   }
 
-  async addRepayment(id, paymentAmount, date = new Date().toISOString().split("T")[0]) {
+  async addRepayment(id, paymentAmount, date = new Date().toISOString().split("T")[0], memberId = null) {
     const loanList = await this.getLoans();
     const loan = loanList.find(l => Number(l.id) === Number(id));
     if (!loan) return false;
@@ -62,7 +62,7 @@ class LoanManager {
     const paid = Number(loan.paidAmount) || 0;
     const newPaidAmount = paid + Number(paymentAmount);
     const history = Array.isArray(loan.paymentHistory) ? loan.paymentHistory : [];
-    history.push({ date, amount: Number(paymentAmount) });
+    history.push({ date, amount: Number(paymentAmount), memberId: memberId ? Number(memberId) : null });
 
     return await this.updateLoan(id, {
       paidAmount: newPaidAmount,

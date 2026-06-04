@@ -1,7 +1,7 @@
 /**
  * App Main Controller - app.js
- * Ties together managers, handles DOM interactions, renders reports,
- * supports user authentication PIN, and seeds demo data on initial load.
+ * SaaS Refactored: Ties together authentication, isolates transactions by familyId,
+ * handles phone/password login & registration, and initializes mock tenants.
  */
 
 import { storage } from "./js/storage.js";
@@ -17,66 +17,79 @@ import { exporter } from "./js/export.js";
 const state = {
   currentView: "dashboard",
   currentExternalAccountId: null,
-  pinBuffer: "",
   activeCurrency: "₹"
 };
 
 // Seed sample data if empty
 async function initDemoData() {
-  const currentMembers = await members.getMembers();
-  if (currentMembers && currentMembers.length > 0) return; // Already seeded/configured
+  const usersExist = await auth.hasRegisteredUsers();
+  if (usersExist) return; // Already seeded/configured
 
-  console.log("Database empty. Seeding demo data...");
+  console.log("SaaS Database empty. Seeding Verma Family tenant...");
 
-  // 1. Base Configuration
-  storage.saveLocal("config", {
-    familyName: "Sharma Family",
-    currency: "₹",
-    theme: "light",
-    useSheets: true,
-    sheetsUrl: "https://script.google.com/macros/s/AKfycbzbCP4D7Q5yCVwWKbU-s-bD76egoTXk_93QgQZsuV0TgJ9g8J92nZlYsRhGRlyf5rDqIw/exec",
-    securePin: storage.encrypt("1234") // Default PIN is 1234
-  }, false);
+  // 1. Register a new Family Workspace (automatically sets Rajesh Verma as Admin)
+  const regResult = await auth.registerFamily(
+    "Verma Family Finance", 
+    "Rajesh Verma", 
+    "9876501234", 
+    "Pass@123", 
+    "rajesh@verma.com"
+  );
 
-  // 2. Members
-  const dad = await members.addMember({ name: "Dad (Admin)", relation: "Father", phone: "9876543210", contribution: 50000, balance: 12000, parentId: 0 });
-  const mom = await members.addMember({ name: "Mom", relation: "Mother", phone: "8765432109", contribution: 10000, balance: 5000, parentId: 1 });
-  const alex = await members.addMember({ name: "Alex", relation: "Son", phone: "7654321098", contribution: 5000, balance: 800, parentId: 1 });
+  if (!regResult.success) {
+    console.error("Demo seeding registration failed:", regResult.error);
+    return;
+  }
 
-  // 3. Budgets
+  const dadUser = regResult.user;
+
+  // 2. Add other family members under Rajesh's administration
+  const mom = await members.addMember({ 
+    name: "Sunita Verma", 
+    relation: "Mother", 
+    phone: "9876505678", 
+    email: "sunita@verma.com", 
+    password: "Pass@123",
+    contribution: 15000, 
+    balance: 8200 
+  });
+  
+  const amit = await members.addMember({ 
+    name: "Amit Verma", 
+    relation: "Son", 
+    phone: "9876509999", 
+    email: "amit@verma.com", 
+    password: "Pass@123",
+    contribution: 8000, 
+    balance: 1500 
+  });
+
+  // 3. Setup category spending limits for Verma Family
   await budgets.setBudget("Food", 15000);
   await budgets.setBudget("Education", 25000);
   await budgets.setBudget("Electricity", 8000);
   await budgets.setBudget("Medical", 10000);
   await budgets.setBudget("Transportation", 5000);
 
-  // 4. External Accounts
-  const shop = await transactions.addExternalAccount({ name: "Kishore Grocery Mart", type: "Shop", phone: "9911223344", address: "Sector 15, Hissar", openingBalance: -1200 }); // We owe them 1200
-  const friend = await transactions.addExternalAccount({ name: "Neighbor John", type: "Friend", phone: "9812739123", address: "House 24, Delhi", openingBalance: 4000 }); // They owe us 4000
+  // 4. Create External Accounts linked to Rajesh's Family
+  await transactions.addExternalAccount({ name: "Kirana Grocery Mart", type: "Shop", phone: "9911223344", address: "Sector 15, Hissar", openingBalance: -3400 });
+  await transactions.addExternalAccount({ name: "Neighbor John", type: "Friend", phone: "9812739123", address: "House 24, Delhi", openingBalance: 4000 });
 
   // 5. Internal Transactions
-  const dadId = dad.id;
-  const momId = mom.id;
-  
-  await transactions.addTransaction({ date: "2026-05-15", type: "Income", category: "Salary", memberId: dadId, amount: 65000, description: "Software Dev Consulting salary" });
-  await transactions.addTransaction({ date: "2026-05-20", type: "Expense", category: "Food", memberId: momId, amount: 4800, description: "Monthly groceries shopping" });
-  await transactions.addTransaction({ date: "2026-05-28", type: "Expense", category: "Electricity", memberId: dadId, amount: 6200, description: "AC bill May" });
-  await transactions.addTransaction({ date: "2026-06-01", type: "Income", category: "Rent Income", memberId: momId, amount: 15000, description: "First floor rent" });
+  await transactions.addTransaction({ date: "2026-06-01", type: "Income", category: "Salary", memberId: dadUser.id, amount: 75000, description: "Monthly Corporate Salary Credit" });
+  await transactions.addTransaction({ date: "2026-06-01", type: "Income", category: "Rent Income", memberId: mom.id, amount: 18000, description: "Commercial Shop Rent" });
+  await transactions.addTransaction({ date: "2026-06-02", type: "Expense", category: "Food", memberId: mom.id, amount: 6200, description: "Weekly wholesale groceries purchase" });
+  await transactions.addTransaction({ date: "2026-06-02", type: "Expense", category: "Electricity", memberId: dadUser.id, amount: 4800, description: "DHBVN Power Bill - Main House" });
+  await transactions.addTransaction({ date: "2026-06-02", type: "Expense", category: "Medical", memberId: amit.id, amount: 2500, description: "Annual dental checkup and scaling" });
 
-  // 6. External Loan Entries
-  // await loans.addLoan({ person: "SBI Bank",memberId:1, loanType: "Taken", amount: 120000, interest: 8.5, emi: 6000, dueDate: "2026-06-10", notes: "Car finance loan","paymentHistory": [
-  //       { memberId:2,"date": "2026-04-05", "amount": 24000 },
-  //       { memberId:2,"date": "2026-05-05", "amount": 24000 }
-  //     ] });
-  const relativeLoan = await loans.addLoan({ person: "Uncle Harry", memberId:1,loanType: "Given", amount: 20000, interest: 5, emi: 2000, dueDate: "2026-06-15", notes: "Emergency business help","paymentHistory": [
-        { memberId:2,"date": "2026-04-05", "amount": 24000 },
-        { memberId:2,"date": "2026-05-05", "amount": 24000 }
-      ] });
+  // 6. External Loans
+  await loans.addLoan({ person: "SBI Bank", loanType: "Taken", amount: 120000, interest: 8.5, emi: 6000, dueDate: "2026-06-10", notes: "Car finance loan", memberId: dadUser.id });
+  const relativeLoan = await loans.addLoan({ person: "Uncle Harry", loanType: "Given", amount: 20000, interest: 5, emi: 2000, dueDate: "2026-06-15", notes: "Emergency business help", memberId: mom.id });
   
-  // Add some payment history to Loan
-  await loans.addRepayment(relativeLoan.id, 4000, "2026-05-20");
+  // Repay record
+  await loans.addRepayment(relativeLoan.id, 4000, "2026-06-02");
 
-  console.log("Demo data initialized successfully!");
+  console.log("SaaS demo tenant Verma Family seeded successfully!");
 }
 
 // Show Toast message
@@ -111,18 +124,15 @@ function initNavigation() {
       const el = document.getElementById(`view-${targetView}`);
       if (el) el.style.display = "block";
       
-      // Update UI state
       state.currentView = targetView;
       renderCurrentView();
       
-      // Mobile sidebar toggle
       if (window.innerWidth <= 768) {
         document.getElementById("sidebar").classList.remove("active");
       }
     });
   });
 
-  // Mobile menu button
   document.getElementById("menuToggle").addEventListener("click", () => {
     document.getElementById("sidebar").classList.toggle("active");
   });
@@ -130,14 +140,16 @@ function initNavigation() {
 
 // Render selected view
 async function renderCurrentView() {
-  auth.resetTimer(); // Reset inactivity timer on view switch
+  auth.resetTimer();
   const config = storage.getLocal("config") || {};
   state.activeCurrency = config.currency || "₹";
 
-  document.getElementById("sidebarFamilyName").textContent = config.familyName || "Family Khata";
-  document.getElementById("familyInitial").textContent = (config.familyName || "F")[0].toUpperCase();
+  // If user is logged in, display their specific family title
+  if (auth.currentUser) {
+    document.getElementById("sidebarFamilyName").textContent = config.familyName || "My Family Workspace";
+    document.getElementById("familyInitial").textContent = (config.familyName || "F")[0].toUpperCase();
+  }
 
-  // Route views
   switch (state.currentView) {
     case "dashboard":
       renderDashboard();
@@ -171,7 +183,6 @@ async function renderDashboard() {
   const sum = await reports.getSummary();
   const txList = await transactions.getTransactions();
   
-  // Format top stat boxes
   const netBalance = sum.income - sum.expenses + sum.savings;
   document.getElementById("dashNetBalance").textContent = `${state.activeCurrency}${netBalance.toLocaleString()}`;
   document.getElementById("dashIncome").textContent = `${state.activeCurrency}${sum.income.toLocaleString()}`;
@@ -181,7 +192,6 @@ async function renderDashboard() {
   const loansLabel = netLoans >= 0 ? `+${state.activeCurrency}${netLoans.toLocaleString()}` : `-${state.activeCurrency}${Math.abs(netLoans).toLocaleString()}`;
   document.getElementById("dashLoans").textContent = loansLabel;
 
-  // Render recent 5 transactions
   const sorted = txList.sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
   const tbody = document.getElementById("dashRecentTxTableBody");
   tbody.innerHTML = "";
@@ -205,7 +215,6 @@ async function renderDashboard() {
     }
   }
 
-  // System Alerts (Dues & Budgets)
   const alertsList = document.getElementById("dashAlertsList");
   alertsList.innerHTML = "";
   
@@ -236,14 +245,13 @@ async function renderMembers() {
   list.forEach(m => {
     const card = document.createElement("div");
     card.className = "card-glass member-card";
-    
-    // Quick ledger summary helper
     card.innerHTML = `
       <div class="member-avatar-lg">
         ${m.photo ? `<img src="${m.photo}">` : (m.name || "M")[0].toUpperCase()}
       </div>
       <h3 style="font-weight: 700;">${m.name}</h3>
-      <p style="color: var(--text-secondary); font-size: 13px; margin: 4px 0 12px 0;">${m.relation}</p>
+      <p style="color: var(--text-secondary); font-size: 13px; margin: 4px 0 6px 0;">${m.relation}</p>
+      <p style="color: var(--text-muted); font-size: 11px; margin-bottom: 12px;">📞 ${m.phone}</p>
       
       <div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
         <span style="color: var(--text-muted)">Contribution:</span>
@@ -270,7 +278,6 @@ async function renderInternalKhata() {
   const tbody = document.getElementById("internalKhataTableBody");
   tbody.innerHTML = "";
 
-  // Set filter categories
   const catSelect = document.getElementById("filterCategory");
   const defaultCats = ["Salary", "Business Income", "Rent Income", "Food", "Education", "Electricity", "Water", "Internet", "Medical", "Transportation", "Entertainment", "Other"];
   catSelect.innerHTML = `<option value="">All Categories</option>`;
@@ -278,14 +285,12 @@ async function renderInternalKhata() {
     catSelect.innerHTML += `<option value="${c}">${c}</option>`;
   });
 
-  // Set filter members
   const memberSelect = document.getElementById("filterMember");
   memberSelect.innerHTML = `<option value="">All Members</option>`;
   userList.forEach(m => {
     memberSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
   });
 
-  // Apply filters
   const searchVal = document.getElementById("filterSearch").value.toLowerCase();
   const typeVal = document.getElementById("filterType").value;
   const catVal = document.getElementById("filterCategory").value;
@@ -360,7 +365,6 @@ async function renderBudget() {
   categories.forEach(cat => {
     const limitObj = utils[cat] || { limit: 0, spent: 0, percent: 0 };
     
-    // Add form field input
     const field = document.createElement("div");
     field.className = "form-group";
     field.innerHTML = `
@@ -369,7 +373,6 @@ async function renderBudget() {
     `;
     inputGrid.appendChild(field);
 
-    // Add Utilization Progress Bar
     const progress = document.createElement("div");
     const exceededClass = limitObj.spent > limitObj.limit ? "style='background: var(--danger)'" : "";
     progress.innerHTML = `
@@ -429,7 +432,6 @@ async function renderReports() {
   const summary = await reports.getSummary(year, month);
   const txList = await transactions.getTransactions();
 
-  // Aggregate Category Expense Values for Pie Chart
   const categoryVals = {};
   txList.filter(t => {
     const d = new Date(t.date);
@@ -446,12 +448,10 @@ async function renderReports() {
   const pieColors = ["#6366f1", "#f43f5e", "#10b981", "#fbbf24", "#06b6d4", "#a855f7", "#ec4899", "#f97316"];
   reports.drawPieChart("expensesPieChart", pieData, pieColors);
 
-  // Bar Chart (Income vs Expense)
   reports.drawBarChart("incomeExpenseBarChart", ["Total Income", "Total Expenses"], [
     { data: [summary.income, summary.expenses] }
   ], ["#10b981", "#ef4444"]);
 
-  // Line Chart (Savings last 6 Months trend)
   const lineLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
   const lineData = [12000, 15000, 9000, 14000, 18000, summary.savings];
   reports.drawLineChart("savingsLineChart", lineLabels, lineData, "rgb(99, 102, 241)");
@@ -477,6 +477,8 @@ window.editMember = async function(id) {
   document.getElementById("memberName").value = m.name;
   document.getElementById("memberRelation").value = m.relation;
   document.getElementById("memberPhone").value = m.phone;
+  document.getElementById("memberEmail").value = m.email || "";
+  document.getElementById("memberPassword").value = m.password || "";
   document.getElementById("memberContribution").value = m.contribution;
   document.getElementById("openingBalanceGroup").style.display = "none";
   document.getElementById("memberModalTitle").textContent = "Edit Family Member";
@@ -549,10 +551,8 @@ window.viewLoanDetails = async function(id) {
   const memberName = member ? member.name : "Unassociated";
   const remaining = loans.getRemainingBalance(l);
 
-  // Populate title
   document.getElementById("loanDetailsTitle").textContent = `${l.person} Loan Details`;
 
-  // Populate metadata grid
   const grid = document.getElementById("loanDetailsGrid");
   grid.innerHTML = `
     <div><strong>Associated Member:</strong><br>${memberName}</div>
@@ -566,20 +566,21 @@ window.viewLoanDetails = async function(id) {
     <div style="grid-column: span 2;"><strong>Notes:</strong><br>${l.notes || "None"}</div>
   `;
 
-  // Populate repayment history table
   const tbody = document.getElementById("loanRepaymentHistoryTableBody");
   tbody.innerHTML = "";
   const history = Array.isArray(l.paymentHistory) ? l.paymentHistory : [];
 
   if (history.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--text-muted);">No payments recorded yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No payments recorded yet.</td></tr>`;
   } else {
-    // Sort history by date descending
     const sortedHistory = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
     sortedHistory.forEach(h => {
+      const payMember = userList.find(m => Number(m.id) === Number(h.memberId));
+      const payMemberName = payMember ? payMember.name : "Unknown/Admin";
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${h.date}</td>
+        <td>${payMemberName}</td>
         <td style="font-weight: 700; color: var(--success);">${state.activeCurrency}${Number(h.amount).toLocaleString()}</td>
       `;
       tbody.appendChild(tr);
@@ -589,7 +590,14 @@ window.viewLoanDetails = async function(id) {
   document.getElementById("loanDetailsModal").classList.add("active");
 };
 
-window.logLoanRepayment = function(id) {
+window.logLoanRepayment = async function(id) {
+  const list = await members.getMembers();
+  const select = document.getElementById("repayMemberId");
+  select.innerHTML = "";
+  list.forEach(m => {
+    select.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+  });
+
   document.getElementById("repayLoanId").value = id;
   document.getElementById("repayDate").value = new Date().toISOString().split("T")[0];
   document.getElementById("repayAmount").value = "";
@@ -604,25 +612,12 @@ window.deleteLoan = async function(id) {
   }
 };
 
-// PIN Login Overlay logic
+// Check if authenticated
 function checkAuthLock() {
-  if (auth.isPinSet() && !auth.isAuthenticated) {
+  if (!auth.isAuthenticated) {
     document.getElementById("lockScreen").style.display = "flex";
-    updatePinDots();
   } else {
     document.getElementById("lockScreen").style.display = "none";
-  }
-}
-
-function updatePinDots() {
-  const bufferLen = state.pinBuffer.length;
-  for (let i = 1; i <= 4; i++) {
-    const dot = document.getElementById(`dot${i}`);
-    if (i <= bufferLen) {
-      dot.classList.add("filled");
-    } else {
-      dot.classList.remove("filled");
-    }
   }
 }
 
@@ -646,56 +641,73 @@ function bindFormSubmissions() {
     renderCurrentView();
   });
 
-  // PIN Update
-  document.getElementById("pinUpdateForm").addEventListener("submit", (e) => {
+  // Phone / Password Login form
+  document.getElementById("authLoginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const newPin = document.getElementById("settNewPin").value;
-    if (newPin.length !== 4) {
-      showToast("PIN must be exactly 4 digits.", "danger");
-      return;
+    const phone = document.getElementById("loginPhone").value;
+    const pass = document.getElementById("loginPassword").value;
+
+    const result = await auth.login(phone, pass);
+    if (result.success) {
+      showToast(`Welcome back, ${result.user.name}!`, "success");
+      
+      // Update config family name
+      const config = storage.getLocal("config") || {};
+      document.getElementById("sidebarFamilyName").textContent = config.familyName || "My Family Workspace";
+
+      checkAuthLock();
+      renderCurrentView();
+    } else {
+      showToast(result.error, "danger");
     }
-    auth.setPin(newPin);
-    showToast("Security PIN updated.", "success");
-    document.getElementById("settNewPin").value = "";
   });
 
-  // Sheets DB Connection API Update
-  document.getElementById("saveSheetsSyncBtn").addEventListener("click", () => {
-    const url = document.getElementById("settSheetsUrl").value;
-    const active = document.getElementById("settUseSheets").checked;
-    
-    const config = storage.getLocal("config") || {};
-    config.sheetsUrl = url;
-    config.useSheets = active;
-    storage.saveLocal("config", config);
+  // SaaS Register New Family Workspace form
+  document.getElementById("authRegisterForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fam = document.getElementById("regFamilyName").value;
+    const admin = document.getElementById("regAdminName").value;
+    const phone = document.getElementById("regPhone").value;
+    const email = document.getElementById("regEmail").value;
+    const pass = document.getElementById("regPassword").value;
 
-    // Apply storage dynamic config
-    storage.useSheets = active;
-    storage.sheetsUrl = url;
-
-    showToast("API synchronization updated.", "success");
+    const result = await auth.registerFamily(fam, admin, phone, pass, email);
+    if (result.success) {
+      showToast("Workspace Registered & Logged In!", "success");
+      checkAuthLock();
+      renderCurrentView();
+      // Reload UI elements
+      document.getElementById("authRegisterForm").reset();
+    } else {
+      showToast(result.error, "danger");
+    }
   });
 
-  // Member Add/Edit Save
+  // Member Add/Edit Save (With email/password credentials)
   document.getElementById("memberForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("memberId").value;
     const name = document.getElementById("memberName").value;
     const relation = document.getElementById("memberRelation").value;
     const phone = document.getElementById("memberPhone").value;
+    const email = document.getElementById("memberEmail").value;
+    const password = document.getElementById("memberPassword").value;
     const contribution = document.getElementById("memberContribution").value;
     const balance = document.getElementById("memberBalance").value;
 
-    if (id) {
-      await members.updateMember(id, { name, relation, phone, contribution });
-      showToast("Member updated.", "success");
-    } else {
-      await members.addMember({ name, relation, phone, contribution, balance });
-      showToast("New member added.", "success");
+    try {
+      if (id) {
+        await members.updateMember(id, { name, relation, phone, email, password, contribution });
+        showToast("Member details updated.", "success");
+      } else {
+        await members.addMember({ name, relation, phone, email, password, contribution, balance });
+        showToast("Family member created & credentialed.", "success");
+      }
+      window.closeModal("memberModal");
+      renderCurrentView();
+    } catch (err) {
+      showToast(err.message, "danger");
     }
-    
-    window.closeModal("memberModal");
-    renderCurrentView();
   });
 
   // Transaction Save
@@ -710,7 +722,6 @@ function bindFormSubmissions() {
 
     await transactions.addTransaction({ date, type, category, memberId, amount, description });
     
-    // Auto adjust associated member's running balance
     const memberList = await members.getMembers();
     const m = memberList.find(item => Number(item.id) === Number(memberId));
     if (m) {
@@ -720,7 +731,6 @@ function bindFormSubmissions() {
       await members.updateMember(memberId, { balance: newBal });
     }
 
-    // Fire alert trigger for budget check
     const utils = await budgets.getBudgetUtilization();
     if (type === "Expense" && utils[category] && utils[category].spent + Number(amount) > utils[category].limit) {
       showToast(`Warning: spending exceeds budget for ${category}!`, "warning");
@@ -747,7 +757,7 @@ function bindFormSubmissions() {
     renderCurrentView();
   });
 
-  // External Transaction Save (Lend/Borrow Ledger payments)
+  // External Transaction Save
   document.getElementById("extTxForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const accountId = document.getElementById("extTxAccountId").value;
@@ -762,7 +772,6 @@ function bindFormSubmissions() {
     showToast("Ledger entry added.", "success");
     window.closeModal("extTxModal");
     
-    // Reload selected ledger details
     window.loadExternalLedger(accountId);
     renderCurrentView();
   });
@@ -789,16 +798,17 @@ function bindFormSubmissions() {
   document.getElementById("repayForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("repayLoanId").value;
+    const memberId = document.getElementById("repayMemberId").value;
     const amount = document.getElementById("repayAmount").value;
     const date = document.getElementById("repayDate").value;
 
-    await loans.addRepayment(id, amount, date);
+    await loans.addRepayment(id, amount, date, memberId);
     showToast("Repayment recorded.", "success");
     window.closeModal("repayModal");
     renderCurrentView();
   });
 
-  // Budget Setup Limits Submissions
+  // Budget Setup Limits
   document.getElementById("budgetForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const inputs = document.querySelectorAll("#budgetInputGrid input");
@@ -815,7 +825,6 @@ function bindFormSubmissions() {
 // Binds visual quick actions
 function bindQuickActions() {
   document.getElementById("globalAddTxBtn").addEventListener("click", async () => {
-    // Populate active member selection list in transaction modal
     const list = await members.getMembers();
     const select = document.getElementById("txMemberId");
     select.innerHTML = "";
@@ -911,16 +920,13 @@ function bindQuickActions() {
     renderInternalKhata();
   });
 
-  // Report Month and Year updates
   document.getElementById("reportYearSelect").addEventListener("change", renderReports);
   document.getElementById("reportMonthSelect").addEventListener("change", renderReports);
 
-  // Print button
   document.getElementById("printReportBtn").addEventListener("click", () => {
     window.print();
   });
 
-  // Backup & Import
   document.getElementById("exportBackupBtn").addEventListener("click", () => {
     exporter.exportJSONBackup();
     showToast("JSON Database backup downloaded.", "success");
@@ -965,46 +971,24 @@ function bindQuickActions() {
       btn.textContent = originalText;
     }
   });
-}
 
-// Initial Keypad controls for login
-function initKeypadControls() {
-  const buttons = document.querySelectorAll(".keypad-btn:not(#keypadClear):not(#keypadDelete)");
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (state.pinBuffer.length < 4) {
-        state.pinBuffer += btn.textContent;
-        updatePinDots();
-        
-        // Auto verify when 4 digits reached
-        if (state.pinBuffer.length === 4) {
-          setTimeout(() => {
-            const ok = auth.verifyPin(state.pinBuffer);
-            if (ok) {
-              showToast("Wallet Unlocked", "success");
-              checkAuthLock();
-              renderCurrentView();
-            } else {
-              showToast("Invalid security PIN", "danger");
-              state.pinBuffer = "";
-              updatePinDots();
-            }
-          }, 150);
-        }
-      }
-    });
+  // SaaS Authenticator view tabs bindings
+  document.getElementById("tabLoginBtn").addEventListener("click", () => {
+    document.getElementById("authLoginForm").style.display = "block";
+    document.getElementById("authRegisterForm").style.display = "none";
+    document.getElementById("tabLoginBtn").style.background = "var(--primary-glass)";
+    document.getElementById("tabLoginBtn").style.color = "var(--primary)";
+    document.getElementById("tabRegisterBtn").style.background = "transparent";
+    document.getElementById("tabRegisterBtn").style.color = "var(--text-secondary)";
   });
 
-  document.getElementById("keypadClear").addEventListener("click", () => {
-    state.pinBuffer = "";
-    updatePinDots();
-  });
-
-  document.getElementById("keypadDelete").addEventListener("click", () => {
-    if (state.pinBuffer.length > 0) {
-      state.pinBuffer = state.pinBuffer.slice(0, -1);
-      updatePinDots();
-    }
+  document.getElementById("tabRegisterBtn").addEventListener("click", () => {
+    document.getElementById("authLoginForm").style.display = "none";
+    document.getElementById("authRegisterForm").style.display = "block";
+    document.getElementById("tabRegisterBtn").style.background = "var(--primary-glass)";
+    document.getElementById("tabRegisterBtn").style.color = "var(--primary)";
+    document.getElementById("tabLoginBtn").style.background = "transparent";
+    document.getElementById("tabLoginBtn").style.color = "var(--text-secondary)";
   });
 }
 
@@ -1015,23 +999,26 @@ async function bootstrap() {
     document.documentElement.setAttribute("data-theme", "dark");
   }
 
+  // Pre-seed demo user workspace
   await initDemoData();
+  
   initNavigation();
   bindFormSubmissions();
   bindQuickActions();
-  initKeypadControls();
   
-  // Set up periodic session timeout checking (every 10s)
   setInterval(() => {
     auth.checkSessionTimeout(() => {
       showToast("Session expired. App locked.", "warning");
-      state.pinBuffer = "";
       checkAuthLock();
     });
   }, 10000);
 
   checkAuthLock();
-  renderCurrentView();
+  
+  // If we seeded demo data, auto-login state was sets. Update views
+  if (auth.isAuthenticated) {
+    renderCurrentView();
+  }
 }
 
 document.addEventListener("DOMContentLoaded", bootstrap);

@@ -2,6 +2,7 @@
  * Storage Manager Module - js/storage.js
  * Handles LocalStorage operations, lightweight encryption,
  * and optional synchronization with the Google Sheets DB client.
+ * Extends capabilities to support SaaS multi-family isolation using familyId.
  */
 
 class StorageManager {
@@ -9,6 +10,7 @@ class StorageManager {
     this.encryptionKey = "FamilyKhataKey123";
     this.useSheets = true;
     this.sheetsUrl = "https://script.google.com/macros/s/AKfycbzbCP4D7Q5yCVwWKbU-s-bD76egoTXk_93QgQZsuV0TgJ9g8J92nZlYsRhGRlyf5rDqIw/exec";
+    this.currentFamilyId = null; // Active family workspace context
     
     // Load config from LocalStorage if present (can override defaults)
     const config = JSON.parse(localStorage.getItem("khata_config") || "{}");
@@ -29,7 +31,7 @@ class StorageManager {
     return decodeURIComponent(escape(window.atob(str)));
   }
 
-  // Lightweight XOR encryption/decryption to satisfy constraints without external libs
+  // Lightweight XOR encryption/decryption
   encrypt(dataText) {
     let result = "";
     for (let i = 0; i < dataText.length; i++) {
@@ -50,7 +52,7 @@ class StorageManager {
       }
       return result;
     } catch (e) {
-      console.error("Decryption failed. Returning raw text.", e);
+      console.warn("Decryption skipped or failed. Raw text processed.", e.message);
       return cipherText;
     }
   }
@@ -90,7 +92,6 @@ class StorageManager {
       const response = await fetch(this.sheetsUrl, {
         method: "POST",
         mode: "cors",
-        // Avoid OPTIONS preflight by omitting Content-Type: application/json
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
         },
@@ -108,7 +109,16 @@ class StorageManager {
     // Write local first
     const list = this.getLocal(table) || [];
     const newId = list.length ? Math.max(...list.map(item => Number(item.id) || 0)) + 1 : 1;
-    const record = { id: newId, ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    
+    // Inject active familyId for multi-tenancy (except for global users/members list, which handles its own routing)
+    const record = { 
+      id: newId, 
+      ...data, 
+      familyId: data.familyId || this.currentFamilyId,
+      createdAt: new Date().toISOString(), 
+      updatedAt: new Date().toISOString() 
+    };
+    
     list.push(record);
     this.saveLocal(table, list);
 
@@ -116,9 +126,6 @@ class StorageManager {
     if (this.useSheets && this.sheetsUrl) {
       // Strip server-managed fields before sending to Sheets
       const { id, createdAt, updatedAt, ...sheetsData } = record;
-      console.log(`<=============>${table} data start<=============>`)
-      console.log(JSON.stringify(sheetsData));
-      console.log(`<=============>${table} data end<=============>`)
       this.sheetsRequest({
         action: "create",
         sheet: table,
@@ -130,20 +137,28 @@ class StorageManager {
   }
 
   async read(table) {
-    // Return LocalStorage contents (always source of truth for offline/speed)
+    // Return LocalStorage contents
     let list = this.getLocal(table) || [];
     
     // If online and using Sheets, optionally sync/fetch
     if (this.useSheets && this.sheetsUrl && navigator.onLine) {
       try {
-        const response = await this.sheetsRequest({ action: "read", sheet: table, limit: 1000 });
+        const response = await this.sheetsRequest({ action: "read", sheet: table, limit: 2000 });
         if (response.success && response.data) {
-          list = response.data;
-          this.saveLocal(table, list); // Sync local copy
+          // If sheet returns empty, but local has data, do not overwrite (prevent overwrite race conditions)
+          if (response.data.length > 0 || list.length === 0) {
+            list = response.data;
+            this.saveLocal(table, list); // Sync local copy
+          }
         }
       } catch (e) {
         console.warn("Could not sync with Google Sheets, using local cache.", e);
       }
+    }
+
+    // SaaS filter: Filter records by current logged-in familyId (except config table)
+    if (table !== "config" && this.currentFamilyId !== null) {
+      return list.filter(item => Number(item.familyId) === Number(this.currentFamilyId));
     }
     return list;
   }
@@ -206,11 +221,11 @@ class StorageManager {
 
     const schemas = {
       config: ["familyName", "currency", "theme", "useSheets", "sheetsUrl", "securePin"],
-      members: ["name", "relation", "phone", "photo", "contribution", "balance"],
-      transactions: ["date", "type", "category", "memberId", "externalAccountId", "amount", "description", "status", "dueDate"],
-      external_accounts: ["name", "phone", "address", "type", "openingBalance", "currentBalance"],
-      budgets: ["category", "limit"],
-      loans: ["person", "loanType", "amount", "interest", "emi", "dueDate", "paidAmount", "notes", "paymentHistory"]
+      members: ["name", "relation", "phone", "email", "password", "parent_id", "familyId", "photo", "contribution", "balance"],
+      transactions: ["date", "type", "category", "memberId", "externalAccountId", "amount", "description", "status", "dueDate", "familyId"],
+      external_accounts: ["name", "phone", "address", "type", "openingBalance", "currentBalance", "familyId"],
+      budgets: ["category", "limit", "familyId"],
+      loans: ["person", "loanType", "amount", "interest", "emi", "dueDate", "paidAmount", "notes", "paymentHistory", "memberId", "familyId"]
     };
 
     const results = [];
@@ -245,4 +260,3 @@ class StorageManager {
 }
 
 export const storage = new StorageManager();
-
