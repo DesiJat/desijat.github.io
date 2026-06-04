@@ -1,12 +1,12 @@
 # Flutter Cross-Platform Family Khata SaaS - Technical Specification
 
-This document provides a comprehensive, A-to-Z specification for building a cross-platform **Flutter** application (targeting **Android, iOS, Windows, and Linux**) with the same features, multi-tenant SaaS architecture, offline-first behavior, local encryption, and secure Google Sheets sync as the web version.
+This document provides a comprehensive, A-to-Z specification for building a cross-platform **Flutter** application (targeting **Android, iOS, Web, Windows, and Linux**) with the same features, multi-tenant SaaS architecture, offline-first behavior, local encryption, and secure Google Sheets sync as the web version.
 
 ---
 
 ## 1. Application Architecture Overview
 
-*   **Platform Target:** Android, iOS, Windows, Linux.
+*   **Platform Target:** Android, iOS, Web, Windows, Linux.
 *   **Architecture Pattern:** Clean Architecture with **Provider** or **Riverpod** for State Management.
 *   **Database & Storage:**
     *   **Local Caching:** SQLite (via `sqflite` or `drift` for desktop/mobile) or Hive (for simple key-value config caching) as the local database.
@@ -24,7 +24,7 @@ This document provides a comprehensive, A-to-Z specification for building a cros
 Stores general application configurations:
 *   `familyName` (String): Name of the family workspace (e.g., "Verma Family Finance").
 *   `currency` (String): Currency symbol (e.g., "₹", "$").
-*   `theme` (String): Theme mode ("light" or "dark").
+*   `theme` (String): Theme mode ("light", "dark", or "e-paper").
 *   `useSheets` (Boolean): Flag to enable/disable background Google Sheets synchronization.
 *   `sheetsUrl` (String): Web App API sync URL.
 *   `jwtSecret` (String): Private key for signing JWT authorization requests.
@@ -181,7 +181,7 @@ When a write action occurs in Flutter:
 
 ## 5. UI Views & Visual Blueprint
 
-Build a responsive UI that adapts to desktop screens (Windows/Linux) and mobile screens (Android/iOS) using a premium **Glassmorphism Theme** with Outfit/Inter typography, smooth micro-animations, and visual indicator cards.
+Build a responsive UI that adapts to desktop screens (Windows/Linux), web browsers (Web), and mobile screens (Android/iOS) using a premium **Glassmorphism Theme** with Outfit/Inter typography, smooth micro-animations, and visual indicator cards.
 
 ### 5.1 Auth Lock Screen
 *   Login Tab: Phone, password, and expandable "Advanced Sheet Settings" dropdown containing Sheets URL and JWT Secret. Designed to fit clean on mobile screens with scroll safety constraints.
@@ -215,7 +215,7 @@ Build a responsive UI that adapts to desktop screens (Windows/Linux) and mobile 
     *   Savings progress line chart.
 
 ### 5.8 Configuration & Backups
-*   Options to adjust currency symbols and toggle themes (Light/Dark).
+*   Options to adjust currency symbols and toggle themes (Light/Dark/E-paper).
 *   Input fields for Sheet sync URL and JWT secret keys (hidden/disabled for non-admins).
 *   **Sync Button:** Triggers `initializeSheetsSchema()` setting up empty sheet table headers dynamically on Google Drive.
 *   **Backup Buttons:** Export local cache to an encrypted JSON backup file, and import a JSON database backup.
