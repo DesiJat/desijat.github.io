@@ -696,18 +696,21 @@ class LedgerProvider extends ChangeNotifier {
   Future<bool> logLoanRepayment(
     int loanId,
     double paymentAmount,
-    Member user,
-  ) async {
+    Member user, {
+    int? paidByMemberId,
+    String? dateStr,
+  }) async {
     final original = await StorageService.instance.getLoanById(loanId);
     if (original == null) return false;
 
     final loan = Loan.fromMap(original);
     final updatedHistory = List.from(loan.paymentHistory);
-    final nowStr = DateTime.now().toIso8601String().split('T').first;
+    final finalDateStr = dateStr ?? DateTime.now().toIso8601String().split('T').first;
+    final finalMemberId = paidByMemberId ?? user.id;
     updatedHistory.add({
-      'date': nowStr,
+      'date': finalDateStr,
       'amount': paymentAmount,
-      'memberId': user.id,
+      'memberId': finalMemberId,
     });
 
     final updatedLoan = Loan(

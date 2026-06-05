@@ -1301,38 +1301,231 @@ class _LoansViewState extends State<LoansView> {
   }
 
   void _showRepayDialog(BuildContext context, AuthProvider auth, LedgerProvider ledger, Loan loan) {
+    Member? selectedMember;
+    try {
+      final membersList = ledger.members.isNotEmpty ? ledger.members : [auth.currentUser!];
+      selectedMember = membersList.firstWhere(
+        (m) => m.id == auth.currentUser?.id,
+        orElse: () => membersList.first,
+      );
+    } catch (_) {
+      selectedMember = auth.currentUser;
+    }
+
+    DateTime selectedDate = DateTime.now();
+    final dateController = TextEditingController(
+      text: "${selectedDate.day.toString().padLeft(2, '0')}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year}",
+    );
+
     showDialog(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          title: Text("Log Repayment for ${loan.person}"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _repayController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: "Repayment amount value (decimal supported)"),
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            final isDark = auth.theme == 'dark';
+            final isEPaper = auth.theme == 'e-paper';
+            final bgColor = isDark 
+                ? const Color(0xFF1E293B) 
+                : (isEPaper ? const Color(0xFFFFFFFA) : Colors.white);
+            final textColor = isDark ? Colors.white : Colors.black87;
+            final labelColor = isDark ? Colors.blueGrey[200]! : Colors.grey[600]!;
+            final borderColor = isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1);
+            final dropdownItems = ledger.members.isNotEmpty ? ledger.members : [auth.currentUser!];
+
+            return Dialog(
+              backgroundColor: bgColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
               ),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
-            ElevatedButton(
-              onPressed: () async {
-                final amt = double.tryParse(_repayController.text) ?? 0.0;
-                final success = await ledger.logLoanRepayment(loan.id!, amt, auth.currentUser!);
-                if (!success && mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Sync failure. Repayment logged locally but rollback occurred."), backgroundColor: Colors.red),
-                  );
-                }
-                _repayController.clear();
-                Navigator.pop(ctx);
-              },
-              child: const Text("Submit Payment"),
-            ),
-          ],
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 450),
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Record Loan Payment",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close, color: textColor.withOpacity(0.6)),
+                          onPressed: () {
+                            _repayController.clear();
+                            Navigator.pop(ctx);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16.0),
+                    Text(
+                      "Paid By (Family Member)",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                        color: labelColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<Member>(
+                          value: selectedMember,
+                          dropdownColor: bgColor,
+                          isExpanded: true,
+                          style: TextStyle(color: textColor, fontSize: 16),
+                          items: dropdownItems.map((m) {
+                            return DropdownMenuItem<Member>(
+                              value: m,
+                              child: Text(m.name),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            setDialogState(() {
+                              selectedMember = val;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                    Text(
+                      "Repayment Date",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                        color: labelColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    TextField(
+                      controller: dateController,
+                      readOnly: true,
+                      style: TextStyle(color: textColor),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        suffixIcon: Icon(Icons.calendar_today, color: labelColor),
+                      ),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            selectedDate = picked;
+                            dateController.text =
+                                "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    Text(
+                      "Amount Paid",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                        color: labelColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    TextField(
+                      controller: _repayController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: TextStyle(color: textColor),
+                      decoration: InputDecoration(
+                        hintText: "Enter amount",
+                        hintStyle: TextStyle(color: labelColor.withOpacity(0.6)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24.0),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.0,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final amt = double.tryParse(_repayController.text) ?? 0.0;
+                          if (amt <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Please enter a valid amount.")),
+                            );
+                            return;
+                          }
+                          final dateStr =
+                              "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+
+                          final success = await ledger.logLoanRepayment(
+                            loan.id!,
+                            amt,
+                            auth.currentUser!,
+                            paidByMemberId: selectedMember?.id,
+                            dateStr: dateStr,
+                          );
+
+                          if (!success && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Sync failure. Repayment logged locally but rollback occurred."),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                          _repayController.clear();
+                          if (context.mounted) {
+                            Navigator.pop(ctx);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4F46E5),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: const Text(
+                          "Submit Repayment",
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
