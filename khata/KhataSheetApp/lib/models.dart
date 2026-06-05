@@ -46,14 +46,14 @@ class Member {
   factory Member.fromMap(Map<String, dynamic> map) {
     return Member(
       id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
-      name: map['name'] ?? '',
-      relation: map['relation'] ?? '',
-      phone: map['phone'] ?? '',
-      email: map['email'] ?? '',
-      password: map['password'] ?? '',
+      name: map['name']?.toString() ?? '',
+      relation: map['relation']?.toString() ?? '',
+      phone: map['phone']?.toString() ?? '',
+      email: map['email']?.toString() ?? '',
+      password: map['password']?.toString() ?? '',
       parentId: int.tryParse(map['parent_id']?.toString() ?? '0') ?? 0,
       familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
-      photo: map['photo'] ?? '',
+      photo: map['photo']?.toString() ?? '',
       contribution: double.tryParse(map['contribution']?.toString() ?? '0.0') ?? 0.0,
       balance: double.tryParse(map['balance']?.toString() ?? '0.0') ?? 0.0,
     );
@@ -103,14 +103,14 @@ class Transaction {
   factory Transaction.fromMap(Map<String, dynamic> map) {
     return Transaction(
       id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
-      date: map['date'] ?? '',
-      type: map['type'] ?? 'Expense',
-      category: map['category'] ?? '',
+      date: map['date']?.toString() ?? '',
+      type: map['type']?.toString() ?? 'Expense',
+      category: map['category']?.toString() ?? '',
       memberId: int.tryParse(map['memberId']?.toString() ?? '0') ?? 0,
       externalAccountId: map['externalAccountId'] != null ? int.tryParse(map['externalAccountId'].toString()) : null,
       amount: double.tryParse(map['amount']?.toString() ?? '0.0') ?? 0.0,
-      description: map['description'] ?? '',
-      status: map['status'] ?? 'Completed',
+      description: map['description']?.toString() ?? '',
+      status: map['status']?.toString() ?? 'Completed',
       familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
     );
   }
@@ -153,10 +153,10 @@ class ExternalAccount {
   factory ExternalAccount.fromMap(Map<String, dynamic> map) {
     return ExternalAccount(
       id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
-      name: map['name'] ?? '',
-      type: map['type'] ?? '',
-      phone: map['phone'] ?? '',
-      address: map['address'] ?? '',
+      name: map['name']?.toString() ?? '',
+      type: map['type']?.toString() ?? '',
+      phone: map['phone']?.toString() ?? '',
+      address: map['address']?.toString() ?? '',
       openingBalance: double.tryParse(map['openingBalance']?.toString() ?? '0.0') ?? 0.0,
       currentBalance: double.tryParse(map['currentBalance']?.toString() ?? '0.0') ?? 0.0,
       familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
@@ -189,7 +189,7 @@ class Budget {
   factory Budget.fromMap(Map<String, dynamic> map) {
     return Budget(
       id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
-      category: map['category'] ?? '',
+      category: map['category']?.toString() ?? '',
       limit: double.tryParse(map['limit']?.toString() ?? '0.0') ?? 0.0,
       familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
     );
@@ -256,14 +256,14 @@ class Loan {
 
     return Loan(
       id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
-      person: map['person'] ?? '',
-      loanType: map['loanType'] ?? 'Given',
+      person: map['person']?.toString() ?? '',
+      loanType: map['loanType']?.toString() ?? 'Given',
       amount: double.tryParse(map['amount']?.toString() ?? '0.0') ?? 0.0,
       interest: double.tryParse(map['interest']?.toString() ?? '0.0') ?? 0.0,
       emi: double.tryParse(map['emi']?.toString() ?? '0.0') ?? 0.0,
-      dueDate: map['dueDate'] ?? '',
+      dueDate: map['dueDate']?.toString() ?? '',
       paidAmount: double.tryParse(map['paidAmount']?.toString() ?? '0.0') ?? 0.0,
-      notes: map['notes'] ?? '',
+      notes: map['notes']?.toString() ?? '',
       paymentHistory: history,
       memberId: int.tryParse(map['memberId']?.toString() ?? '0') ?? 0,
       familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,

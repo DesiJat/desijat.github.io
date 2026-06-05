@@ -110,10 +110,10 @@ class StorageService {
         .toList();
 
     if (phone != null) {
-      all = all.where((m) => m['phone'] == phone).toList();
+      all = all.where((m) => m['phone']?.toString() == phone).toList();
     }
     if (password != null) {
-      all = all.where((m) => m['password'] == password).toList();
+      all = all.where((m) => m['password']?.toString() == password).toList();
     }
     if (familyId != null) {
       all = all
