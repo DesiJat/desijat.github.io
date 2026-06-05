@@ -171,22 +171,24 @@ class StorageService {
         .where((t) => _toInt(t['familyId']) == familyId)
         .toList();
 
+    debugPrint('queryTransactions: familyId=$familyId, total_txn_keys=${_txn.keys.length}, filtered_all=${all.length}, limit=$limit, offset=$offset');
+
     if (search != null && search.isNotEmpty) {
       all = all
           .where((t) =>
-              (t['description'] as String? ?? '')
+              (t['description']?.toString() ?? '')
                   .toLowerCase()
                   .contains(search.toLowerCase()))
           .toList();
     }
     if (category != null && category.isNotEmpty) {
-      all = all.where((t) => t['category'] == category).toList();
+      all = all.where((t) => t['category']?.toString() == category).toList();
     }
     if (type != null && type.isNotEmpty) {
-      all = all.where((t) => t['type'] == type).toList();
+      all = all.where((t) => t['type']?.toString() == type).toList();
     }
     all.sort((a, b) =>
-        (b['date'] as String? ?? '').compareTo(a['date'] as String? ?? ''));
+        (b['date']?.toString() ?? '').compareTo(a['date']?.toString() ?? ''));
     return all.skip(offset).take(limit).toList();
   }
 
@@ -199,7 +201,7 @@ class StorageService {
     await _txn.deleteAll(del);
     for (final row in rows) {
       final id = _toInt(row['id']);
-      final fId = _toInt(row['familyId']);
+      final fId = _toInt(row['familyId'] ?? row['family_id']);
       if (id != null && id > 0 && fId == familyId) {
         await _txn.put('t$id', Map<String, dynamic>.from(row));
       }
@@ -253,7 +255,7 @@ class StorageService {
     await _acc.deleteAll(del);
     for (final row in rows) {
       final id = _toInt(row['id']);
-      final fId = _toInt(row['familyId']);
+      final fId = _toInt(row['familyId'] ?? row['family_id']);
       if (id != null && id > 0 && fId == familyId) {
         await _acc.put('a$id', Map<String, dynamic>.from(row));
       }
@@ -291,7 +293,7 @@ class StorageService {
     await _bud.deleteAll(del);
     for (final row in rows) {
       final id = _toInt(row['id']);
-      final fId = _toInt(row['familyId']);
+      final fId = _toInt(row['familyId'] ?? row['family_id']);
       if (id != null && id > 0 && fId == familyId) {
         await _bud.put('b$id', Map<String, dynamic>.from(row));
       }
@@ -340,7 +342,7 @@ class StorageService {
     await _loa.deleteAll(del);
     for (final row in rows) {
       final id = _toInt(row['id']);
-      final fId = _toInt(row['familyId']);
+      final fId = _toInt(row['familyId'] ?? row['family_id']);
       if (id != null && id > 0 && fId == familyId) {
         await _loa.put('l$id', Map<String, dynamic>.from(row));
       }

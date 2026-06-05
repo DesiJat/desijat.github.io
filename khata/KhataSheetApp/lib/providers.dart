@@ -220,6 +220,9 @@ class LedgerProvider extends ChangeNotifier {
   String _searchQuery = '';
   String _categoryFilter = '';
   String _typeFilter = '';
+  bool _hasNextPage = false;
+
+  bool get hasNextPage => _hasNextPage;
 
   List<Transaction> get transactions => _transactions;
   List<ExternalAccount> get accounts => _accounts;
@@ -268,11 +271,18 @@ class LedgerProvider extends ChangeNotifier {
       search: _searchQuery,
       category: _categoryFilter,
       type: _typeFilter,
-      limit: _limit,
+      limit: _limit + 1,
       offset: offset,
     );
 
-    _transactions = res.map((m) => Transaction.fromMap(m)).toList();
+    final allItems = res.map((m) => Transaction.fromMap(m)).toList();
+    if (allItems.length > _limit) {
+      _hasNextPage = true;
+      _transactions = allItems.take(_limit).toList();
+    } else {
+      _hasNextPage = false;
+      _transactions = allItems;
+    }
     notifyListeners();
   }
 
@@ -341,6 +351,10 @@ class LedgerProvider extends ChangeNotifier {
           .timeout(const Duration(seconds: 10));
       if (txRes['success'] == true && txRes['data'] is List) {
         final List rows = txRes['data'];
+        debugPrint('syncFromSheets: read transactions, count=${rows.length}');
+        for (var row in rows) {
+          debugPrint('txn row: id=${row['id']}, familyId=${row['familyId']}, description=${row['description']}');
+        }
         final txRows = rows.map((row) => Map<String, dynamic>.from(row)).toList();
         await StorageService.instance.bulkReplaceTransactions(txRows, familyId);
       }

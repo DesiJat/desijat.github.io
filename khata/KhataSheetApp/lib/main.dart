@@ -4,7 +4,9 @@ import 'views.dart';
 import 'providers.dart';
 
 void main() {
+  debugPrint("BOOTSTRAP: main() started");
   runApp(const KhataApp());
+  debugPrint("BOOTSTRAP: runApp() completed");
 }
 
 class KhataApp extends StatelessWidget {
@@ -12,6 +14,7 @@ class KhataApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("BOOTSTRAP: KhataApp.build() called");
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -20,6 +23,7 @@ class KhataApp extends StatelessWidget {
       child: Consumer<AuthProvider>(
         builder: (context, auth, _) {
           final themeMode = auth.theme;
+          debugPrint("BOOTSTRAP: Consumer<AuthProvider> builder called with theme: $themeMode");
           
           ThemeData appTheme;
           if (themeMode == 'e-paper') {
@@ -28,7 +32,6 @@ class KhataApp extends StatelessWidget {
               scaffoldBackgroundColor: const Color(0xFFF5F5F0),
               primaryColor: Colors.black,
               useMaterial3: true,
-              fontFamily: 'Outfit',
               cardTheme: const CardThemeData(
                 color: Colors.white,
                 elevation: 0,
@@ -40,7 +43,6 @@ class KhataApp extends StatelessWidget {
               scaffoldBackgroundColor: const Color(0xFFF8FAFC),
               primaryColor: const Color(0xFF6366F1),
               useMaterial3: true,
-              fontFamily: 'Outfit',
               cardTheme: const CardThemeData(
                 color: Colors.white,
                 elevation: 2,
@@ -54,7 +56,6 @@ class KhataApp extends StatelessWidget {
               scaffoldBackgroundColor: const Color(0xFF0F172A),
               primaryColor: const Color(0xFF6366F1),
               useMaterial3: true,
-              fontFamily: 'Outfit',
               cardTheme: const CardThemeData(
                 color: Color(0xFF1E293B),
                 elevation: 2,
@@ -80,6 +81,8 @@ class MainGatekeeper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    debugPrint("BOOTSTRAP: MainGatekeeper.build() called. isAuthenticated: ${auth.isAuthenticated}");
     return auth.isAuthenticated ? const MainViewFrame() : const AuthLockView();
   }
 }
+

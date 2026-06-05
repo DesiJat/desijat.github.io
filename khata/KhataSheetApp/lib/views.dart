@@ -84,11 +84,14 @@ class _AuthLockViewState extends State<AuthLockView> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
+    debugPrint("BOOTSTRAP: AuthLockView.initState() started");
     _tabController = TabController(length: 2, vsync: this);
+    debugPrint("BOOTSTRAP: AuthLockView.initState() completed");
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("BOOTSTRAP: AuthLockView.build() called");
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -678,7 +681,7 @@ class _LedgerViewState extends State<LedgerView> {
               ),
               Text("Page ${ledger.currentPage}"),
               ElevatedButton(
-                onPressed: ledger.transactions.length == ledger.limit ? () => ledger.nextPage() : null,
+                onPressed: ledger.hasNextPage ? () => ledger.nextPage() : null,
                 child: const Text("Next"),
               ),
             ],

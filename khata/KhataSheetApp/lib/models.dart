@@ -51,8 +51,8 @@ class Member {
       phone: map['phone']?.toString() ?? '',
       email: map['email']?.toString() ?? '',
       password: map['password']?.toString() ?? '',
-      parentId: int.tryParse(map['parent_id']?.toString() ?? '0') ?? 0,
-      familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
+      parentId: int.tryParse((map['parent_id'] ?? map['parentId'])?.toString() ?? '0') ?? 0,
+      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
       photo: map['photo']?.toString() ?? '',
       contribution: double.tryParse(map['contribution']?.toString() ?? '0.0') ?? 0.0,
       balance: double.tryParse(map['balance']?.toString() ?? '0.0') ?? 0.0,
@@ -106,12 +106,14 @@ class Transaction {
       date: map['date']?.toString() ?? '',
       type: map['type']?.toString() ?? 'Expense',
       category: map['category']?.toString() ?? '',
-      memberId: int.tryParse(map['memberId']?.toString() ?? '0') ?? 0,
-      externalAccountId: map['externalAccountId'] != null ? int.tryParse(map['externalAccountId'].toString()) : null,
+      memberId: int.tryParse((map['memberId'] ?? map['member_id'])?.toString() ?? '0') ?? 0,
+      externalAccountId: (map['externalAccountId'] ?? map['external_account_id']) != null
+          ? int.tryParse((map['externalAccountId'] ?? map['external_account_id']).toString())
+          : null,
       amount: double.tryParse(map['amount']?.toString() ?? '0.0') ?? 0.0,
       description: map['description']?.toString() ?? '',
       status: map['status']?.toString() ?? 'Completed',
-      familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
+      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
     );
   }
 }
@@ -157,9 +159,9 @@ class ExternalAccount {
       type: map['type']?.toString() ?? '',
       phone: map['phone']?.toString() ?? '',
       address: map['address']?.toString() ?? '',
-      openingBalance: double.tryParse(map['openingBalance']?.toString() ?? '0.0') ?? 0.0,
-      currentBalance: double.tryParse(map['currentBalance']?.toString() ?? '0.0') ?? 0.0,
-      familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
+      openingBalance: double.tryParse((map['openingBalance'] ?? map['opening_balance'])?.toString() ?? '0.0') ?? 0.0,
+      currentBalance: double.tryParse((map['currentBalance'] ?? map['current_balance'])?.toString() ?? '0.0') ?? 0.0,
+      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
     );
   }
 }
@@ -191,7 +193,7 @@ class Budget {
       id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
       category: map['category']?.toString() ?? '',
       limit: double.tryParse(map['limit']?.toString() ?? '0.0') ?? 0.0,
-      familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
+      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
     );
   }
 }
@@ -265,8 +267,8 @@ class Loan {
       paidAmount: double.tryParse(map['paidAmount']?.toString() ?? '0.0') ?? 0.0,
       notes: map['notes']?.toString() ?? '',
       paymentHistory: history,
-      memberId: int.tryParse(map['memberId']?.toString() ?? '0') ?? 0,
-      familyId: int.tryParse(map['familyId']?.toString() ?? '0') ?? 0,
+      memberId: int.tryParse((map['memberId'] ?? map['member_id'])?.toString() ?? '0') ?? 0,
+      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
     );
   }
 }
