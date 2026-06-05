@@ -1091,5 +1091,10 @@ flutter run -d chrome --web-renderer html
 cd /Users/apple/data/desijat.github.io/khata/KhataSheetApp/build/web
 python3 -m http.server 8080
 # Open: http://localhost:8080
+
+
+flutter build apk
+build/app/outputs/flutter-apk/app-release.apk
+
 """
 

@@ -1658,11 +1658,12 @@ class _LoansViewState extends State<LoansView> {
                 borderRadius: BorderRadius.circular(16.0),
               ),
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 450),
+                constraints: const BoxConstraints(maxWidth: 450, maxHeight: 480),
                 padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1844,7 +1845,8 @@ class _LoansViewState extends State<LoansView> {
                   ],
                 ),
               ),
-            );
+            ),
+          );
           },
         );
       },
@@ -1933,152 +1935,149 @@ class _LoansViewState extends State<LoansView> {
           backgroundColor: bgColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 550),
+            constraints: const BoxConstraints(maxWidth: 550, maxHeight: 520),
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "${loan.person} Loan Details",
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "${loan.person} Loan Details",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.close, color: textColor.withOpacity(0.6)),
-                      onPressed: () => Navigator.pop(ctx),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildDetailItem("Associated Member:", assocMember.name, textColor, labelColor),
-                          const SizedBox(height: 12.0),
-                          _buildDetailItem("Principal Amount:", "$cur${loan.amount.toStringAsFixed(2)}", textColor, labelColor),
-                          const SizedBox(height: 12.0),
-                          _buildDetailItem("Monthly EMI Amount:", "$cur${loan.emi.toStringAsFixed(2)}", textColor, labelColor),
-                          const SizedBox(height: 12.0),
-                          _buildDetailItem("Total Paid Amount:", "$cur${loan.paidAmount.toStringAsFixed(2)}", textColor, labelColor),
-                        ],
+                      IconButton(
+                        icon: Icon(Icons.close, color: textColor.withOpacity(0.6)),
+                        onPressed: () => Navigator.pop(ctx),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildDetailItem("Loan Type:", loan.loanType == 'Taken' ? "Borrowed (Taken)" : "Lent (Given)", textColor, labelColor),
-                          const SizedBox(height: 12.0),
-                          _buildDetailItem("Interest Rate:", "${loan.interest.toStringAsFixed(2)}% Simple", textColor, labelColor),
-                          const SizedBox(height: 12.0),
-                          _buildDetailItem("Due Date:", loan.dueDate, textColor, labelColor),
-                          const SizedBox(height: 12.0),
-                          _buildDetailItem("Outstanding Balance:", "$cur${outstanding.toStringAsFixed(2)}", textColor, labelColor),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                Text(
-                  "Notes:",
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
-                    color: labelColor,
+                    ],
                   ),
-                ),
-                const SizedBox(height: 4.0),
-                Text(
-                  loan.notes.isNotEmpty ? loan.notes : "-",
-                  style: TextStyle(fontSize: 15.0, color: textColor),
-                ),
-                const SizedBox(height: 24.0),
-                Text(
-                  "Repayment Ledger History",
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                Divider(color: borderColor),
-                const SizedBox(height: 8.0),
-                if (loan.paymentHistory.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Center(
-                      child: Text(
-                        "No repayments logged yet.",
-                        style: TextStyle(color: labelColor.withOpacity(0.8)),
+                  const SizedBox(height: 16.0),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDetailItem("Associated Member:", assocMember.name, textColor, labelColor),
+                            const SizedBox(height: 12.0),
+                            _buildDetailItem("Principal Amount:", "$cur${loan.amount.toStringAsFixed(2)}", textColor, labelColor),
+                            const SizedBox(height: 12.0),
+                            _buildDetailItem("Monthly EMI Amount:", "$cur${loan.emi.toStringAsFixed(2)}", textColor, labelColor),
+                            const SizedBox(height: 12.0),
+                            _buildDetailItem("Total Paid Amount:", "$cur${loan.paidAmount.toStringAsFixed(2)}", textColor, labelColor),
+                          ],
+                        ),
                       ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDetailItem("Loan Type:", loan.loanType == 'Taken' ? "Borrowed (Taken)" : "Lent (Given)", textColor, labelColor),
+                            const SizedBox(height: 12.0),
+                            _buildDetailItem("Interest Rate:", "${loan.interest.toStringAsFixed(2)}% Simple", textColor, labelColor),
+                            const SizedBox(height: 12.0),
+                            _buildDetailItem("Due Date:", loan.dueDate, textColor, labelColor),
+                            const SizedBox(height: 12.0),
+                            _buildDetailItem("Outstanding Balance:", "$cur${outstanding.toStringAsFixed(2)}", textColor, labelColor),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  Text(
+                    "Notes:",
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                      color: labelColor,
                     ),
-                  )
-                else
-                  SizedBox(
-                    height: 180,
-                    child: SingleChildScrollView(
-                      child: Table(
-                        columnWidths: const {
-                          0: FlexColumnWidth(1.2),
-                          1: FlexColumnWidth(1.2),
-                          2: FlexColumnWidth(1),
-                        },
-                        children: [
-                          TableRow(
-                            children: [
-                              _buildTableHeaderCell("Payment Date", labelColor),
-                              _buildTableHeaderCell("Paid By", labelColor),
-                              _buildTableHeaderCell("Amount Settled", labelColor),
-                            ],
-                          ),
-                          ...loan.paymentHistory.reversed.map((h) {
-                            final hMap = Map<String, dynamic>.from(h as Map);
-                            final dateVal = hMap['date']?.toString() ?? '-';
-                            final amtVal = double.tryParse(hMap['amount']?.toString() ?? '0') ?? 0.0;
-                            final mId = int.tryParse(hMap['memberId']?.toString() ?? '0') ?? 0;
-                            final payer = ledger.members.firstWhere(
-                              (m) => m.id == mId,
-                              orElse: () => Member(id: mId, name: "Member $mId", relation: "", phone: "", familyId: 0, parentId: 0),
-                            );
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    loan.notes.isNotEmpty ? loan.notes : "-",
+                    style: TextStyle(fontSize: 15.0, color: textColor),
+                  ),
+                  const SizedBox(height: 24.0),
+                  Text(
+                    "Repayment Ledger History",
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Divider(color: borderColor),
+                  const SizedBox(height: 8.0),
+                  if (loan.paymentHistory.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Center(
+                        child: Text(
+                          "No repayments logged yet.",
+                          style: TextStyle(color: labelColor.withOpacity(0.8)),
+                        ),
+                      ),
+                    )
+                  else
+                    Table(
+                      columnWidths: const {
+                        0: FlexColumnWidth(1.2),
+                        1: FlexColumnWidth(1.2),
+                        2: FlexColumnWidth(1),
+                      },
+                      children: [
+                        TableRow(
+                          children: [
+                            _buildTableHeaderCell("Payment Date", labelColor),
+                            _buildTableHeaderCell("Paid By", labelColor),
+                            _buildTableHeaderCell("Amount Settled", labelColor),
+                          ],
+                        ),
+                        ...loan.paymentHistory.reversed.map((h) {
+                          final hMap = Map<String, dynamic>.from(h as Map);
+                          final dateVal = hMap['date']?.toString() ?? '-';
+                          final amtVal = double.tryParse(hMap['amount']?.toString() ?? '0') ?? 0.0;
+                          final mId = int.tryParse(hMap['memberId']?.toString() ?? '0') ?? 0;
+                          final payer = ledger.members.firstWhere(
+                            (m) => m.id == mId,
+                            orElse: () => Member(id: mId, name: "Member $mId", relation: "", phone: "", familyId: 0, parentId: 0),
+                          );
 
-                            return TableRow(
-                              children: [
-                                _buildTableCell(dateVal, textColor),
-                                _buildTableCell(payer.name, textColor),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Text(
-                                    "$cur${amtVal.toStringAsFixed(2)}",
-                                    style: const TextStyle(
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14.0,
-                                    ),
+                          return TableRow(
+                            children: [
+                              _buildTableCell(dateVal, textColor),
+                              _buildTableCell(payer.name, textColor),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  "$cur${amtVal.toStringAsFixed(2)}",
+                                  style: const TextStyle(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.0,
                                   ),
                                 ),
-                              ],
-                            );
-                          }).toList(),
-                        ],
-                      ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ],
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         );
