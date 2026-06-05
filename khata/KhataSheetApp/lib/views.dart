@@ -1128,14 +1128,32 @@ class _LoansViewState extends State<LoansView> {
   final _interestController = TextEditingController();
   final _emiController = TextEditingController();
   final _repayController = TextEditingController();
+  final _notesController = TextEditingController();
   String _loanType = 'Given';
   int? _selectedMember;
+  int _loansPage = 1;
+  int _loansLimit = 10;
 
   @override
   Widget build(BuildContext context) {
     final ledger = context.watch<LedgerProvider>();
     final auth = context.watch<AuthProvider>();
     final cur = auth.currency;
+
+    final isDark = auth.theme == 'dark';
+    final isEPaper = auth.theme == 'e-paper';
+    final cardBg = isDark 
+        ? const Color(0xFF1E293B) 
+        : (isEPaper ? const Color(0xFFFFFFFA) : Colors.white);
+    final headerBg = isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC);
+    final borderColor = isDark ? const Color(0xFF475569) : const Color(0xFFE2E8F0);
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subtitleColor = isDark ? Colors.blueGrey[200]! : Colors.grey[600]!;
+
+    // Pagination calculations
+    final totalLoans = ledger.loans.length;
+    final totalPages = (totalLoans / _loansLimit).ceil();
+    final displayedLoans = ledger.loans.skip((_loansPage - 1) * _loansLimit).take(_loansLimit).toList();
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -1145,68 +1163,325 @@ class _LoansViewState extends State<LoansView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Debt & Loan Center", style: titleStyle(context, size: 20)),
+              Text("Loans Portfolio", style: titleStyle(context, size: 20)),
               ElevatedButton.icon(
-                icon: const Icon(Icons.add_circle, color: Colors.white),
-                label: const Text("Register Loan Profile", style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6366F1)),
+                icon: const Icon(Icons.add, color: Colors.white, size: 18),
+                label: const Text("New Loan Entry", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4F46E5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
                 onPressed: () => _showAddLoanDialog(context, auth, ledger),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              itemCount: ledger.loans.length,
-              itemBuilder: (ctx, idx) {
-                final l = ledger.loans[idx];
-                final remaining = l.amount - l.paidAmount;
-
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SizedBox(
+                  width: 1100,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: borderColor),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("${l.person} (${l.loanType})", style: titleStyle(context, size: 16)),
-                            Text("Balance: $cur ${remaining.toStringAsFixed(2)} / $cur ${l.amount.toStringAsFixed(2)}"),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text("EMI target: $cur ${l.emi.toStringAsFixed(2)} • Interest Rate: ${l.interest.toStringAsFixed(2)}%", style: subtitleStyle(context)),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () => _showRepayDialog(context, auth, ledger, l),
-                              child: const Text("Log Repayment"),
+                        // Header Row
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: headerBg,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(12),
                             ),
-                            const SizedBox(width: 8),
-                            if (auth.isAdmin)
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.redAccent),
-                                onPressed: () async {
-                                  final success = await ledger.deleteLoan(l.id!, auth.currentUser!);
-                                  if (!success && mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text("Sync failure. Loan delete reverted."), backgroundColor: Colors.red),
-                                    );
-                                  }
-                                },
-                              ),
-                          ],
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(flex: 30, child: _buildTableHeaderText("Person/Bank", subtitleColor)),
+                              Expanded(flex: 20, child: _buildTableHeaderText("Type", subtitleColor)),
+                              Expanded(flex: 20, child: _buildTableHeaderText("Principal", subtitleColor)),
+                              Expanded(flex: 15, child: _buildTableHeaderText("Interest", subtitleColor)),
+                              Expanded(flex: 20, child: _buildTableHeaderText("EMI", subtitleColor)),
+                              Expanded(flex: 20, child: _buildTableHeaderText("Paid Amount", subtitleColor)),
+                              Expanded(flex: 25, child: _buildTableHeaderText("Remaining", subtitleColor)),
+                              Expanded(flex: 30, child: _buildTableHeaderText("Due Date", subtitleColor)),
+                              Expanded(flex: 35, child: _buildTableHeaderText("Actions", subtitleColor)),
+                            ],
+                          ),
                         ),
+                        // Data Rows
+                        if (displayedLoans.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Center(
+                              child: Text(
+                                "No loan entries found.",
+                                style: TextStyle(color: subtitleColor, fontSize: 16),
+                              ),
+                            ),
+                          )
+                        else
+                          ...displayedLoans.map((l) {
+                            final interestAmt = l.amount * (l.interest / 100.0);
+                            final remaining = (l.amount + interestAmt) - l.paidAmount;
+
+                            final assocMember = ledger.members.firstWhere(
+                              (m) => m.id == l.memberId,
+                              orElse: () => Member(id: l.memberId, name: "Member ${l.memberId}", relation: "", phone: "", familyId: 0, parentId: 0),
+                            );
+
+                            return Container(
+                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: borderColor),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 30,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          l.person,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                            color: textColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          "Member: ${assocMember.name}",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: subtitleColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 20,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: _buildTypeBadge(l.loanType),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 20,
+                                    child: Text(
+                                      "$cur${l.amount.toStringAsFixed(0)}",
+                                      style: TextStyle(color: textColor, fontSize: 14),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 15,
+                                    child: Text(
+                                      "${l.interest.toStringAsFixed(0)}%",
+                                      style: TextStyle(color: textColor, fontSize: 14),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 20,
+                                    child: Text(
+                                      "$cur${l.emi.toStringAsFixed(0)}/mo",
+                                      style: TextStyle(color: textColor, fontSize: 14),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 20,
+                                    child: Text(
+                                      "$cur${l.paidAmount.toStringAsFixed(2)}",
+                                      style: TextStyle(color: textColor, fontSize: 14),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 25,
+                                    child: Text(
+                                      "$cur${remaining.toStringAsFixed(2)}",
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 30,
+                                    child: Text(
+                                      l.dueDate,
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 35,
+                                    child: Row(
+                                      children: [
+                                        _buildActionButton("View", const Color(0xFFEEF2FF), const Color(0xFF4338CA), () {
+                                          _showDetailsDialog(context, auth, ledger, l);
+                                        }),
+                                        const SizedBox(width: 8),
+                                        _buildActionButton("Repay", const Color(0xFFF3E8FF), const Color(0xFF7E22CE), () {
+                                          _showRepayDialog(context, auth, ledger, l);
+                                        }),
+                                        const SizedBox(width: 8),
+                                        if (auth.isAdmin)
+                                          GestureDetector(
+                                            onTap: () async {
+                                              final success = await ledger.deleteLoan(l.id!, auth.currentUser!);
+                                              if (!success && mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text("Sync failure. Loan delete reverted."), backgroundColor: Colors.red),
+                                                );
+                                              }
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(
+                                                color: Colors.red,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: 14,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
                       ],
                     ),
                   ),
-                );
-              },
+                ),
+              ),
             ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    "Show ",
+                    style: TextStyle(color: subtitleColor, fontSize: 14),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: borderColor),
+                      borderRadius: BorderRadius.circular(6),
+                      color: cardBg,
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<int>(
+                        value: _loansLimit,
+                        dropdownColor: cardBg,
+                        style: TextStyle(color: textColor, fontSize: 14),
+                        items: const [
+                          DropdownMenuItem(value: 5, child: Text("5")),
+                          DropdownMenuItem(value: 10, child: Text("10")),
+                          DropdownMenuItem(value: 20, child: Text("20")),
+                          DropdownMenuItem(value: 50, child: Text("50")),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _loansLimit = val;
+                              _loansPage = 1;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  Text(
+                    " per page",
+                    style: TextStyle(color: subtitleColor, fontSize: 14),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: _loansPage > 1
+                        ? () {
+                            setState(() {
+                              _loansPage--;
+                            });
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEEF2FF),
+                      foregroundColor: const Color(0xFF4338CA),
+                      disabledBackgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                    child: const Text(
+                      "‹ Prev",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    "Page $_loansPage of ${totalPages > 0 ? totalPages : 1}",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: _loansPage < totalPages
+                        ? () {
+                            setState(() {
+                              _loansPage++;
+                            });
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEEF2FF),
+                      foregroundColor: const Color(0xFF4338CA),
+                      disabledBackgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                    child: const Text(
+                      "Next ›",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -1216,6 +1491,11 @@ class _LoansViewState extends State<LoansView> {
   void _showAddLoanDialog(BuildContext context, AuthProvider auth, LedgerProvider ledger) {
     if (ledger.members.isEmpty) return;
     _selectedMember = auth.currentUser?.id;
+
+    DateTime selectedDueDate = DateTime.now().add(const Duration(days: 30));
+    final dueDateController = TextEditingController(
+      text: "${selectedDueDate.day.toString().padLeft(2, '0')}/${selectedDueDate.month.toString().padLeft(2, '0')}/${selectedDueDate.year}",
+    );
 
     showDialog(
       context: context,
@@ -1230,6 +1510,7 @@ class _LoansViewState extends State<LoansView> {
                   children: [
                     DropdownButtonFormField<String>(
                       value: _loanType,
+                      decoration: const InputDecoration(labelText: "Loan Type"),
                       items: const [
                         DropdownMenuItem(value: 'Given', child: Text("Given (Debtor)")),
                         DropdownMenuItem(value: 'Taken', child: Text("Taken (Creditor)")),
@@ -1260,11 +1541,48 @@ class _LoansViewState extends State<LoansView> {
                       }).toList(),
                       onChanged: (val) => setModalState(() => _selectedMember = val),
                     ),
+                    TextField(
+                      controller: dueDateController,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: "Due Date",
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDueDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setModalState(() {
+                            selectedDueDate = picked;
+                            dueDateController.text =
+                                "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+                          });
+                        }
+                      },
+                    ),
+                    TextField(
+                      controller: _notesController,
+                      decoration: const InputDecoration(labelText: "Notes / Description"),
+                    ),
                   ],
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+                TextButton(
+                  onPressed: () {
+                    _personController.clear();
+                    _amountController.clear();
+                    _interestController.clear();
+                    _emiController.clear();
+                    _notesController.clear();
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text("Cancel"),
+                ),
                 ElevatedButton(
                   onPressed: () async {
                     final loan = Loan(
@@ -1273,7 +1591,8 @@ class _LoansViewState extends State<LoansView> {
                       amount: double.tryParse(_amountController.text) ?? 0.0,
                       interest: double.tryParse(_interestController.text) ?? 0.0,
                       emi: double.tryParse(_emiController.text) ?? 0.0,
-                      dueDate: DateTime.now().add(const Duration(days: 30)).toIso8601String().split('T').first,
+                      dueDate: "${selectedDueDate.year}-${selectedDueDate.month.toString().padLeft(2, '0')}-${selectedDueDate.day.toString().padLeft(2, '0')}",
+                      notes: _notesController.text,
                       paymentHistory: [],
                       memberId: _selectedMember ?? auth.currentUser!.id!,
                       familyId: StorageService.instance.currentFamilyId ?? auth.currentUser!.familyId,
@@ -1288,6 +1607,7 @@ class _LoansViewState extends State<LoansView> {
                     _amountController.clear();
                     _interestController.clear();
                     _emiController.clear();
+                    _notesController.clear();
                     Navigator.pop(ctx);
                   },
                   child: const Text("Register Loan"),
@@ -1528,6 +1848,289 @@ class _LoansViewState extends State<LoansView> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildTypeBadge(String type) {
+    final isTaken = type == 'Taken';
+    final bgColor = isTaken ? const Color(0xFFFEE2E2) : const Color(0xFFD1FAE5);
+    final textColor = isTaken ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    final text = isTaken ? 'TAKEN' : 'GIVEN';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String label, Color bgColor, Color textColor, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableHeaderText(String label, Color color) {
+    return Text(
+      label,
+      style: TextStyle(
+        color: color,
+        fontWeight: FontWeight.bold,
+        fontSize: 13,
+      ),
+    );
+  }
+
+  void _showDetailsDialog(BuildContext context, AuthProvider auth, LedgerProvider ledger, Loan loan) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final isDark = auth.theme == 'dark';
+        final isEPaper = auth.theme == 'e-paper';
+        final bgColor = isDark 
+            ? const Color(0xFF1E293B) 
+            : (isEPaper ? const Color(0xFFFFFFFA) : Colors.white);
+        final textColor = isDark ? Colors.white : Colors.black87;
+        final labelColor = isDark ? Colors.blueGrey[200]! : Colors.grey[600]!;
+        final borderColor = isDark ? const Color(0xFF475569) : const Color(0xFFE2E8F0);
+        final cur = auth.currency;
+
+        final interestAmt = loan.amount * (loan.interest / 100.0);
+        final outstanding = (loan.amount + interestAmt) - loan.paidAmount;
+
+        final assocMember = ledger.members.firstWhere(
+          (m) => m.id == loan.memberId,
+          orElse: () => Member(id: loan.memberId, name: "Member ${loan.memberId}", relation: "", phone: "", familyId: 0, parentId: 0),
+        );
+
+        return Dialog(
+          backgroundColor: bgColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 550),
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "${loan.person} Loan Details",
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: textColor.withOpacity(0.6)),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildDetailItem("Associated Member:", assocMember.name, textColor, labelColor),
+                          const SizedBox(height: 12.0),
+                          _buildDetailItem("Principal Amount:", "$cur${loan.amount.toStringAsFixed(2)}", textColor, labelColor),
+                          const SizedBox(height: 12.0),
+                          _buildDetailItem("Monthly EMI Amount:", "$cur${loan.emi.toStringAsFixed(2)}", textColor, labelColor),
+                          const SizedBox(height: 12.0),
+                          _buildDetailItem("Total Paid Amount:", "$cur${loan.paidAmount.toStringAsFixed(2)}", textColor, labelColor),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildDetailItem("Loan Type:", loan.loanType == 'Taken' ? "Borrowed (Taken)" : "Lent (Given)", textColor, labelColor),
+                          const SizedBox(height: 12.0),
+                          _buildDetailItem("Interest Rate:", "${loan.interest.toStringAsFixed(2)}% Simple", textColor, labelColor),
+                          const SizedBox(height: 12.0),
+                          _buildDetailItem("Due Date:", loan.dueDate, textColor, labelColor),
+                          const SizedBox(height: 12.0),
+                          _buildDetailItem("Outstanding Balance:", "$cur${outstanding.toStringAsFixed(2)}", textColor, labelColor),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                Text(
+                  "Notes:",
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold,
+                    color: labelColor,
+                  ),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  loan.notes.isNotEmpty ? loan.notes : "-",
+                  style: TextStyle(fontSize: 15.0, color: textColor),
+                ),
+                const SizedBox(height: 24.0),
+                Text(
+                  "Repayment Ledger History",
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                Divider(color: borderColor),
+                const SizedBox(height: 8.0),
+                if (loan.paymentHistory.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Center(
+                      child: Text(
+                        "No repayments logged yet.",
+                        style: TextStyle(color: labelColor.withOpacity(0.8)),
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 180,
+                    child: SingleChildScrollView(
+                      child: Table(
+                        columnWidths: const {
+                          0: FlexColumnWidth(1.2),
+                          1: FlexColumnWidth(1.2),
+                          2: FlexColumnWidth(1),
+                        },
+                        children: [
+                          TableRow(
+                            children: [
+                              _buildTableHeaderCell("Payment Date", labelColor),
+                              _buildTableHeaderCell("Paid By", labelColor),
+                              _buildTableHeaderCell("Amount Settled", labelColor),
+                            ],
+                          ),
+                          ...loan.paymentHistory.reversed.map((h) {
+                            final hMap = Map<String, dynamic>.from(h as Map);
+                            final dateVal = hMap['date']?.toString() ?? '-';
+                            final amtVal = double.tryParse(hMap['amount']?.toString() ?? '0') ?? 0.0;
+                            final mId = int.tryParse(hMap['memberId']?.toString() ?? '0') ?? 0;
+                            final payer = ledger.members.firstWhere(
+                              (m) => m.id == mId,
+                              orElse: () => Member(id: mId, name: "Member $mId", relation: "", phone: "", familyId: 0, parentId: 0),
+                            );
+
+                            return TableRow(
+                              children: [
+                                _buildTableCell(dateVal, textColor),
+                                _buildTableCell(payer.name, textColor),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    "$cur${amtVal.toStringAsFixed(2)}",
+                                    style: const TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailItem(String title, String value, Color textColor, Color labelColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 13.0,
+            fontWeight: FontWeight.bold,
+            color: labelColor,
+          ),
+        ),
+        const SizedBox(height: 2.0),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 15.0,
+            color: textColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTableHeaderCell(String text, Color labelColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: labelColor,
+          fontSize: 13.0,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableCell(String text, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        text,
+        style: TextStyle(color: textColor, fontSize: 14.0),
+      ),
     );
   }
 }
