@@ -284,6 +284,14 @@ class MainViewFrame extends StatefulWidget {
 class _MainViewFrameState extends State<MainViewFrame> {
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LedgerProvider>().fetchAllData();
+    });
+  }
+
   final List<Widget> _views = [
     const DashboardOverview(),
     const LedgerView(),
@@ -416,12 +424,14 @@ class DashboardOverview extends StatelessWidget {
       children: [
         // Summary Cards Layout Grid
         GridView.count(
-          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
+          crossAxisCount: MediaQuery.of(context).size.width > 900 
+              ? 4 
+              : (MediaQuery.of(context).size.width > 600 ? 3 : 2),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1.6,
+          childAspectRatio: MediaQuery.of(context).size.width > 600 ? 1.5 : 1.2,
           children: [
             _buildStatCard(context, "Net Balance", "$cur ${totalBalances.toStringAsFixed(2)}", Icons.account_balance_wallet, Colors.teal),
             _buildStatCard(context, "Contributions", "$cur ${totalContributions.toStringAsFixed(2)}", Icons.savings, Colors.blue),
@@ -495,7 +505,7 @@ class DashboardOverview extends StatelessWidget {
 
   Widget _buildStatCard(BuildContext context, String title, String val, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: glassDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

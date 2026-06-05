@@ -14,6 +14,10 @@ class AuthProvider extends ChangeNotifier {
   String _currency = '₹';
   String _theme = 'dark';
 
+  AuthProvider() {
+    tryAutoLogin();
+  }
+
   Member? get currentUser => _currentUser;
   bool get isAuthenticated => _isAuthenticated;
   bool get isAdmin => _currentUser != null && _currentUser!.parentId == 0;
@@ -21,6 +25,40 @@ class AuthProvider extends ChangeNotifier {
   String get familyName => _familyName;
   String get currency => _currency;
   String get theme => _theme;
+
+  Future<void> _saveSession(String phone, String password) async {
+    debugPrint("SESSION: Saving session for phone: $phone");
+    final cfg = await StorageService.instance.getConfig() ?? {};
+    cfg['sessionPhone'] = phone;
+    cfg['sessionPassword'] = password;
+    await StorageService.instance.saveConfig(cfg);
+    debugPrint("SESSION: Saved session successfully");
+  }
+
+  Future<void> tryAutoLogin() async {
+    debugPrint("SESSION: tryAutoLogin started");
+    final cfg = await StorageService.instance.getConfig();
+    if (cfg != null && cfg['sessionPhone'] != null && cfg['sessionPassword'] != null) {
+      final phone = cfg['sessionPhone'].toString();
+      final password = cfg['sessionPassword'].toString();
+      debugPrint("SESSION: Found session credentials: $phone");
+      
+      final localRes = await StorageService.instance.queryMembers(
+        phone: phone.trim(),
+        password: password,
+      );
+
+      debugPrint("SESSION: Query members returned count: ${localRes.length}");
+      if (localRes.isNotEmpty) {
+        await _loginSuccess(Member.fromMap(localRes.first));
+        debugPrint("SESSION: Auto-login success for member: ${localRes.first['name']}");
+      } else {
+        debugPrint("SESSION: Auto-login failed: member not found in local db");
+      }
+    } else {
+      debugPrint("SESSION: No session credentials found in config");
+    }
+  }
 
   Future<void> updateTheme(String newTheme) async {
     _theme = newTheme;
@@ -38,7 +76,8 @@ class AuthProvider extends ChangeNotifier {
     _familyName = name;
     _currency = symbol;
     _theme = themeMode;
-    await StorageService.instance.saveConfig({
+    final cfg = await StorageService.instance.getConfig() ?? {};
+    cfg.addAll({
       'familyName': name,
       'currency': symbol,
       'theme': themeMode,
@@ -46,6 +85,7 @@ class AuthProvider extends ChangeNotifier {
       'sheetsUrl': StorageService.instance.sheetsUrl,
       'jwtSecret': StorageService.instance.jwtSecret,
     });
+    await StorageService.instance.saveConfig(cfg);
     notifyListeners();
   }
 
@@ -123,6 +163,7 @@ class AuthProvider extends ChangeNotifier {
       _currency = configRes['currency']?.toString() ?? '₹';
       _theme = configRes['theme']?.toString() ?? 'dark';
     }
+    await _saveSession(user.phone, user.password);
     notifyListeners();
   }
 
@@ -190,6 +231,8 @@ class AuthProvider extends ChangeNotifier {
     );
     _isAuthenticated = true;
     StorageService.instance.currentFamilyId = adminId;
+
+    await _saveSession(phone, password);
 
     // Fire-and-forget push to sheets
     StorageService.instance.sheetsRequest(
