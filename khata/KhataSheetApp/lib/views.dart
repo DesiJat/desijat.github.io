@@ -760,6 +760,13 @@ class _LedgerViewState extends State<LedgerView> {
     if (ledger.members.isEmpty) return;
     _selectedMember = auth.currentUser?.id;
     
+    final budgetCategories = ledger.budgets.map((b) => b.category).toSet().toList()..sort();
+    final dropdownCategories = budgetCategories.isNotEmpty 
+        ? budgetCategories 
+        : ["Salary", "Business Income", "Rent Income", "Food", "Education", "Electricity", "Water", "Internet", "Medical", "Transportation", "Entertainment", "Other"];
+    
+    String selectedCategory = dropdownCategories.first;
+    
     showDialog(
       context: context,
       builder: (ctx) {
@@ -785,7 +792,14 @@ class _LedgerViewState extends State<LedgerView> {
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       decoration: const InputDecoration(labelText: "Amount (Precise decimal supported)"),
                     ),
-                    TextField(controller: _categoryController, decoration: const InputDecoration(labelText: "Category (e.g. Groceries)")),
+                    DropdownButtonFormField<String>(
+                      value: selectedCategory,
+                      decoration: const InputDecoration(labelText: "Category"),
+                      items: dropdownCategories.map((c) {
+                        return DropdownMenuItem(value: c, child: Text(c));
+                      }).toList(),
+                      onChanged: (val) => setModalState(() => selectedCategory = val!),
+                    ),
                     DropdownButtonFormField<int>(
                       value: _selectedMember,
                       decoration: const InputDecoration(labelText: "Associated Family Member"),
@@ -804,7 +818,7 @@ class _LedgerViewState extends State<LedgerView> {
                     final tx = Transaction(
                       date: DateTime.now().toIso8601String().split('T').first,
                       type: _txType,
-                      category: _categoryController.text,
+                      category: selectedCategory,
                       memberId: _selectedMember ?? auth.currentUser!.id!,
                       amount: double.tryParse(_amountController.text) ?? 0.0,
                       description: _descController.text,
