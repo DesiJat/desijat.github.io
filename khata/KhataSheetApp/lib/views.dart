@@ -579,8 +579,18 @@ class _LedgerViewState extends State<LedgerView> {
   final _descController = TextEditingController();
   final _amountController = TextEditingController();
   final _categoryController = TextEditingController();
+  final _searchController = TextEditingController();
   String _txType = 'Expense';
   int? _selectedMember;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _descController.dispose();
+    _amountController.dispose();
+    _categoryController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -607,19 +617,56 @@ class _LedgerViewState extends State<LedgerView> {
           ),
           const SizedBox(height: 16),
           // Filter Row
-          Row(
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Expanded(
+              SizedBox(
+                width: 200,
                 child: TextField(
+                  controller: _searchController,
                   decoration: const InputDecoration(
-                    labelText: "Search logs...",
+                    labelText: "Search description...",
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   onChanged: (val) => ledger.setFilters(search: val),
                 ),
               ),
-              const SizedBox(width: 8),
+              DropdownButton<String>(
+                value: ledger.typeFilter.isEmpty ? null : ledger.typeFilter,
+                hint: const Text("All Types"),
+                items: const [
+                  DropdownMenuItem(value: null, child: Text("All Types")),
+                  DropdownMenuItem(value: "Income", child: Text("Income")),
+                  DropdownMenuItem(value: "Expense", child: Text("Expense")),
+                ],
+                onChanged: (val) => ledger.setFilters(type: val ?? ""),
+              ),
+              DropdownButton<String>(
+                value: ledger.categoryFilter.isEmpty ? null : ledger.categoryFilter,
+                hint: const Text("All Categories"),
+                items: [
+                  const DropdownMenuItem(value: null, child: Text("All Categories")),
+                  ...[
+                    "Salary",
+                    "Business Income",
+                    "Rent Income",
+                    "Food",
+                    "Education",
+                    "Electricity",
+                    "Water",
+                    "Internet",
+                    "Medical",
+                    "Transportation",
+                    "Entertainment",
+                    "Other"
+                  ].map((c) => DropdownMenuItem(value: c, child: Text(c))),
+                ],
+                onChanged: (val) => ledger.setFilters(category: val ?? ""),
+              ),
               DropdownButton<int>(
                 value: ledger.limit,
                 items: const [
@@ -628,7 +675,15 @@ class _LedgerViewState extends State<LedgerView> {
                   DropdownMenuItem(value: 100, child: Text("100 / Page")),
                 ],
                 onChanged: (val) => ledger.updateLimit(val ?? 10),
-              )
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white70),
+                tooltip: "Reset Filters",
+                onPressed: () {
+                  _searchController.clear();
+                  ledger.setFilters(search: "", category: "", type: "");
+                },
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -754,7 +809,7 @@ class _LedgerViewState extends State<LedgerView> {
                       amount: double.tryParse(_amountController.text) ?? 0.0,
                       description: _descController.text,
                       status: 'Completed',
-                      familyId: auth.currentUser!.familyId,
+                      familyId: StorageService.instance.currentFamilyId ?? auth.currentUser!.familyId,
                     );
                     final success = await ledger.addTransaction(tx, auth.currentUser!);
                     if (!success && mounted) {
@@ -893,7 +948,7 @@ class _MembersViewState extends State<MembersView> {
                   email: _emailController.text,
                   password: _passwordController.text,
                   parentId: auth.currentUser!.id!,
-                  familyId: auth.currentUser!.familyId,
+                  familyId: StorageService.instance.currentFamilyId ?? auth.currentUser!.familyId,
                   contribution: 0.0,
                   balance: 0.0,
                 );
@@ -1036,7 +1091,7 @@ class _BudgetsViewState extends State<BudgetsView> {
                 final newBudget = Budget(
                   category: _categoryController.text,
                   limit: double.tryParse(_limitController.text) ?? 0.0,
-                  familyId: auth.currentUser!.familyId,
+                  familyId: StorageService.instance.currentFamilyId ?? auth.currentUser!.familyId,
                 );
                 final success = await ledger.setBudget(newBudget, auth.currentUser!);
                 if (!success && mounted) {
@@ -1221,7 +1276,7 @@ class _LoansViewState extends State<LoansView> {
                       dueDate: DateTime.now().add(const Duration(days: 30)).toIso8601String().split('T').first,
                       paymentHistory: [],
                       memberId: _selectedMember ?? auth.currentUser!.id!,
-                      familyId: auth.currentUser!.familyId,
+                      familyId: StorageService.instance.currentFamilyId ?? auth.currentUser!.familyId,
                     );
                     final success = await ledger.addLoan(loan, auth.currentUser!);
                     if (!success && mounted) {

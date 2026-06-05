@@ -123,6 +123,7 @@ class AuthProvider extends ChangeNotifier {
               sheet: 'members',
               sub: 0,
               parentId: 0,
+              limit: 100000,
             )
             .timeout(const Duration(seconds: 8));
 
@@ -369,7 +370,13 @@ class LedgerProvider extends ChangeNotifier {
     try {
       // 1. Sync Members
       final membersRes = await StorageService.instance
-          .sheetsRequest(action: 'read', sheet: 'members', sub: 0, parentId: 0)
+          .sheetsRequest(
+            action: 'read',
+            sheet: 'members',
+            sub: 0,
+            parentId: 0,
+            limit: 100000,
+          )
           .timeout(const Duration(seconds: 10));
       if (membersRes['success'] == true && membersRes['data'] is List) {
         final List rows = membersRes['data'];
@@ -390,6 +397,7 @@ class LedgerProvider extends ChangeNotifier {
             sheet: 'transactions',
             sub: 0,
             parentId: 0,
+            limit: 100000,
           )
           .timeout(const Duration(seconds: 10));
       if (txRes['success'] == true && txRes['data'] is List) {
@@ -409,6 +417,7 @@ class LedgerProvider extends ChangeNotifier {
             sheet: 'external_accounts',
             sub: 0,
             parentId: 0,
+            limit: 100000,
           )
           .timeout(const Duration(seconds: 10));
       if (accRes['success'] == true && accRes['data'] is List) {
@@ -424,6 +433,7 @@ class LedgerProvider extends ChangeNotifier {
             sheet: 'budgets',
             sub: 0,
             parentId: 0,
+            limit: 100000,
           )
           .timeout(const Duration(seconds: 10));
       if (budgetRes['success'] == true && budgetRes['data'] is List) {
@@ -434,7 +444,13 @@ class LedgerProvider extends ChangeNotifier {
 
       // 5. Sync Loans
       final loanRes = await StorageService.instance
-          .sheetsRequest(action: 'read', sheet: 'loans', sub: 0, parentId: 0)
+          .sheetsRequest(
+            action: 'read',
+            sheet: 'loans',
+            sub: 0,
+            parentId: 0,
+            limit: 100000,
+          )
           .timeout(const Duration(seconds: 10));
       if (loanRes['success'] == true && loanRes['data'] is List) {
         final List rows = loanRes['data'];

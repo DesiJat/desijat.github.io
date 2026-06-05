@@ -195,10 +195,17 @@ class StorageService {
   Future<void> bulkReplaceTransactions(
       List<Map<String, dynamic>> rows, int familyId) async {
     await _ensureReady();
-    final del = _txn.keys
+    final incomingIds = rows.map((r) => _toInt(r['id'])).toSet();
+    final keysToDelete = _txn.keys
         .where((k) => k is String && (k as String).startsWith('t'))
+        .where((k) {
+          final t = _m(_txn.get(k)!);
+          final fId = _toInt(t['familyId'] ?? t['family_id']);
+          final id = _toInt(t['id']);
+          return fId == familyId && !incomingIds.contains(id);
+        })
         .toList();
-    await _txn.deleteAll(del);
+    await _txn.deleteAll(keysToDelete);
     for (final row in rows) {
       final id = _toInt(row['id']);
       final fId = _toInt(row['familyId'] ?? row['family_id']);
@@ -249,10 +256,17 @@ class StorageService {
   Future<void> bulkReplaceAccounts(
       List<Map<String, dynamic>> rows, int familyId) async {
     await _ensureReady();
-    final del = _acc.keys
+    final incomingIds = rows.map((r) => _toInt(r['id'])).toSet();
+    final keysToDelete = _acc.keys
         .where((k) => k is String && (k as String).startsWith('a'))
+        .where((k) {
+          final a = _m(_acc.get(k)!);
+          final fId = _toInt(a['familyId'] ?? a['family_id']);
+          final id = _toInt(a['id']);
+          return fId == familyId && !incomingIds.contains(id);
+        })
         .toList();
-    await _acc.deleteAll(del);
+    await _acc.deleteAll(keysToDelete);
     for (final row in rows) {
       final id = _toInt(row['id']);
       final fId = _toInt(row['familyId'] ?? row['family_id']);
@@ -287,10 +301,17 @@ class StorageService {
   Future<void> bulkReplaceBudgets(
       List<Map<String, dynamic>> rows, int familyId) async {
     await _ensureReady();
-    final del = _bud.keys
+    final incomingIds = rows.map((r) => _toInt(r['id'])).toSet();
+    final keysToDelete = _bud.keys
         .where((k) => k is String && (k as String).startsWith('b'))
+        .where((k) {
+          final b = _m(_bud.get(k)!);
+          final fId = _toInt(b['familyId'] ?? b['family_id']);
+          final id = _toInt(b['id']);
+          return fId == familyId && !incomingIds.contains(id);
+        })
         .toList();
-    await _bud.deleteAll(del);
+    await _bud.deleteAll(keysToDelete);
     for (final row in rows) {
       final id = _toInt(row['id']);
       final fId = _toInt(row['familyId'] ?? row['family_id']);
@@ -336,10 +357,17 @@ class StorageService {
   Future<void> bulkReplaceLoans(
       List<Map<String, dynamic>> rows, int familyId) async {
     await _ensureReady();
-    final del = _loa.keys
+    final incomingIds = rows.map((r) => _toInt(r['id'])).toSet();
+    final keysToDelete = _loa.keys
         .where((k) => k is String && (k as String).startsWith('l'))
+        .where((k) {
+          final l = _m(_loa.get(k)!);
+          final fId = _toInt(l['familyId'] ?? l['family_id']);
+          final id = _toInt(l['id']);
+          return fId == familyId && !incomingIds.contains(id);
+        })
         .toList();
-    await _loa.deleteAll(del);
+    await _loa.deleteAll(keysToDelete);
     for (final row in rows) {
       final id = _toInt(row['id']);
       final fId = _toInt(row['familyId'] ?? row['family_id']);
@@ -403,6 +431,8 @@ class StorageService {
     List<dynamic>? bulkData,
     required int sub,
     required int parentId,
+    int? limit,
+    int? page,
   }) async {
     if (!useSheets || sheetsUrl.isEmpty) {
       return {'success': false, 'error': 'Sync disabled or empty URL'};
@@ -422,6 +452,8 @@ class StorageService {
       if (recordId != null) body['id'] = recordId;
       if (recordData != null) body['data'] = recordData;
       if (bulkData != null) body['data'] = bulkData;
+      if (limit != null) body['limit'] = limit;
+      if (page != null) body['page'] = page;
 
       final res = await http
           .post(
