@@ -104,19 +104,19 @@ class StorageService {
     int? familyId,
   }) async {
     await _ensureReady();
-    final all = _mem.keys
+    var all = _mem.keys
         .where((k) => k is String && (k as String).startsWith('m'))
         .map((k) => _m(_mem.get(k)!))
         .toList();
 
-    if (phone != null && password != null) {
-      return all
-          .where((m) => m['phone'] == phone && m['password'] == password)
-          .take(1)
-          .toList();
+    if (phone != null) {
+      all = all.where((m) => m['phone'] == phone).toList();
+    }
+    if (password != null) {
+      all = all.where((m) => m['password'] == password).toList();
     }
     if (familyId != null) {
-      return all
+      all = all
           .where((m) =>
               _toInt(m['familyId']) == familyId ||
               _toInt(m['id']) == familyId)

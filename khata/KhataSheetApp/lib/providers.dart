@@ -24,8 +24,9 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> updateTheme(String newTheme) async {
     _theme = newTheme;
-    final db = await StorageService.instance.database;
-    await db.update('config', {'theme': newTheme});
+    final cfg = await StorageService.instance.getConfig() ?? {};
+    cfg['theme'] = newTheme;
+    await StorageService.instance.saveConfig(cfg);
     notifyListeners();
   }
 
@@ -61,18 +62,14 @@ class AuthProvider extends ChangeNotifier {
       StorageService.instance.jwtSecret = jwtSecret;
     }
 
-    final db = await StorageService.instance.database;
-
     // Try local lookup first
-    final localRes = await db.query(
-      'members',
-      where: 'phone = ? AND password = ?',
-      whereArgs: [phone.trim(), password],
-      limit: 1,
+    final localRes = await StorageService.instance.queryMembers(
+      phone: phone.trim(),
+      password: password,
     );
 
     if (localRes.isNotEmpty) {
-      _loginSuccess(Member.fromMap(localRes.first), db);
+      await _loginSuccess(Member.fromMap(localRes.first));
       return true;
     }
 
@@ -91,11 +88,8 @@ class AuthProvider extends ChangeNotifier {
 
         if (res['success'] == true && res['data'] is List) {
           final List rows = res['data'];
-          await db.delete('members');
-          for (var row in rows) {
-            final m = Member.fromMap(Map<String, dynamic>.from(row));
-            await db.insert('members', m.toMap());
-          }
+          final memberRows = rows.map((row) => Map<String, dynamic>.from(row)).toList();
+          await StorageService.instance.bulkReplaceMembers(memberRows);
           debugPrint('Synced ${rows.length} members from Sheets');
         }
       } catch (e) {
@@ -103,15 +97,13 @@ class AuthProvider extends ChangeNotifier {
       }
 
       // Retry local lookup after sync
-      final retryRes = await db.query(
-        'members',
-        where: 'phone = ? AND password = ?',
-        whereArgs: [phone.trim(), password],
-        limit: 1,
+      final retryRes = await StorageService.instance.queryMembers(
+        phone: phone.trim(),
+        password: password,
       );
 
       if (retryRes.isNotEmpty) {
-        _loginSuccess(Member.fromMap(retryRes.first), db);
+        await _loginSuccess(Member.fromMap(retryRes.first));
         return true;
       }
     }
@@ -119,17 +111,17 @@ class AuthProvider extends ChangeNotifier {
     return false;
   }
 
-  void _loginSuccess(Member user, dynamic db) async {
+  Future<void> _loginSuccess(Member user) async {
     _currentUser = user;
     _isAuthenticated = true;
     StorageService.instance.currentFamilyId =
         user.parentId == 0 ? user.id : user.parentId;
 
-    final configRes = await db.query('config', limit: 1);
-    if (configRes.isNotEmpty) {
-      _familyName = configRes.first['familyName']?.toString() ?? 'Family Ledger';
-      _currency = configRes.first['currency']?.toString() ?? '₹';
-      _theme = configRes.first['theme']?.toString() ?? 'dark';
+    final configRes = await StorageService.instance.getConfig();
+    if (configRes != null) {
+      _familyName = configRes['familyName']?.toString() ?? 'Family Ledger';
+      _currency = configRes['currency']?.toString() ?? '₹';
+      _theme = configRes['theme']?.toString() ?? 'dark';
     }
     notifyListeners();
   }
@@ -150,14 +142,7 @@ class AuthProvider extends ChangeNotifier {
     String? sheetsUrl,
     String? jwtSecret,
   }) async {
-    final db = await StorageService.instance.database;
-
-    final check = await db.query(
-      'members',
-      where: 'phone = ?',
-      whereArgs: [phone],
-      limit: 1,
-    );
+    final check = await StorageService.instance.queryMembers(phone: phone);
     if (check.isNotEmpty) return false;
 
     if (sheetsUrl != null && sheetsUrl.isNotEmpty) {
@@ -180,7 +165,7 @@ class AuthProvider extends ChangeNotifier {
       'jwtSecret': StorageService.instance.jwtSecret,
     });
 
-    final adminId = await db.insert('members', {
+    final adminId = await StorageService.instance.insertMember({
       'name': adminName,
       'relation': 'Father (Admin)',
       'phone': phone,
@@ -193,12 +178,7 @@ class AuthProvider extends ChangeNotifier {
       'balance': 0.0,
     });
 
-    await db.update(
-      'members',
-      {'familyId': adminId},
-      where: 'id = ?',
-      whereArgs: [adminId],
-    );
+    await StorageService.instance.updateMemberField(adminId, {'familyId': adminId});
 
     _currentUser = Member(
       id: adminId,
@@ -280,33 +260,16 @@ class LedgerProvider extends ChangeNotifier {
   }
 
   Future fetchLedger() async {
-    final db = await StorageService.instance.database;
     final familyId = StorageService.instance.currentFamilyId ?? 0;
     final offset = (_currentPage - 1) * _limit;
 
-    String whereClause = 'familyId = ?';
-    List<dynamic> whereArgs = [familyId];
-
-    if (_searchQuery.isNotEmpty) {
-      whereClause += ' AND description LIKE ?';
-      whereArgs.add('%$_searchQuery%');
-    }
-    if (_categoryFilter.isNotEmpty) {
-      whereClause += ' AND category = ?';
-      whereArgs.add(_categoryFilter);
-    }
-    if (_typeFilter.isNotEmpty) {
-      whereClause += ' AND type = ?';
-      whereArgs.add(_typeFilter);
-    }
-
-    final res = await db.query(
-      'transactions',
-      where: whereClause,
-      whereArgs: whereArgs,
+    final res = await StorageService.instance.queryTransactions(
+      familyId: familyId,
+      search: _searchQuery,
+      category: _categoryFilter,
+      type: _typeFilter,
       limit: _limit,
       offset: offset,
-      orderBy: 'date DESC',
     );
 
     _transactions = res.map((m) => Transaction.fromMap(m)).toList();
@@ -314,49 +277,29 @@ class LedgerProvider extends ChangeNotifier {
   }
 
   Future fetchAccounts() async {
-    final db = await StorageService.instance.database;
     final familyId = StorageService.instance.currentFamilyId ?? 0;
-    final res = await db.query(
-      'external_accounts',
-      where: 'familyId = ?',
-      whereArgs: [familyId],
-    );
+    final res = await StorageService.instance.queryAccounts(familyId);
     _accounts = res.map((m) => ExternalAccount.fromMap(m)).toList();
     notifyListeners();
   }
 
   Future fetchMembers() async {
-    final db = await StorageService.instance.database;
     final familyId = StorageService.instance.currentFamilyId ?? 0;
-    final res = await db.query(
-      'members',
-      where: 'familyId = ? OR id = ?',
-      whereArgs: [familyId, familyId],
-    );
+    final res = await StorageService.instance.queryMembers(familyId: familyId);
     _members = res.map((m) => Member.fromMap(m)).toList();
     notifyListeners();
   }
 
   Future fetchBudgets() async {
-    final db = await StorageService.instance.database;
     final familyId = StorageService.instance.currentFamilyId ?? 0;
-    final res = await db.query(
-      'budgets',
-      where: 'familyId = ?',
-      whereArgs: [familyId],
-    );
+    final res = await StorageService.instance.queryBudgets(familyId);
     _budgets = res.map((m) => Budget.fromMap(m)).toList();
     notifyListeners();
   }
 
   Future fetchLoans() async {
-    final db = await StorageService.instance.database;
     final familyId = StorageService.instance.currentFamilyId ?? 0;
-    final res = await db.query(
-      'loans',
-      where: 'familyId = ?',
-      whereArgs: [familyId],
-    );
+    final res = await StorageService.instance.queryLoans(familyId);
     _loans = res.map((m) => Loan.fromMap(m)).toList();
     notifyListeners();
   }
@@ -368,7 +311,6 @@ class LedgerProvider extends ChangeNotifier {
       return false;
     }
 
-    final db = await StorageService.instance.database;
     final familyId = StorageService.instance.currentFamilyId ?? 0;
 
     try {
@@ -377,13 +319,15 @@ class LedgerProvider extends ChangeNotifier {
           .sheetsRequest(action: 'read', sheet: 'members', sub: 0, parentId: 0)
           .timeout(const Duration(seconds: 10));
       if (membersRes['success'] == true && membersRes['data'] is List) {
-        await db.delete('members');
-        for (var row in membersRes['data']) {
+        final List rows = membersRes['data'];
+        final List<Map<String, dynamic>> filteredRows = [];
+        for (var row in rows) {
           final m = Member.fromMap(Map<String, dynamic>.from(row));
           if (m.familyId == familyId || m.id == familyId) {
-            await db.insert('members', m.toMap());
+            filteredRows.add(m.toMap());
           }
         }
+        await StorageService.instance.bulkReplaceMembers(filteredRows);
       }
 
       // 2. Sync Transactions
@@ -396,13 +340,9 @@ class LedgerProvider extends ChangeNotifier {
           )
           .timeout(const Duration(seconds: 10));
       if (txRes['success'] == true && txRes['data'] is List) {
-        await db.delete('transactions');
-        for (var row in txRes['data']) {
-          final tx = Transaction.fromMap(Map<String, dynamic>.from(row));
-          if (tx.familyId == familyId) {
-            await db.insert('transactions', tx.toMap());
-          }
-        }
+        final List rows = txRes['data'];
+        final txRows = rows.map((row) => Map<String, dynamic>.from(row)).toList();
+        await StorageService.instance.bulkReplaceTransactions(txRows, familyId);
       }
 
       // 3. Sync Accounts
@@ -415,13 +355,9 @@ class LedgerProvider extends ChangeNotifier {
           )
           .timeout(const Duration(seconds: 10));
       if (accRes['success'] == true && accRes['data'] is List) {
-        await db.delete('external_accounts');
-        for (var row in accRes['data']) {
-          final acc = ExternalAccount.fromMap(Map<String, dynamic>.from(row));
-          if (acc.familyId == familyId) {
-            await db.insert('external_accounts', acc.toMap());
-          }
-        }
+        final List rows = accRes['data'];
+        final accRows = rows.map((row) => Map<String, dynamic>.from(row)).toList();
+        await StorageService.instance.bulkReplaceAccounts(accRows, familyId);
       }
 
       // 4. Sync Budgets
@@ -434,13 +370,9 @@ class LedgerProvider extends ChangeNotifier {
           )
           .timeout(const Duration(seconds: 10));
       if (budgetRes['success'] == true && budgetRes['data'] is List) {
-        await db.delete('budgets');
-        for (var row in budgetRes['data']) {
-          final b = Budget.fromMap(Map<String, dynamic>.from(row));
-          if (b.familyId == familyId) {
-            await db.insert('budgets', b.toMap());
-          }
-        }
+        final List rows = budgetRes['data'];
+        final budgetRows = rows.map((row) => Map<String, dynamic>.from(row)).toList();
+        await StorageService.instance.bulkReplaceBudgets(budgetRows, familyId);
       }
 
       // 5. Sync Loans
@@ -448,13 +380,9 @@ class LedgerProvider extends ChangeNotifier {
           .sheetsRequest(action: 'read', sheet: 'loans', sub: 0, parentId: 0)
           .timeout(const Duration(seconds: 10));
       if (loanRes['success'] == true && loanRes['data'] is List) {
-        await db.delete('loans');
-        for (var row in loanRes['data']) {
-          final l = Loan.fromMap(Map<String, dynamic>.from(row));
-          if (l.familyId == familyId) {
-            await db.insert('loans', l.toMap());
-          }
-        }
+        final List rows = loanRes['data'];
+        final loanRows = rows.map((row) => Map<String, dynamic>.from(row)).toList();
+        await StorageService.instance.bulkReplaceLoans(loanRows, familyId);
       }
       return true;
     } catch (e) {
@@ -487,19 +415,12 @@ class LedgerProvider extends ChangeNotifier {
   // ── LOCAL-FIRST CRUD (always writes locally; Sheets sync is fire-and-forget) ──
 
   Future<bool> addTransaction(Transaction tx, Member user) async {
-    final db = await StorageService.instance.database;
-    final txId = await db.insert('transactions', tx.toMap());
+    final txId = await StorageService.instance.insertTransaction(tx.toMap());
 
     final balanceDiff = tx.type == 'Income' ? tx.amount : -tx.amount;
-    await db.execute(
-      'UPDATE members SET balance = balance + ? WHERE id = ?',
-      [balanceDiff, tx.memberId],
-    );
+    await StorageService.instance.updateMemberBalance(tx.memberId, balanceDiff);
     if (tx.externalAccountId != null) {
-      await db.execute(
-        'UPDATE external_accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-        [balanceDiff, tx.externalAccountId],
-      );
+      await StorageService.instance.updateAccountBalance(tx.externalAccountId!, balanceDiff);
     }
 
     // Background Sheets sync — no rollback
@@ -518,27 +439,16 @@ class LedgerProvider extends ChangeNotifier {
   Future<bool> deleteTransaction(int id, Member user) async {
     if (user.parentId != 0) return false;
 
-    final db = await StorageService.instance.database;
-    final original = await db.query(
-      'transactions',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    if (original.isEmpty) return false;
+    final original = await StorageService.instance.getTransactionById(id);
+    if (original == null) return false;
 
-    final tx = Transaction.fromMap(original.first);
+    final tx = Transaction.fromMap(original);
     final balanceDiff = tx.type == 'Income' ? -tx.amount : tx.amount;
 
-    await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
-    await db.execute(
-      'UPDATE members SET balance = balance + ? WHERE id = ?',
-      [balanceDiff, tx.memberId],
-    );
+    await StorageService.instance.deleteTransactionById(id);
+    await StorageService.instance.updateMemberBalance(tx.memberId, balanceDiff);
     if (tx.externalAccountId != null) {
-      await db.execute(
-        'UPDATE external_accounts SET currentBalance = currentBalance + ? WHERE id = ?',
-        [balanceDiff, tx.externalAccountId],
-      );
+      await StorageService.instance.updateAccountBalance(tx.externalAccountId!, balanceDiff);
     }
 
     // Background sync
@@ -555,9 +465,8 @@ class LedgerProvider extends ChangeNotifier {
   }
 
   Future<bool> addMember(Member member, Member user) async {
-    final db = await StorageService.instance.database;
     try {
-      final id = await db.insert('members', member.toMap());
+      final id = await StorageService.instance.insertMember(member.toMap());
       final updatedMember = Member(
         id: id,
         name: member.name,
@@ -590,8 +499,7 @@ class LedgerProvider extends ChangeNotifier {
 
   Future<bool> deleteMember(int id, Member user) async {
     if (user.parentId != 0) return false;
-    final db = await StorageService.instance.database;
-    await db.delete('members', where: 'id = ?', whereArgs: [id]);
+    await StorageService.instance.deleteMemberById(id);
 
     StorageService.instance.sheetsRequest(
       action: 'delete',
@@ -606,8 +514,7 @@ class LedgerProvider extends ChangeNotifier {
   }
 
   Future<bool> addAccount(ExternalAccount acc, Member user) async {
-    final db = await StorageService.instance.database;
-    final id = await db.insert('external_accounts', acc.toMap());
+    final id = await StorageService.instance.insertAccount(acc.toMap());
     final updatedAcc = ExternalAccount(
       id: id,
       name: acc.name,
@@ -633,8 +540,7 @@ class LedgerProvider extends ChangeNotifier {
 
   Future<bool> deleteAccount(int id, Member user) async {
     if (user.parentId != 0) return false;
-    final db = await StorageService.instance.database;
-    await db.delete('external_accounts', where: 'id = ?', whereArgs: [id]);
+    await StorageService.instance.deleteAccountById(id);
 
     StorageService.instance.sheetsRequest(
       action: 'delete',
@@ -649,8 +555,7 @@ class LedgerProvider extends ChangeNotifier {
   }
 
   Future<bool> setBudget(Budget budget, Member user) async {
-    final db = await StorageService.instance.database;
-    final id = await db.insert('budgets', budget.toMap());
+    final id = await StorageService.instance.insertBudget(budget.toMap());
     final updatedBudget = Budget(
       id: id,
       category: budget.category,
@@ -672,8 +577,7 @@ class LedgerProvider extends ChangeNotifier {
 
   Future<bool> deleteBudget(int id, Member user) async {
     if (user.parentId != 0) return false;
-    final db = await StorageService.instance.database;
-    await db.delete('budgets', where: 'id = ?', whereArgs: [id]);
+    await StorageService.instance.deleteBudgetById(id);
 
     StorageService.instance.sheetsRequest(
       action: 'delete',
@@ -688,8 +592,7 @@ class LedgerProvider extends ChangeNotifier {
   }
 
   Future<bool> addLoan(Loan loan, Member user) async {
-    final db = await StorageService.instance.database;
-    final id = await db.insert('loans', loan.toMap());
+    final id = await StorageService.instance.insertLoan(loan.toMap());
     final updatedLoan = Loan(
       id: id,
       person: loan.person,
@@ -722,15 +625,10 @@ class LedgerProvider extends ChangeNotifier {
     double paymentAmount,
     Member user,
   ) async {
-    final db = await StorageService.instance.database;
-    final original = await db.query(
-      'loans',
-      where: 'id = ?',
-      whereArgs: [loanId],
-    );
-    if (original.isEmpty) return false;
+    final original = await StorageService.instance.getLoanById(loanId);
+    if (original == null) return false;
 
-    final loan = Loan.fromMap(original.first);
+    final loan = Loan.fromMap(original);
     final updatedHistory = List.from(loan.paymentHistory);
     final nowStr = DateTime.now().toIso8601String().split('T').first;
     updatedHistory.add({
@@ -754,12 +652,7 @@ class LedgerProvider extends ChangeNotifier {
       familyId: loan.familyId,
     );
 
-    await db.update(
-      'loans',
-      updatedLoan.toMap(),
-      where: 'id = ?',
-      whereArgs: [loanId],
-    );
+    await StorageService.instance.updateLoanData(loanId, updatedLoan.toMap());
 
     StorageService.instance.sheetsRequest(
       action: 'update',
@@ -776,8 +669,7 @@ class LedgerProvider extends ChangeNotifier {
 
   Future<bool> deleteLoan(int id, Member user) async {
     if (user.parentId != 0) return false;
-    final db = await StorageService.instance.database;
-    await db.delete('loans', where: 'id = ?', whereArgs: [id]);
+    await StorageService.instance.deleteLoanById(id);
 
     StorageService.instance.sheetsRequest(
       action: 'delete',
