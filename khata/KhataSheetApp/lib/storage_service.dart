@@ -455,13 +455,20 @@ class StorageService {
       if (limit != null) body['limit'] = limit;
       if (page != null) body['page'] = page;
 
-      final res = await http
+      var res = await http
           .post(
             Uri.parse(sheetsUrl),
             headers: {'Content-Type': 'text/plain;charset=utf-8'},
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 15));
+
+      if (res.statusCode == 302 || res.statusCode == 307 || res.statusCode == 303) {
+        final location = res.headers['location'];
+        if (location != null) {
+          res = await http.get(Uri.parse(location)).timeout(const Duration(seconds: 15));
+        }
+      }
 
       if (res.statusCode == 200) {
         return jsonDecode(res.body) as Map<String, dynamic>;
