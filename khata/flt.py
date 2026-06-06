@@ -1094,6 +1094,7 @@ python3 -m http.server 8080
 
 
 flutter build apk
+flutter build apk --release 2>&1
 build/app/outputs/flutter-apk/app-release.apk
 
 """

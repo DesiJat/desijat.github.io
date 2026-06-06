@@ -209,13 +209,16 @@ class StorageService {
         })
         .toList();
     await _txn.deleteAll(keysToDelete);
+    int maxId = _txn.get('__tid') as int? ?? 0;
     for (final row in rows) {
       final id = _toInt(row['id']);
       final fId = _toInt(row['familyId'] ?? row['family_id']);
       if (id != null && id > 0 && fId == familyId) {
         await _txn.put('t$id', Map<String, dynamic>.from(row));
+        if (id > maxId) maxId = id;
       }
     }
+    await _txn.put('__tid', maxId);
   }
 
   // ─── External Accounts ────────────────────────────────────────────
@@ -273,13 +276,16 @@ class StorageService {
         })
         .toList();
     await _acc.deleteAll(keysToDelete);
+    int maxId = _acc.get('__aid') as int? ?? 0;
     for (final row in rows) {
       final id = _toInt(row['id']);
       final fId = _toInt(row['familyId'] ?? row['family_id']);
       if (id != null && id > 0 && fId == familyId) {
         await _acc.put('a$id', Map<String, dynamic>.from(row));
+        if (id > maxId) maxId = id;
       }
     }
+    await _acc.put('__aid', maxId);
   }
 
   // ─── Budgets ─────────────────────────────────────────────────────
@@ -326,13 +332,16 @@ class StorageService {
         })
         .toList();
     await _bud.deleteAll(keysToDelete);
+    int maxId = _bud.get('__bid') as int? ?? 0;
     for (final row in rows) {
       final id = _toInt(row['id']);
       final fId = _toInt(row['familyId'] ?? row['family_id']);
       if (id != null && id > 0 && fId == familyId) {
         await _bud.put('b$id', Map<String, dynamic>.from(row));
+        if (id > maxId) maxId = id;
       }
     }
+    await _bud.put('__bid', maxId);
   }
 
   // ─── Loans ───────────────────────────────────────────────────────
@@ -385,13 +394,16 @@ class StorageService {
         })
         .toList();
     await _loa.deleteAll(keysToDelete);
+    int maxId = _loa.get('__lid') as int? ?? 0;
     for (final row in rows) {
       final id = _toInt(row['id']);
       final fId = _toInt(row['familyId'] ?? row['family_id']);
       if (id != null && id > 0 && fId == familyId) {
         await _loa.put('l$id', Map<String, dynamic>.from(row));
+        if (id > maxId) maxId = id;
       }
     }
+    await _loa.put('__lid', maxId);
   }
 
   // ─── Clear all ────────────────────────────────────────────────────
