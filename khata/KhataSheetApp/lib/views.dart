@@ -287,6 +287,7 @@ class MainViewFrame extends StatefulWidget {
 
 class _MainViewFrameState extends State<MainViewFrame> {
   int _selectedIndex = 0;
+  bool _isSyncing = false;
 
   @override
   void initState() {
@@ -328,6 +329,74 @@ class _MainViewFrameState extends State<MainViewFrame> {
             : (isLight ? Colors.white : const Color(0xFF1E293B)),
         elevation: 0,
         actions: [
+          if (_isSyncing)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isEPaper ? Colors.black : Colors.white,
+                  ),
+                ),
+              ),
+            )
+          else
+            IconButton(
+              icon: Icon(Icons.refresh, color: isEPaper ? Colors.black : Colors.white),
+              tooltip: "Refresh Sync Data",
+              onPressed: () async {
+                setState(() {
+                  _isSyncing = true;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Syncing fresh data from Sheets..."),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+                try {
+                  final success = await context.read<LedgerProvider>().syncFromSheets();
+                  if (success) {
+                    await context.read<LedgerProvider>().fetchAllData();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Data synced successfully!"),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } else {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Failed to sync from Sheets"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Sync failed: $e"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _isSyncing = false;
+                    });
+                  }
+                }
+              },
+            ),
           Center(
             child: Text(
               auth.currentUser?.name ?? '',
