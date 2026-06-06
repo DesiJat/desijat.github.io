@@ -40,20 +40,22 @@ BoxDecoration glassDecoration(BuildContext context, {Color? customColor}) {
 // Global Text Theme helpers
 TextStyle titleStyle(BuildContext context, {double size = 18, Color? color}) {
   final theme = context.watch<AuthProvider>().theme;
+  final isLight = theme == 'light';
   final isEPaper = theme == 'e-paper';
   return TextStyle(
     fontSize: size,
     fontWeight: FontWeight.bold,
-    color: color ?? (isEPaper ? Colors.black : Colors.white),
+    color: color ?? ((isLight || isEPaper) ? Colors.black87 : Colors.white),
   );
 }
 
 TextStyle subtitleStyle(BuildContext context, {double size = 13, Color? color}) {
   final theme = context.watch<AuthProvider>().theme;
+  final isLight = theme == 'light';
   final isEPaper = theme == 'e-paper';
   return TextStyle(
     fontSize: size,
-    color: color ?? (isEPaper ? Colors.black54 : Colors.white70),
+    color: color ?? ((isLight || isEPaper) ? Colors.black54 : Colors.white70),
   );
 }
 
@@ -321,7 +323,7 @@ class _MainViewFrameState extends State<MainViewFrame> {
           "₹ ${auth.familyName}",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isEPaper ? Colors.black : Colors.white,
+            color: (isLight || isEPaper) ? Colors.black87 : Colors.white,
           ),
         ),
         backgroundColor: isEPaper 
@@ -338,14 +340,14 @@ class _MainViewFrameState extends State<MainViewFrame> {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    isEPaper ? Colors.black : Colors.white,
+                    (isLight || isEPaper) ? Colors.black87 : Colors.white,
                   ),
                 ),
               ),
             )
           else
             IconButton(
-              icon: Icon(Icons.refresh, color: isEPaper ? Colors.black : Colors.white),
+              icon: Icon(Icons.refresh, color: (isLight || isEPaper) ? Colors.black87 : Colors.white),
               tooltip: "Refresh Sync Data",
               onPressed: () async {
                 setState(() {
@@ -405,7 +407,7 @@ class _MainViewFrameState extends State<MainViewFrame> {
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: Icon(Icons.logout, color: isEPaper ? Colors.black : Colors.white),
+            icon: Icon(Icons.logout, color: (isLight || isEPaper) ? Colors.black87 : Colors.white),
             onPressed: () => auth.logout(),
           ),
         ],
@@ -423,7 +425,7 @@ class _MainViewFrameState extends State<MainViewFrame> {
                   : (isLight ? Colors.white : const Color(0xFF1E293B)),
               selectedIconTheme: const IconThemeData(color: Color(0xFF6366F1)),
               unselectedIconTheme: IconThemeData(
-                color: isEPaper ? Colors.black54 : Colors.white54,
+                color: (isLight || isEPaper) ? Colors.black54 : Colors.white54,
               ),
               destinations: const [
                 NavigationRailDestination(icon: Icon(Icons.dashboard), label: Text("Dashboard")),
@@ -446,7 +448,7 @@ class _MainViewFrameState extends State<MainViewFrame> {
                   ? Colors.white 
                   : (isLight ? Colors.white : const Color(0xFF1E293B)),
               selectedItemColor: const Color(0xFF6366F1),
-              unselectedItemColor: isEPaper ? Colors.black54 : Colors.white54,
+              unselectedItemColor: (isLight || isEPaper) ? Colors.black54 : Colors.white54,
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Dashboard"),
                 BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: "Ledger"),
@@ -545,12 +547,16 @@ class DashboardOverview extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
                   child: Center(child: Text("No transactions recorded yet", style: subtitleStyle(context))),
                 )
-              else
+                else
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: ledger.transactions.take(5).length,
-                  separatorBuilder: (_, __) => Divider(color: Colors.white.withOpacity(0.05)),
+                  separatorBuilder: (_, __) {
+                    final theme = context.watch<AuthProvider>().theme;
+                    final isDark = theme == 'dark';
+                    return Divider(color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08));
+                  },
                   itemBuilder: (ctx, idx) {
                     final tx = ledger.transactions[idx];
                     final memberName = ledger.members.firstWhere((m) => m.id == tx.memberId, orElse: () => Member(name: 'Unknown', relation: '', phone: '', familyId: 0)).name;
@@ -751,14 +757,17 @@ class _LedgerViewState extends State<LedgerView> {
                 ],
                 onChanged: (val) => ledger.updateLimit(val ?? 10),
               ),
-              IconButton(
-                icon: const Icon(Icons.refresh, color: Colors.white70),
-                tooltip: "Reset Filters",
-                onPressed: () {
-                  _searchController.clear();
-                  ledger.setFilters(search: "", category: "", type: "");
-                },
-              ),
+              Builder(builder: (ctx) {
+                final isDark = ctx.watch<AuthProvider>().theme == 'dark';
+                return IconButton(
+                  icon: Icon(Icons.refresh, color: isDark ? Colors.white70 : Colors.black54),
+                  tooltip: "Reset Filters",
+                  onPressed: () {
+                    _searchController.clear();
+                    ledger.setFilters(search: "", category: "", type: "");
+                  },
+                );
+              }),
             ],
           ),
           const SizedBox(height: 16),
@@ -793,17 +802,20 @@ class _LedgerViewState extends State<LedgerView> {
                                 ),
                               ),
                               if (auth.isAdmin) // Only admin can delete transactions
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.white38),
-                                  onPressed: () async {
-                                    final success = await ledger.deleteTransaction(tx.id!, auth.currentUser!);
-                                    if (!success && mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text("Sync execution rollback occurred"), backgroundColor: Colors.red),
-                                      );
-                                    }
-                                  },
-                                ),
+                                Builder(builder: (ctx) {
+                                  final isDark = ctx.watch<AuthProvider>().theme == 'dark';
+                                  return IconButton(
+                                    icon: Icon(Icons.delete, color: isDark ? Colors.white38 : Colors.grey.shade400),
+                                    onPressed: () async {
+                                      final success = await ledger.deleteTransaction(tx.id!, auth.currentUser!);
+                                      if (!success && mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text("Sync execution rollback occurred"), backgroundColor: Colors.red),
+                                        );
+                                      }
+                                    },
+                                  );
+                                }),
                             ],
                           ),
                         );
@@ -1399,11 +1411,14 @@ class _BudgetsViewState extends State<BudgetsView> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        LinearProgressIndicator(
-                          value: percentage > 1.0 ? 1.0 : percentage,
-                          backgroundColor: Colors.white12,
-                          color: isOver ? Colors.red : Colors.green,
-                        ),
+                        Builder(builder: (ctx) {
+                          final isDark = ctx.watch<AuthProvider>().theme == 'dark';
+                          return LinearProgressIndicator(
+                            value: percentage > 1.0 ? 1.0 : percentage,
+                            backgroundColor: isDark ? Colors.white12 : Colors.black12,
+                            color: isOver ? Colors.red : Colors.green,
+                          );
+                        }),
                         if (isOver)
                           const Padding(
                             padding: EdgeInsets.only(top: 8.0),
@@ -2800,12 +2815,17 @@ class _SettingsViewState extends State<SettingsView> {
   Widget _buildThemeButton(BuildContext context, String mode, String label) {
     final auth = context.watch<AuthProvider>();
     final active = auth.theme == mode;
+    final isDark = auth.theme == 'dark';
+    final inactiveBg = isDark ? Colors.grey.shade700 : Colors.grey.shade200;
+    final inactiveFg = isDark ? Colors.white70 : Colors.black54;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: active ? const Color(0xFF6366F1) : Colors.grey.shade800,
+        backgroundColor: active ? const Color(0xFF6366F1) : inactiveBg,
+        foregroundColor: active ? Colors.white : inactiveFg,
+        elevation: active ? 4 : 0,
       ),
       onPressed: () => auth.updateTheme(mode),
-      child: Text(label, style: const TextStyle(color: Colors.white)),
+      child: Text(label, style: TextStyle(color: active ? Colors.white : inactiveFg, fontWeight: active ? FontWeight.bold : FontWeight.normal)),
     );
   }
 }
