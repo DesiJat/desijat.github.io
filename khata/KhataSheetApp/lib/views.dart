@@ -938,12 +938,47 @@ class _MembersViewState extends State<MembersView> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _searchController = TextEditingController();
+  
+  int _membersPage = 1;
+  int _membersLimit = 10;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _relationController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final ledger = context.watch<LedgerProvider>();
     final auth = context.watch<AuthProvider>();
     final cur = auth.currency;
+
+    final query = _searchController.text.trim().toLowerCase();
+    var filtered = ledger.members;
+    if (query.isNotEmpty) {
+      filtered = filtered.where((m) {
+        final nameMatch = m.name.toLowerCase().contains(query);
+        final relationMatch = m.relation.toLowerCase().contains(query);
+        final phoneMatch = m.phone.toLowerCase().contains(query);
+        final emailMatch = m.email.toLowerCase().contains(query);
+        return nameMatch || relationMatch || phoneMatch || emailMatch;
+      }).toList();
+    }
+
+    final totalMembers = filtered.length;
+    final totalPages = (totalMembers / _membersLimit).ceil();
+    if (_membersPage > totalPages) _membersPage = totalPages;
+    if (_membersPage < 1) _membersPage = 1;
+
+    final startIndex = (_membersPage - 1) * _membersLimit;
+    final paginated = filtered.skip(startIndex).take(_membersLimit).toList();
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -964,61 +999,158 @@ class _MembersViewState extends State<MembersView> {
             ],
           ),
           const SizedBox(height: 16),
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 1,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: auth.isAdmin ? 1.7 : 2.2,
+          // Filter Bar
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              SizedBox(
+                width: 250,
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    labelText: "Filter members...",
+                    hintText: "Search name, relation, phone, email",
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _membersPage = 1;
+                              });
+                            },
+                          )
+                        : null,
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      _membersPage = 1;
+                    });
+                  },
+                ),
               ),
-              itemCount: ledger.members.length,
-              itemBuilder: (ctx, idx) {
-                final mem = ledger.members[idx];
-                return Container(
-                  padding: const EdgeInsets.all(14.0),
-                  decoration: glassDecoration(context),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(mem.name, style: titleStyle(context, size: 16)),
-                          Chip(label: Text(mem.relation, style: const TextStyle(fontSize: 11))),
-                        ],
-                      ),
-                      Text("Phone: ${mem.phone}", style: subtitleStyle(context)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Balance: $cur ${mem.balance.toStringAsFixed(2)}", style: titleStyle(context, size: 13, color: Colors.teal)),
-                          Text("Contr: $cur ${mem.contribution.toStringAsFixed(2)}", style: titleStyle(context, size: 13)),
-                        ],
-                      ),
-                      if (auth.isAdmin)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: paginated.isEmpty
+                ? const Center(child: Text("No matching members found."))
+                : GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 1,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: auth.isAdmin ? 1.7 : 2.2,
+                    ),
+                    itemCount: paginated.length,
+                    itemBuilder: (ctx, idx) {
+                      final mem = paginated[idx];
+                      return Container(
+                        padding: const EdgeInsets.all(14.0),
+                        decoration: glassDecoration(context),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            TextButton.icon(
-                              icon: const Icon(Icons.edit, size: 16, color: Colors.indigoAccent),
-                              label: const Text("Edit", style: TextStyle(fontSize: 12, color: Colors.indigoAccent)),
-                              onPressed: () => _showEditMemberDialog(context, auth, ledger, mem),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(mem.name, style: titleStyle(context, size: 16)),
+                                Chip(label: Text(mem.relation, style: const TextStyle(fontSize: 11))),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            TextButton.icon(
-                              icon: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
-                              label: const Text("Delete", style: TextStyle(fontSize: 12, color: Colors.redAccent)),
-                              onPressed: () => _showDeleteMemberConfirmation(context, auth, ledger, mem),
+                            Text("Phone: ${mem.phone}", style: subtitleStyle(context)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Balance: $cur ${mem.balance.toStringAsFixed(2)}", style: titleStyle(context, size: 13, color: Colors.teal)),
+                                Text("Contr: $cur ${mem.contribution.toStringAsFixed(2)}", style: titleStyle(context, size: 13)),
+                              ],
                             ),
+                            if (auth.isAdmin)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton.icon(
+                                    icon: const Icon(Icons.edit, size: 16, color: Colors.indigoAccent),
+                                    label: const Text("Edit", style: TextStyle(fontSize: 12, color: Colors.indigoAccent)),
+                                    onPressed: () => _showEditMemberDialog(context, auth, ledger, mem),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  TextButton.icon(
+                                    icon: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
+                                    label: const Text("Delete", style: TextStyle(fontSize: 12, color: Colors.redAccent)),
+                                    onPressed: () => _showDeleteMemberConfirmation(context, auth, ledger, mem),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+          ),
+          const SizedBox(height: 12),
+          // Pagination Footer
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Text("Show ", style: TextStyle(fontSize: 13)),
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<int>(
+                      value: _membersLimit,
+                      items: const [
+                        DropdownMenuItem(value: 5, child: Text("5")),
+                        DropdownMenuItem(value: 10, child: Text("10")),
+                        DropdownMenuItem(value: 20, child: Text("20")),
+                        DropdownMenuItem(value: 50, child: Text("50")),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _membersLimit = val;
+                            _membersPage = 1;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  Text(" members per page (Total: $totalMembers)", style: const TextStyle(fontSize: 13)),
+                ],
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    onPressed: _membersPage > 1
+                        ? () {
+                            setState(() {
+                              _membersPage--;
+                            });
+                          }
+                        : null,
+                  ),
+                  Text("Page $_membersPage of ${totalPages == 0 ? 1 : totalPages}", style: const TextStyle(fontSize: 13)),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    onPressed: _membersPage < totalPages
+                        ? () {
+                            setState(() {
+                              _membersPage++;
+                            });
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -1277,6 +1409,25 @@ class _BudgetsViewState extends State<BudgetsView> {
                             padding: EdgeInsets.only(top: 8.0),
                             child: Text("Warning: Approaching or Exceeded 90% budget cap limit!", style: TextStyle(color: Colors.red, fontSize: 11)),
                           ),
+                        if (auth.isAdmin) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton.icon(
+                                icon: const Icon(Icons.edit, size: 16, color: Colors.indigoAccent),
+                                label: const Text("Edit", style: TextStyle(fontSize: 12, color: Colors.indigoAccent)),
+                                onPressed: () => _showEditBudgetDialog(context, auth, ledger, b),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton.icon(
+                                icon: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
+                                label: const Text("Delete", style: TextStyle(fontSize: 12, color: Colors.redAccent)),
+                                onPressed: () => _showDeleteBudgetConfirmation(context, auth, ledger, b),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -1326,6 +1477,100 @@ class _BudgetsViewState extends State<BudgetsView> {
                 Navigator.pop(ctx);
               },
               child: const Text("Save Budget"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditBudgetDialog(BuildContext context, AuthProvider auth, LedgerProvider ledger, Budget b) {
+    _categoryController.text = b.category;
+    _limitController.text = b.limit.toString();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text("Edit Budget: ${b.category}"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _categoryController, 
+                decoration: const InputDecoration(labelText: "Category Name (e.g. Groceries)")
+              ),
+              TextField(
+                controller: _limitController, 
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: "Monthly cap budget limit (decimal allowed)"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _categoryController.clear();
+                _limitController.clear();
+                Navigator.pop(ctx);
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final updatedBudget = Budget(
+                  id: b.id,
+                  category: _categoryController.text,
+                  limit: double.tryParse(_limitController.text) ?? 0.0,
+                  familyId: b.familyId,
+                );
+                final success = await ledger.updateBudget(updatedBudget, auth.currentUser!);
+                if (!success && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Failed to update budget on Sheets"), backgroundColor: Colors.red),
+                  );
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Budget updated successfully!"), backgroundColor: Colors.green),
+                  );
+                }
+                _categoryController.clear();
+                _limitController.clear();
+                Navigator.pop(ctx);
+              },
+              child: const Text("Save Changes"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteBudgetConfirmation(BuildContext context, AuthProvider auth, LedgerProvider ledger, Budget b) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text("Delete Budget Cap?"),
+          content: Text("Are you sure you want to delete the budget cap limit for category '${b.category}'?"),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                final success = await ledger.deleteBudget(b.id!, auth.currentUser!);
+                if (!success && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Failed to delete budget on Sheets"), backgroundColor: Colors.red),
+                  );
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Budget deleted successfully!"), backgroundColor: Colors.green),
+                  );
+                }
+                Navigator.pop(ctx);
+              },
+              child: const Text("Delete"),
             ),
           ],
         );

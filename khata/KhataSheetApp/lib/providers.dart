@@ -757,6 +757,27 @@ class LedgerProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateBudget(Budget budget, Member user) async {
+    if (user.parentId != 0) return false;
+    try {
+      await StorageService.instance.updateBudgetData(budget.id!, budget.toMap());
+
+      StorageService.instance.sheetsRequest(
+        action: 'update',
+        sheet: 'budgets',
+        recordId: budget.id,
+        recordData: budget.toMap(),
+        sub: user.id!,
+        parentId: user.parentId,
+      ).catchError((_) => <String, dynamic>{});
+
+      await fetchBudgets();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<bool> deleteBudget(int id, Member user) async {
     if (user.parentId != 0) return false;
     await StorageService.instance.deleteBudgetById(id);
