@@ -95,7 +95,7 @@ const TEST_TOKEN = 'your-very-secure-family-khata-secret-key-2026';
  * Manually handles 302 Found redirects via a follow-up GET request to prevent
  * native environments from dropping the request body or failing parsing.
  */
-async function sheetsRequest(payload) {
+async function apiCall_textPlain(payload) {
   try {
     const res = await fetch(SHEETS_URL, {
       method: 'POST',
@@ -121,14 +121,40 @@ async function sheetsRequest(payload) {
   }
 }
 
+// using JSON but not working from frontend APP
+async function apiCall_applicationJson(payload) {
+  try {
+    const res = await fetch(SHEETS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+
+async function sheetsRequest(payload) {
+  try {
+    return await apiCall_textPlain(payload); // for CORS 
+    // return await apiCall_applicationJson(payload); 
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 // ─── SEED DATA DEFINITIONS ──────────────────────────────────────────────────
 const DUMMY_MEMBERS = [
   {
     id: 1,
-    name: 'Ramkali',
+    name: 'Kavita',
     relation: 'Self',
     phone: '9999999999',
-    email: 'ramkali@khata.com',
+    email: 'kavita@khata.com',
     password: 'admin',
     familyId: 1,
     parentId: 0,
@@ -300,6 +326,7 @@ async function seedDatabase() {
     };
     
     const currentListRes = await sheetsRequest(readPayload);
+
     if (currentListRes.success && Array.isArray(currentListRes.data)) {
       // Delete existing records one by one
       for (const item of currentListRes.data) {
