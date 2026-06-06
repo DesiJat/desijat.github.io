@@ -970,7 +970,7 @@ class _MembersViewState extends State<MembersView> {
                 crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 1,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 2.2,
+                childAspectRatio: auth.isAdmin ? 1.7 : 2.2,
               ),
               itemCount: ledger.members.length,
               itemBuilder: (ctx, idx) {
@@ -997,6 +997,23 @@ class _MembersViewState extends State<MembersView> {
                           Text("Contr: $cur ${mem.contribution.toStringAsFixed(2)}", style: titleStyle(context, size: 13)),
                         ],
                       ),
+                      if (auth.isAdmin)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton.icon(
+                              icon: const Icon(Icons.edit, size: 16, color: Colors.indigoAccent),
+                              label: const Text("Edit", style: TextStyle(fontSize: 12, color: Colors.indigoAccent)),
+                              onPressed: () => _showEditMemberDialog(context, auth, ledger, mem),
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              icon: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
+                              label: const Text("Delete", style: TextStyle(fontSize: 12, color: Colors.redAccent)),
+                              onPressed: () => _showDeleteMemberConfirmation(context, auth, ledger, mem),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 );
@@ -1055,6 +1072,122 @@ class _MembersViewState extends State<MembersView> {
                 Navigator.pop(ctx);
               },
               child: const Text("Add Member"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditMemberDialog(BuildContext context, AuthProvider auth, LedgerProvider ledger, Member mem) {
+    _nameController.text = mem.name;
+    _relationController.text = mem.relation;
+    _phoneController.text = mem.phone;
+    _emailController.text = mem.email;
+    _passwordController.text = mem.password;
+    final contributionController = TextEditingController(text: mem.contribution.toString());
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text("Edit Member: ${mem.name}"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: _nameController, decoration: const InputDecoration(labelText: "Display Name")),
+                TextField(controller: _relationController, decoration: const InputDecoration(labelText: "Relation (e.g. Son, Wife)")),
+                TextField(controller: _phoneController, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: "Phone (Login ID)")),
+                TextField(controller: _emailController, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: "Email (Optional)")),
+                TextField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: "Password")),
+                TextField(
+                  controller: contributionController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(labelText: "Monthly Contribution (Decimal allowed)"),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _nameController.clear();
+                _relationController.clear();
+                _phoneController.clear();
+                _emailController.clear();
+                _passwordController.clear();
+                Navigator.pop(ctx);
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final updatedMember = Member(
+                  id: mem.id,
+                  name: _nameController.text,
+                  relation: _relationController.text,
+                  phone: _phoneController.text,
+                  email: _emailController.text,
+                  password: _passwordController.text,
+                  parentId: mem.parentId,
+                  familyId: mem.familyId,
+                  photo: mem.photo,
+                  contribution: double.tryParse(contributionController.text) ?? 0.0,
+                  balance: mem.balance,
+                );
+
+                final success = await ledger.updateMember(updatedMember, auth.currentUser!);
+                if (!success && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Failed to update member on Google Sheets"), backgroundColor: Colors.red),
+                  );
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Member details updated successfully!"), backgroundColor: Colors.green),
+                  );
+                }
+
+                _nameController.clear();
+                _relationController.clear();
+                _phoneController.clear();
+                _emailController.clear();
+                _passwordController.clear();
+                Navigator.pop(ctx);
+              },
+              child: const Text("Save Changes"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteMemberConfirmation(BuildContext context, AuthProvider auth, LedgerProvider ledger, Member mem) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text("Delete Member Profile?"),
+          content: Text("Are you sure you want to delete ${mem.name} from the family list? This action will also delete their credentials."),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                final success = await ledger.deleteMember(mem.id!, auth.currentUser!);
+                if (!success && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Failed to delete member on Google Sheets"), backgroundColor: Colors.red),
+                  );
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Member deleted successfully!"), backgroundColor: Colors.green),
+                  );
+                }
+                Navigator.pop(ctx);
+              },
+              child: const Text("Delete"),
             ),
           ],
         );

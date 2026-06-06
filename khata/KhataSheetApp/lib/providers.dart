@@ -617,6 +617,41 @@ class LedgerProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateMember(Member member, Member user) async {
+    if (user.parentId != 0) return false;
+    try {
+      await StorageService.instance.updateMemberField(member.id!, {
+        'name': member.name,
+        'relation': member.relation,
+        'phone': member.phone,
+        'email': member.email,
+        'password': member.password,
+        'contribution': member.contribution,
+      });
+
+      StorageService.instance.sheetsRequest(
+        action: 'update',
+        sheet: 'members',
+        recordId: member.id,
+        recordData: {
+          'name': member.name,
+          'relation': member.relation,
+          'phone': member.phone,
+          'email': member.email,
+          'password': member.password,
+          'contribution': member.contribution,
+        },
+        sub: user.id!,
+        parentId: user.parentId,
+      ).catchError((_) => <String, dynamic>{});
+
+      await fetchMembers();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<bool> deleteMember(int id, Member user) async {
     if (user.parentId != 0) return false;
     await StorageService.instance.deleteMemberById(id);
