@@ -77,6 +77,7 @@ class _AuthLockViewState extends State<AuthLockView> with SingleTickerProviderSt
   final _regFamilyController = TextEditingController();
   final _regAdminController = TextEditingController();
   final _regPhoneController = TextEditingController();
+  final _regEmailController = TextEditingController();
   final _regPasswordController = TextEditingController();
 
   bool _isAdvancedExpanded = false;
@@ -216,6 +217,8 @@ class _AuthLockViewState extends State<AuthLockView> with SingleTickerProviderSt
         const SizedBox(height: 12),
         _buildTextField("Admin Phone", _regPhoneController, TextInputType.phone),
         const SizedBox(height: 12),
+        _buildTextField("Admin Email", _regEmailController, TextInputType.emailAddress),
+        const SizedBox(height: 12),
         _buildTextField("Password", _regPasswordController, TextInputType.visiblePassword, obscureText: true),
         const SizedBox(height: 24),
         ElevatedButton(
@@ -231,6 +234,7 @@ class _AuthLockViewState extends State<AuthLockView> with SingleTickerProviderSt
               _regAdminController.text,
               _regPhoneController.text,
               _regPasswordController.text,
+              email: _regEmailController.text,
               sheetsUrl: _sheetsUrlController.text,
               jwtSecret: _jwtSecretController.text,
             );
@@ -598,6 +602,21 @@ class _LedgerViewState extends State<LedgerView> {
     final auth = context.watch<AuthProvider>();
     final cur = auth.currency;
 
+    final budgetCats = ledger.budgets.map((b) => b.category).toSet();
+    final txCats = ledger.transactions.map((t) => t.category).toSet();
+    final combinedCats = {...budgetCats, ...txCats}
+        .where((c) => c.trim().isNotEmpty)
+        .toList()
+        ..sort();
+    final filterCats = combinedCats.isNotEmpty
+        ? combinedCats
+        : ["Salary", "Business Income", "Rent Income", "Food", "Education", "Electricity", "Water", "Internet", "Medical", "Transportation", "Entertainment", "Other"];
+
+    if (ledger.categoryFilter.isNotEmpty && !filterCats.contains(ledger.categoryFilter)) {
+      filterCats.add(ledger.categoryFilter);
+      filterCats.sort();
+    }
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -650,20 +669,7 @@ class _LedgerViewState extends State<LedgerView> {
                 hint: const Text("All Categories"),
                 items: [
                   const DropdownMenuItem(value: null, child: Text("All Categories")),
-                  ...[
-                    "Salary",
-                    "Business Income",
-                    "Rent Income",
-                    "Food",
-                    "Education",
-                    "Electricity",
-                    "Water",
-                    "Internet",
-                    "Medical",
-                    "Transportation",
-                    "Entertainment",
-                    "Other"
-                  ].map((c) => DropdownMenuItem(value: c, child: Text(c))),
+                  ...filterCats.map((c) => DropdownMenuItem(value: c, child: Text(c))),
                 ],
                 onChanged: (val) => ledger.setFilters(category: val ?? ""),
               ),

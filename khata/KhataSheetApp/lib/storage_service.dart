@@ -66,9 +66,9 @@ class StorageService {
   }
 
   // ─── Members ─────────────────────────────────────────────────────
-  Future<int> insertMember(Map<String, dynamic> row) async {
+  Future<int> insertMember(Map<String, dynamic> row, {int? forceId}) async {
     await _ensureReady();
-    final id = _nextId(_mem, 'mid');
+    final id = forceId ?? _nextId(_mem, 'mid');
     await _mem.put('m$id', {...row, 'id': id});
     return id;
   }
@@ -195,7 +195,10 @@ class StorageService {
   Future<void> bulkReplaceTransactions(
       List<Map<String, dynamic>> rows, int familyId) async {
     await _ensureReady();
-    final incomingIds = rows.map((r) => _toInt(r['id'])).toSet();
+    final incomingIds = rows
+        .where((r) => _toInt(r['familyId'] ?? r['family_id']) == familyId)
+        .map((r) => _toInt(r['id']))
+        .toSet();
     final keysToDelete = _txn.keys
         .where((k) => k is String && (k as String).startsWith('t'))
         .where((k) {
@@ -256,7 +259,10 @@ class StorageService {
   Future<void> bulkReplaceAccounts(
       List<Map<String, dynamic>> rows, int familyId) async {
     await _ensureReady();
-    final incomingIds = rows.map((r) => _toInt(r['id'])).toSet();
+    final incomingIds = rows
+        .where((r) => _toInt(r['familyId'] ?? r['family_id']) == familyId)
+        .map((r) => _toInt(r['id']))
+        .toSet();
     final keysToDelete = _acc.keys
         .where((k) => k is String && (k as String).startsWith('a'))
         .where((k) {
@@ -284,6 +290,11 @@ class StorageService {
     return id;
   }
 
+  Future<void> updateBudgetData(int id, Map<String, dynamic> row) async {
+    await _ensureReady();
+    await _bud.put('b$id', Map<String, dynamic>.from(row)..['id'] = id);
+  }
+
   Future<void> deleteBudgetById(int id) async {
     await _ensureReady();
     await _bud.delete('b$id');
@@ -301,7 +312,10 @@ class StorageService {
   Future<void> bulkReplaceBudgets(
       List<Map<String, dynamic>> rows, int familyId) async {
     await _ensureReady();
-    final incomingIds = rows.map((r) => _toInt(r['id'])).toSet();
+    final incomingIds = rows
+        .where((r) => _toInt(r['familyId'] ?? r['family_id']) == familyId)
+        .map((r) => _toInt(r['id']))
+        .toSet();
     final keysToDelete = _bud.keys
         .where((k) => k is String && (k as String).startsWith('b'))
         .where((k) {
@@ -357,7 +371,10 @@ class StorageService {
   Future<void> bulkReplaceLoans(
       List<Map<String, dynamic>> rows, int familyId) async {
     await _ensureReady();
-    final incomingIds = rows.map((r) => _toInt(r['id'])).toSet();
+    final incomingIds = rows
+        .where((r) => _toInt(r['familyId'] ?? r['family_id']) == familyId)
+        .map((r) => _toInt(r['id']))
+        .toSet();
     final keysToDelete = _loa.keys
         .where((k) => k is String && (k as String).startsWith('l'))
         .where((k) {
@@ -482,6 +499,11 @@ class StorageService {
 
   // ─── Helpers ─────────────────────────────────────────────────────
   Map<String, dynamic> _m(dynamic v) => Map<String, dynamic>.from(v as Map);
-  int? _toInt(dynamic v) => v != null ? int.tryParse(v.toString()) : null;
+  int? _toInt(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toInt();
+    final d = double.tryParse(v.toString());
+    return d?.toInt();
+  }
   double? _toDouble(dynamic v) => v != null ? double.tryParse(v.toString()) : null;
 }

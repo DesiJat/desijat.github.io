@@ -344,7 +344,7 @@ class StorageManager {
 
     const schemas = {
       config: ["familyName", "currency", "theme", "useSheets", "sheetsUrl", "securePin"],
-      members: ["name", "relation", "phone", "email", "password", "parent_id", "familyId", "photo", "contribution", "balance"],
+      members: ["name", "relation", "phone", "email", "password", "parentId", "familyId", "photo", "contribution", "balance"],
       transactions: ["date", "type", "category", "memberId", "externalAccountId", "amount", "description", "status", "dueDate", "familyId"],
       external_accounts: ["name", "phone", "address", "type", "openingBalance", "currentBalance", "familyId"],
       budgets: ["category", "limit", "familyId"],

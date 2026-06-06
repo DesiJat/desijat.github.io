@@ -268,7 +268,7 @@ async function renderMembers() {
   document.getElementById("membersPrevBtn").disabled = pag.page === 1;
   document.getElementById("membersNextBtn").disabled = pag.page === totalPages;
 
-  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
 
   paginatedList.forEach(m => {
     const card = document.createElement("div");
@@ -357,7 +357,7 @@ async function renderInternalKhata() {
   document.getElementById("internalKhataPrevBtn").disabled = pag.page === 1;
   document.getElementById("internalKhataNextBtn").disabled = pag.page === totalPages;
 
-  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
 
   if (paginatedList.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No matching transactions found.</td></tr>`;
@@ -388,7 +388,7 @@ async function renderExternalKhata() {
   const tbody = document.getElementById("externalAccountsTableBody");
   tbody.innerHTML = "";
 
-  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
 
   accounts.forEach(a => {
     const tr = document.createElement("tr");
@@ -417,7 +417,7 @@ async function renderBudget() {
   inputGrid.innerHTML = "";
   barContainer.innerHTML = "";
 
-  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
   const submitBtn = document.querySelector("#budgetForm button[type='submit']");
   if (submitBtn) {
     submitBtn.style.display = isAdmin ? "block" : "none";
@@ -474,7 +474,7 @@ async function renderLoans() {
   document.getElementById("loansPrevBtn").disabled = pag.page === 1;
   document.getElementById("loansNextBtn").disabled = pag.page === totalPages;
 
-  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
 
   if (paginatedList.length === 0) {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No active loans recorded.</td></tr>`;
@@ -548,7 +548,7 @@ async function renderSettings() {
   document.getElementById("settJwtSecret").value = config.jwtSecret || "";
   document.getElementById("settUseSheets").checked = !!config.useSheets;
 
-  const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+  const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
   document.getElementById("settFamilyName").disabled = !isAdmin;
   document.getElementById("settCurrency").disabled = !isAdmin;
   document.getElementById("settSheetsUrl").disabled = !isAdmin;
@@ -567,7 +567,7 @@ async function renderSettings() {
 
 // Global Modals controllers
 window.editMember = async function(id) {
-  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+  if (auth.currentUser && Number(auth.currentUser.parentId) !== 0) {
     showToast("Only Admin has authority to update members.", "danger");
     return;
   }
@@ -588,7 +588,7 @@ window.editMember = async function(id) {
 };
 
 window.deleteMember = async function(id) {
-  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+  if (auth.currentUser && Number(auth.currentUser.parentId) !== 0) {
     showToast("Only Admin has authority to delete members.", "danger");
     return;
   }
@@ -600,7 +600,7 @@ window.deleteMember = async function(id) {
 };
 
 window.deleteTransaction = async function(id) {
-  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+  if (auth.currentUser && Number(auth.currentUser.parentId) !== 0) {
     showToast("Only Admin has authority to delete transactions.", "danger");
     return;
   }
@@ -663,7 +663,7 @@ window.loadExternalLedger = async function(id) {
 };
 
 window.deleteExternalAccount = async function(id) {
-  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+  if (auth.currentUser && Number(auth.currentUser.parentId) !== 0) {
     showToast("Only Admin has authority to delete external accounts.", "danger");
     return;
   }
@@ -738,7 +738,7 @@ window.logLoanRepayment = async function(id) {
 };
 
 window.deleteLoan = async function(id) {
-  if (auth.currentUser && Number(auth.currentUser.parent_id) !== 0) {
+  if (auth.currentUser && Number(auth.currentUser.parentId) !== 0) {
     showToast("Only Admin has authority to delete loans.", "danger");
     return;
   }
@@ -763,7 +763,7 @@ function bindFormSubmissions() {
   // Config save
   document.getElementById("settingsForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+    const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
     if (!isAdmin) {
       showToast("Only Admin has authority to update settings.", "danger");
       return;
@@ -842,7 +842,7 @@ function bindFormSubmissions() {
     const balance = document.getElementById("memberBalance").value;
 
     try {
-      const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+      const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
       if (id && !isAdmin) {
         showToast("Only Admin has authority to update members.", "danger");
         return;
@@ -962,7 +962,7 @@ function bindFormSubmissions() {
   // Budget Setup Limits
   document.getElementById("budgetForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const isAdmin = auth.currentUser && Number(auth.currentUser.parent_id) === 0;
+    const isAdmin = auth.currentUser && Number(auth.currentUser.parentId) === 0;
     if (!isAdmin) {
       showToast("Only Admin has authority to update budgets.", "danger");
       return;

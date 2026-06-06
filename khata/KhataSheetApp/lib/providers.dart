@@ -181,6 +181,7 @@ class AuthProvider extends ChangeNotifier {
     String adminName,
     String phone,
     String password, {
+    String email = '',
     String? sheetsUrl,
     String? jwtSecret,
   }) async {
@@ -198,6 +199,75 @@ class AuthProvider extends ChangeNotifier {
     _currency = '₹';
     _theme = 'dark';
 
+    int finalId = 0;
+    try {
+      final res = await StorageService.instance.sheetsRequest(
+        action: 'create',
+        sheet: 'members',
+        recordData: {
+          'name': adminName,
+          'relation': 'Father (Admin)',
+          'phone': phone,
+          'email': email,
+          'password': password,
+          'parentId': 0,
+          'familyId': 0, // Server will automatically set this to the new ID
+          'photo': '',
+          'contribution': 0.0,
+          'balance': 0.0,
+        },
+        sub: 0,
+        parentId: 0,
+      ).timeout(const Duration(seconds: 12));
+
+      if (res['success'] == true && res['id'] != null) {
+        finalId = int.tryParse(res['id'].toString()) ?? 0;
+        
+        // Fail-safe client-side update to ensure familyId == finalId in Google Sheets
+        await StorageService.instance.sheetsRequest(
+          action: 'update',
+          sheet: 'members',
+          recordId: finalId,
+          recordData: {'familyId': finalId},
+          sub: finalId,
+          parentId: 0,
+        ).timeout(const Duration(seconds: 5)).catchError((_) => <String, dynamic>{});
+      }
+    } catch (e) {
+      debugPrint('Sheets registration push failed: $e');
+    }
+
+    // Fallback to local auto-increment if Sheets creation failed
+    if (finalId == 0) {
+      finalId = await StorageService.instance.insertMember({
+        'name': adminName,
+        'relation': 'Father (Admin)',
+        'phone': phone,
+        'email': email,
+        'password': password,
+        'parentId': 0,
+        'familyId': 0,
+        'photo': '',
+        'contribution': 0.0,
+        'balance': 0.0,
+      });
+      await StorageService.instance.updateMemberField(finalId, {'familyId': finalId});
+    } else {
+      // Succeeded, insert locally using the forceId helper
+      await StorageService.instance.insertMember({
+        'name': adminName,
+        'relation': 'Father (Admin)',
+        'phone': phone,
+        'email': email,
+        'password': password,
+        'parentId': 0,
+        'familyId': finalId,
+        'photo': '',
+        'contribution': 0.0,
+        'balance': 0.0,
+      }, forceId: finalId);
+    }
+
     await StorageService.instance.saveConfig({
       'familyName': familyName,
       'currency': '₹',
@@ -207,43 +277,20 @@ class AuthProvider extends ChangeNotifier {
       'jwtSecret': StorageService.instance.jwtSecret,
     });
 
-    final adminId = await StorageService.instance.insertMember({
-      'name': adminName,
-      'relation': 'Father (Admin)',
-      'phone': phone,
-      'email': '',
-      'password': password,
-      'parent_id': 0,
-      'familyId': 0,
-      'photo': '',
-      'contribution': 0.0,
-      'balance': 0.0,
-    });
-
-    await StorageService.instance.updateMemberField(adminId, {'familyId': adminId});
-
     _currentUser = Member(
-      id: adminId,
+      id: finalId,
       name: adminName,
       relation: 'Father (Admin)',
       phone: phone,
-      familyId: adminId,
+      email: email,
+      password: password,
+      familyId: finalId,
       parentId: 0,
     );
     _isAuthenticated = true;
-    StorageService.instance.currentFamilyId = adminId;
+    StorageService.instance.currentFamilyId = finalId;
 
     await _saveSession(phone, password);
-
-    // Fire-and-forget push to sheets
-    StorageService.instance.sheetsRequest(
-      action: 'create',
-      sheet: 'members',
-      recordData: _currentUser!.toMap(),
-      sub: adminId,
-      parentId: 0,
-    ).catchError((_) => <String, dynamic>{});
-
     notifyListeners();
     return true;
   }
@@ -628,24 +675,51 @@ class LedgerProvider extends ChangeNotifier {
   }
 
   Future<bool> setBudget(Budget budget, Member user) async {
-    final id = await StorageService.instance.insertBudget(budget.toMap());
-    final updatedBudget = Budget(
-      id: id,
-      category: budget.category,
-      limit: budget.limit,
-      familyId: budget.familyId,
-    );
+    final existingIdx = _budgets.indexWhere(
+        (b) => b.category.trim().toLowerCase() == budget.category.trim().toLowerCase());
 
-    StorageService.instance.sheetsRequest(
-      action: 'create',
-      sheet: 'budgets',
-      recordData: updatedBudget.toMap(),
-      sub: user.id!,
-      parentId: user.parentId,
-    ).catchError((_) => <String, dynamic>{});
+    if (existingIdx != -1) {
+      final existing = _budgets[existingIdx];
+      final updatedBudget = Budget(
+        id: existing.id,
+        category: existing.category,
+        limit: budget.limit,
+        familyId: budget.familyId,
+      );
 
-    await fetchBudgets();
-    return true;
+      await StorageService.instance.updateBudgetData(existing.id!, updatedBudget.toMap());
+
+      StorageService.instance.sheetsRequest(
+        action: 'update',
+        sheet: 'budgets',
+        recordId: existing.id,
+        recordData: updatedBudget.toMap(),
+        sub: user.id!,
+        parentId: user.parentId,
+      ).catchError((_) => <String, dynamic>{});
+
+      await fetchBudgets();
+      return true;
+    } else {
+      final id = await StorageService.instance.insertBudget(budget.toMap());
+      final updatedBudget = Budget(
+        id: id,
+        category: budget.category,
+        limit: budget.limit,
+        familyId: budget.familyId,
+      );
+
+      StorageService.instance.sheetsRequest(
+        action: 'create',
+        sheet: 'budgets',
+        recordData: updatedBudget.toMap(),
+        sub: user.id!,
+        parentId: user.parentId,
+      ).catchError((_) => <String, dynamic>{});
+
+      await fetchBudgets();
+      return true;
+    }
   }
 
   Future<bool> deleteBudget(int id, Member user) async {

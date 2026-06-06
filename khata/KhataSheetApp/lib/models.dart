@@ -1,5 +1,12 @@
 import 'dart:convert';
 
+int? safeParseInt(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toInt();
+  final d = double.tryParse(value.toString());
+  return d?.toInt();
+}
+
 class Member {
   final int? id;
   final String name;
@@ -35,7 +42,7 @@ class Member {
       'phone': phone,
       'email': email,
       'password': password,
-      'parent_id': parentId,
+      'parentId': parentId,
       'familyId': familyId,
       'photo': photo,
       'contribution': contribution,
@@ -45,14 +52,14 @@ class Member {
 
   factory Member.fromMap(Map<String, dynamic> map) {
     return Member(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: safeParseInt(map['id']),
       name: map['name']?.toString() ?? '',
       relation: map['relation']?.toString() ?? '',
       phone: map['phone']?.toString() ?? '',
       email: map['email']?.toString() ?? '',
       password: map['password']?.toString() ?? '',
-      parentId: int.tryParse((map['parent_id'] ?? map['parentId'])?.toString() ?? '0') ?? 0,
-      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
+      parentId: safeParseInt(map['parentId'] ?? map['parent_id']) ?? 0,
+      familyId: safeParseInt(map['familyId'] ?? map['family_id']) ?? 0,
       photo: map['photo']?.toString() ?? '',
       contribution: double.tryParse(map['contribution']?.toString() ?? '0.0') ?? 0.0,
       balance: double.tryParse(map['balance']?.toString() ?? '0.0') ?? 0.0,
@@ -102,18 +109,16 @@ class Transaction {
 
   factory Transaction.fromMap(Map<String, dynamic> map) {
     return Transaction(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: safeParseInt(map['id']),
       date: map['date']?.toString() ?? '',
       type: map['type']?.toString() ?? 'Expense',
       category: map['category']?.toString() ?? '',
-      memberId: int.tryParse((map['memberId'] ?? map['member_id'])?.toString() ?? '0') ?? 0,
-      externalAccountId: (map['externalAccountId'] ?? map['external_account_id']) != null
-          ? int.tryParse((map['externalAccountId'] ?? map['external_account_id']).toString())
-          : null,
+      memberId: safeParseInt(map['memberId'] ?? map['member_id']) ?? 0,
+      externalAccountId: safeParseInt(map['externalAccountId'] ?? map['external_account_id']),
       amount: double.tryParse(map['amount']?.toString() ?? '0.0') ?? 0.0,
       description: map['description']?.toString() ?? '',
       status: map['status']?.toString() ?? 'Completed',
-      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
+      familyId: safeParseInt(map['familyId'] ?? map['family_id']) ?? 0,
     );
   }
 }
@@ -154,14 +159,14 @@ class ExternalAccount {
 
   factory ExternalAccount.fromMap(Map<String, dynamic> map) {
     return ExternalAccount(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: safeParseInt(map['id']),
       name: map['name']?.toString() ?? '',
       type: map['type']?.toString() ?? '',
       phone: map['phone']?.toString() ?? '',
       address: map['address']?.toString() ?? '',
       openingBalance: double.tryParse((map['openingBalance'] ?? map['opening_balance'])?.toString() ?? '0.0') ?? 0.0,
       currentBalance: double.tryParse((map['currentBalance'] ?? map['current_balance'])?.toString() ?? '0.0') ?? 0.0,
-      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
+      familyId: safeParseInt(map['familyId'] ?? map['family_id']) ?? 0,
     );
   }
 }
@@ -190,10 +195,10 @@ class Budget {
 
   factory Budget.fromMap(Map<String, dynamic> map) {
     return Budget(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: safeParseInt(map['id']),
       category: map['category']?.toString() ?? '',
       limit: double.tryParse(map['limit']?.toString() ?? '0.0') ?? 0.0,
-      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
+      familyId: safeParseInt(map['familyId'] ?? map['family_id']) ?? 0,
     );
   }
 }
@@ -257,7 +262,7 @@ class Loan {
     } catch (_) {}
 
     return Loan(
-      id: map['id'] != null ? int.tryParse(map['id'].toString()) : null,
+      id: safeParseInt(map['id']),
       person: map['person']?.toString() ?? '',
       loanType: map['loanType']?.toString() ?? 'Given',
       amount: double.tryParse(map['amount']?.toString() ?? '0.0') ?? 0.0,
@@ -267,8 +272,8 @@ class Loan {
       paidAmount: double.tryParse(map['paidAmount']?.toString() ?? '0.0') ?? 0.0,
       notes: map['notes']?.toString() ?? '',
       paymentHistory: history,
-      memberId: int.tryParse((map['memberId'] ?? map['member_id'])?.toString() ?? '0') ?? 0,
-      familyId: int.tryParse((map['familyId'] ?? map['family_id'])?.toString() ?? '0') ?? 0,
+      memberId: safeParseInt(map['memberId'] ?? map['member_id']) ?? 0,
+      familyId: safeParseInt(map['familyId'] ?? map['family_id']) ?? 0,
     );
   }
 }

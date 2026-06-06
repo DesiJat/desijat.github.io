@@ -15,7 +15,7 @@ class AuthManager {
     if (savedUser) {
       this.isAuthenticated = true;
       this.currentUser = savedUser;
-      storage.currentFamilyId = Number(savedUser.parent_id) === 0 ? Number(savedUser.id) : Number(savedUser.parent_id);
+      storage.currentFamilyId = Number(savedUser.parentId) === 0 ? Number(savedUser.id) : Number(savedUser.parentId);
       
       const config = storage.getLocal("config") || {};
       if (config.sheetsUrl) storage.sheetsUrl = config.sheetsUrl;
@@ -84,7 +84,7 @@ class AuthManager {
       phone: phone,
       email: email,
       password: password, // plain password for simple local SaaS checks
-      parent_id: 0,
+      parentId: 0,
       familyId: newId, // Self-anchored family tenant
       photo: "",
       contribution: 0,
@@ -191,7 +191,7 @@ class AuthManager {
       this.isAuthenticated = true;
       this.currentUser = user;
       // If user has parent_id = 0 (Admin), their familyId is their own ID. Otherwise it is their parent_id
-      storage.currentFamilyId = Number(user.parent_id) === 0 ? Number(user.id) : Number(user.parent_id);
+      storage.currentFamilyId = Number(user.parentId) === 0 ? Number(user.id) : Number(user.parentId);
       
       this.resetTimer();
       storage.saveLocal("currentUser", user, false);

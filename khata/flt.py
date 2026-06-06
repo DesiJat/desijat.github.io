@@ -1097,4 +1097,20 @@ flutter build apk
 build/app/outputs/flutter-apk/app-release.apk
 
 """
+# call api using terminal
+"""
+python3 -c "
+import requests, json
+url = 'https://script.google.com/macros/s/AKfycbyIesDi6qGtfrrVYMEnjLwX1HaOuwHzS5SXutH_5HNyFjikcclvuc1hIfmjWPEDiRYZ/exec'
+token = 'your-very-secure-family-khata-secret-key-2026'
+payload = {'action': 'read', 'sheet': 'budgets', 'token': token, 'limit': 100}
+r = requests.post(url, json=payload, headers={'Content-Type': 'text/plain'})
+print(json.dumps(r.json(), indent=2))
+"
 
+
+python3 -c 'import json, requests; res = requests.post("https://script.google.com/macros/s/AKfycbyIesDi6qGtfrrVYMEnjLwX1HaOuwHzS5SXutH_5HNyFjikcclvuc1hIfmjWPEDiRYZ/exec", headers={"Content-Type": "text/plain"}, data=json.dumps({"action": "read", "sheet": "budgets", "token": "your-very-secure-family-khata-secret-key-2026", "limit": 100})); print(json.dumps(res.json(), indent=2))'
+
+python3 -c 'import json, requests; res = requests.post("https://script.google.com/macros/s/AKfycbyIesDi6qGtfrrVYMEnjLwX1HaOuwHzS5SXutH_5HNyFjikcclvuc1hIfmjWPEDiRYZ/exec", headers={"Content-Type": "text/plain"}, data=json.dumps({"action": "read", "sheet": "transactions", "token": "your-very-secure-family-khata-secret-key-2026", "limit": 100})); print(json.dumps(res.json(), indent=2))'
+
+"""

@@ -55,7 +55,7 @@ class MemberManager {
       phone: memberData.phone || "",
       email: memberData.email || "",
       password: memberData.password || "",
-      parent_id: memberData.parent_id !== undefined ? memberData.parent_id : activeAdminId,
+      parentId: memberData.parentId !== undefined ? memberData.parentId : activeAdminId,
       familyId: memberData.familyId || activeFamilyId,
       photo: memberData.photo || "",
       contribution: Number(memberData.contribution) || 0,

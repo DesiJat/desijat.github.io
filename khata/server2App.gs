@@ -200,6 +200,19 @@ function createRecord(body) {
     }
   }
 
+  const sheet =
+    getSheet(body.sheet);
+
+  const id =
+    nextId(sheet);
+
+  if (body.sheet === "members" && body.data) {
+    const parentId = Number(body.data.parentId ?? 0);
+    if (parentId === 0) {
+      body.data.familyId = id;
+    }
+  }
+
   const now = nowIST();
 
   body.data.createdAt = now;
@@ -209,14 +222,8 @@ function createRecord(body) {
     body.columns ||
     Object.keys(body.data || {});
 
-  const sheet =
-    getSheet(body.sheet, cols);
-
   const headers =
     getHeaders(sheet);
-
-  const id =
-    nextId(sheet);
 
   const row =
     headers.map(h =>
