@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Guru Granth Sahib Ji - Interactive Gurbani Reader with Audio TTS</title>
+    <meta name="description" content="Read and listen to Sri Guru Granth Sahib Ji with multi-language scripts (Punjabi, Hindi, English) and meanings with audio playback support.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sticky Navigation Header with Audio Controls -->
+    <header class="top-nav">
+        <div class="nav-container">
+            <div class="brand-title">
+                <span class="brand-icon">ੴ</span>
+                <h1>Sri Guru Granth Sahib Ji</h1>
+            </div>
+
+            <!-- Sticky Audio Player Toolbar -->
+            <div class="audio-player-bar">
+                <button id="btnPlayAll" class="btn-audio-main">
+                    ▶️ Play Full Page
+                </button>
+                <button id="btnStopAudio" class="btn-audio-sub">
+                    ⏹️ Stop
+                </button>
+
+                <div class="audio-control-item">
+                    <label for="ttsLangSelect">Audio Voice:</label>
+                    <select id="ttsLangSelect" class="audio-select">
+                        <option value="pa" selected>Punjabi (ਪੰਜਾਬੀ)</option>
+                        <option value="hi">Hindi (हिंदी)</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <div class="audio-control-item">
+                    <label for="ttsRateSelect">Speed:</label>
+                    <select id="ttsRateSelect" class="audio-select">
+                        <option value="0.8">0.8x Slow</option>
+                        <option value="1.0" selected>1.0x Normal</option>
+                        <option value="1.2">1.2x Fast</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Ang / Page Navigator -->
+            <div class="ang-navigator">
+                <button id="prevAngBtn" class="btn-nav" title="Previous Ang">&lt;</button>
+                <div class="ang-input-group">
+                    <span>Ang</span>
+                    <input type="number" id="angInput" class="ang-input" value="1" min="1" max="1430">
+                    <span>of 1430</span>
+                </div>
+                <button id="nextAngBtn" class="btn-nav" title="Next Ang">&gt;</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toolbar: View Filter Checkboxes -->
+    <section class="toolbar-section">
+        <div class="controls-card">
+            <!-- View Checkboxes Grid -->
+            <div>
+                <div class="filter-group-title">Display Options</div>
+                <div class="view-filters-grid">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="punjabi" checked>
+                        <span>ਪੰਜਾਬੀ (Punjabi Script)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="hindi" checked>
+                        <span>हिंदी (Hindi Script)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="english" checked>
+                        <span>English (Transliteration)</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="punjabiArth" checked>
+                        <span>ਪੰਜਾਬੀ ਅਰਥ (Punjabi Arth)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="hindiArth" checked>
+                        <span>हिंदी अर्थ (Hindi Arth)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="englishMeaning" checked>
+                        <span>Eng Meaning (English)</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="info" checked>
+                        <span>Info (Author/Bani)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Verses Container -->
+    <main class="main-content" id="versesContainer">
+        <!-- Rendered by app.js -->
+    </main>
+
+    <!-- Floating Audio Status Indicator -->
+    <div id="floatingAudioStatus" class="status-floating-bar hidden">
+        <div class="sound-wave">
+            <div class="sound-bar"></div>
+            <div class="sound-bar"></div>
+            <div class="sound-bar"></div>
+        </div>
+        <span id="floatingAudioText" style="font-size:0.9rem; font-weight:600; color:var(--gold-accent);">
+            Playing Audio...
+        </span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
