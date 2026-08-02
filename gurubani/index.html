@@ -16,8 +16,8 @@
     <header class="top-nav">
         <div class="nav-container">
             <div class="brand-title">
-                <span class="brand-icon">ੴ</span>
-                <h1>Sri Guru Granth Sahib Ji</h1>
+                <span class="brand-icon">ॐ ੴ</span>
+                <select id="bookSelect" class="audio-select book-select" title="Select Book"></select>
             </div>
 
             <!-- Sticky Audio Player Toolbar -->
@@ -62,7 +62,7 @@
                 <div class="ang-input-group">
                     <span>Ang</span>
                     <input type="number" id="angInput" class="ang-input" value="1" min="1" max="1430">
-                    <span>of 1430</span>
+                    <span id="totalAngsSpan">of 1430</span>
                 </div>
                 <button id="nextAngBtn" class="btn-nav" title="Next Ang">&gt;</button>
             </div>
@@ -105,6 +105,10 @@
                     <label class="checkbox-label">
                         <input type="checkbox" class="view-toggle" data-key="info" checked>
                         <span>Info (Author/Bani)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="teekas" checked>
+                        <span>ਟੀਕਾ / पद अर्थ (Teekas)</span>
                     </label>
                 </div>
             </div>

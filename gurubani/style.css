@@ -369,6 +369,27 @@ body {
     border-left-color: var(--text-meaning-english);
 }
 
+.verse-teekas {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    background: rgba(211, 84, 0, 0.15);
+    border-left: 3px solid #e67e22;
+    border-radius: 4px;
+    color: #f39c12;
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+.teekas-badge {
+    background: #e67e22;
+    color: #0d0f14;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-right: 6px;
+}
+
 .verse-info {
     font-size: 0.8rem;
     color: var(--text-muted);
