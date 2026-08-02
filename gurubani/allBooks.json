@@ -46,7 +46,7 @@
     "name": "Gurbani",
     "folderName": "gurbani",
     "fileNameAlias": "gurbani_sggs-",
-    "totalFiles": 1410,
+    "totalFiles": 1430,
     "displayOptions": [
       { "key": "punjabi", "label": "ਪੰਜਾਬੀ (Punjabi Script)", "default": true, "class": "punjabi", "type": "line" },
       { "key": "hindi", "label": "हिंदी (Hindi Script)", "default": true, "class": "hindi", "type": "line" },
