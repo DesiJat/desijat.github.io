@@ -1,64 +1,45 @@
-// app.js - Interactive Gurbani Reader with Dynamic Config from allBooks.json
+// app.js - Interactive Gurbani Reader with Dynamic Config & Optimized Modular Architecture
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Embedded Fallback Config (Used if allBooks.json cannot be fetched) ---
+    // --- Helper Factory for Default Book Display & Audio Settings (DRY) ---
+    function createDefaultBookConfig(name, folderName, fileNameAlias, totalFiles) {
+        return {
+            name,
+            folderName,
+            fileNameAlias,
+            totalFiles,
+            displayOptions: [
+                { key: "punjabi", label: "ਪੰਜਾਬੀ (Punjabi Script)", default: true, class: "punjabi", type: "line" },
+                { key: "hindi", label: "हिंदी (Hindi Script)", default: true, class: "hindi", type: "line" },
+                { key: "english", label: "English (Transliteration)", default: true, class: "english", type: "line" },
+                { key: "punjabiArth", label: "ਪੰਜਾਬੀ ਅਰਥ (Punjabi Arth)", default: true, class: "punjabi-arth", type: "arth" },
+                { key: "hindiArth", label: "हिंदी अर्थ (Hindi Arth)", default: true, class: "hindi-arth", type: "arth" },
+                { key: "englishMeaning", label: "Eng Meaning (English)", default: true, class: "english-meaning", type: "arth" },
+                { key: "teekas", label: "ਟੀਕਾ / पद अर्थ (Teekas)", default: true, class: "verse-teekas", type: "teekas" },
+                { key: "info", label: "Info (Author/Bani)", default: true, class: "verse-info", type: "info" }
+            ],
+            audioOptions: {
+                defaultLang: "pa",
+                defaultRate: 1.0,
+                voices: [
+                    { code: "pa", label: "Punjabi (ਪੰਜਾਬੀ)", langMatch: ["pa", "punjabi", "gurmukhi"], textFields: ["punjabi", "punjabiArth"], fallbackText: ["hindi", "english"] },
+                    { code: "hi", label: "Hindi (हिंदी)", langMatch: ["hi", "hindi"], textFields: ["hindi", "hindiArth"], fallbackText: ["english", "punjabi"] },
+                    { code: "en", label: "English", langMatch: ["en", "english"], textFields: ["english", "englishMeaning"], fallbackText: ["punjabi", "hindi"] }
+                ]
+            }
+        };
+    }
+
+    // Embedded Fallback Configuration if allBooks.json is unreachable
     const fallbackAllBooksConfig = {
-        "srigranth": {
-            "name": "Sri Guru Granth Sahib (SriGranth)",
-            "folderName": "srigranth",
-            "fileNameAlias": "gurbani_sggs-",
-            "totalFiles": 1430,
-            "displayOptions": [
-                { "key": "punjabi", "label": "ਪੰਜਾਬੀ (Punjabi Script)", "default": true, "class": "punjabi", "type": "line" },
-                { "key": "hindi", "label": "हिंदी (Hindi Script)", "default": true, "class": "hindi", "type": "line" },
-                { "key": "english", "label": "English (Transliteration)", "default": true, "class": "english", "type": "line" },
-                { "key": "punjabiArth", "label": "ਪੰਜਾਬੀ ਅਰਥ (Punjabi Arth)", "default": true, "class": "punjabi-arth", "type": "arth" },
-                { "key": "hindiArth", "label": "हिंदी अर्थ (Hindi Arth)", "default": true, "class": "hindi-arth", "type": "arth" },
-                { "key": "englishMeaning", "label": "Eng Meaning (English)", "default": true, "class": "english-meaning", "type": "arth" },
-                { "key": "teekas", "label": "ਟੀਕਾ / पद अर्थ (Teekas)", "default": true, "class": "verse-teekas", "type": "teekas" },
-                { "key": "info", "label": "Info (Author/Bani)", "default": true, "class": "verse-info", "type": "info" }
-            ],
-            "audioOptions": {
-                "defaultLang": "pa",
-                "defaultRate": 1.0,
-                "voices": [
-                    { "code": "pa", "label": "Punjabi (ਪੰਜਾਬੀ)", "langMatch": ["pa", "punjabi", "gurmukhi"], "textFields": ["punjabi", "punjabiArth"], "fallbackText": ["hindi", "english"] },
-                    { "code": "hi", "label": "Hindi (हिंदी)", "langMatch": ["hi", "hindi"], "textFields": ["hindi", "hindiArth"], "fallbackText": ["english", "punjabi"] },
-                    { "code": "en", "label": "English", "langMatch": ["en", "english"], "textFields": ["english", "englishMeaning"], "fallbackText": ["punjabi", "hindi"] }
-                ]
-            }
-        },
-        "gurbani": {
-            "name": "Gurbani",
-            "folderName": "gurbani",
-            "fileNameAlias": "gurbani_sggs-",
-            "totalFiles": 1410,
-            "displayOptions": [
-                { "key": "punjabi", "label": "ਪੰਜਾਬੀ (Punjabi Script)", "default": true, "class": "punjabi", "type": "line" },
-                { "key": "hindi", "label": "हिंदी (Hindi Script)", "default": true, "class": "hindi", "type": "line" },
-                { "key": "english", "label": "English (Transliteration)", "default": true, "class": "english", "type": "line" },
-                { "key": "punjabiArth", "label": "ਪੰਜਾਬੀ ਅਰਥ (Punjabi Arth)", "default": true, "class": "punjabi-arth", "type": "arth" },
-                { "key": "hindiArth", "label": "हिंदी अर्थ (Hindi Arth)", "default": true, "class": "hindi-arth", "type": "arth" },
-                { "key": "englishMeaning", "label": "Eng Meaning (English)", "default": true, "class": "english-meaning", "type": "arth" },
-                { "key": "teekas", "label": "ਟੀਕਾ / पद अर्थ (Teekas)", "default": true, "class": "verse-teekas", "type": "teekas" },
-                { "key": "info", "label": "Info (Author/Bani)", "default": true, "class": "verse-info", "type": "info" }
-            ],
-            "audioOptions": {
-                "defaultLang": "pa",
-                "defaultRate": 1.0,
-                "voices": [
-                    { "code": "pa", "label": "Punjabi (ਪੰਜਾਬੀ)", "langMatch": ["pa", "punjabi", "gurmukhi"], "textFields": ["punjabi", "punjabiArth"], "fallbackText": ["hindi", "english"] },
-                    { "code": "hi", "label": "Hindi (हिंदी)", "langMatch": ["hi", "hindi"], "textFields": ["hindi", "hindiArth"], "fallbackText": ["english", "punjabi"] },
-                    { "code": "en", "label": "English", "langMatch": ["en", "english"], "textFields": ["english", "englishMeaning"], "fallbackText": ["punjabi", "hindi"] }
-                ]
-            }
-        }
+        srigranth: createDefaultBookConfig("Sri Guru Granth Sahib (SriGranth)", "srigranth", "gurbani_sggs-", 1430),
+        gurbani: createDefaultBookConfig("Gurbani", "gurbani", "gurbani_sggs-", 1410)
     };
 
     let allBooks = {};
 
-    // --- Application State ---
+    // --- Global Application State ---
     const state = {
         currentBookKey: '',
         currentAng: 1,
@@ -74,30 +55,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- DOM Element References ---
-    const bookSelect = document.getElementById('bookSelect');
-    const totalAngsSpan = document.getElementById('totalAngsSpan');
-    const angInput = document.getElementById('angInput');
-    const prevAngBtn = document.getElementById('prevAngBtn');
-    const nextAngBtn = document.getElementById('nextAngBtn');
-    const versesContainer = document.getElementById('versesContainer');
-    const viewFiltersGrid = document.getElementById('viewFiltersGrid');
+    // --- DOM Element Cache ---
+    const dom = {
+        bookSelect: document.getElementById('bookSelect'),
+        totalAngsSpan: document.getElementById('totalAngsSpan'),
+        angInput: document.getElementById('angInput'),
+        prevAngBtn: document.getElementById('prevAngBtn'),
+        nextAngBtn: document.getElementById('nextAngBtn'),
+        versesContainer: document.getElementById('versesContainer'),
+        viewFiltersGrid: document.getElementById('viewFiltersGrid'),
+        btnPlayAll: document.getElementById('btnPlayAll'),
+        btnStopAudio: document.getElementById('btnStopAudio'),
+        ttsLangSelect: document.getElementById('ttsLangSelect'),
+        ttsRateSelect: document.getElementById('ttsRateSelect'),
+        floatingAudioStatus: document.getElementById('floatingAudioStatus'),
+        floatingAudioText: document.getElementById('floatingAudioText')
+    };
 
-    const btnPlayAll = document.getElementById('btnPlayAll');
-    const btnStopAudio = document.getElementById('btnStopAudio');
-    const ttsLangSelect = document.getElementById('ttsLangSelect');
-    const ttsRateSelect = document.getElementById('ttsRateSelect');
-
-    const floatingAudioStatus = document.getElementById('floatingAudioStatus');
-    const floatingAudioText = document.getElementById('floatingAudioText');
-
-    // --- Speech Synthesis Setup ---
+    // --- Speech Synthesis Engine ---
     const synth = window.speechSynthesis;
     let activeUtterance = null;
 
     function populateVoices() {
-        if (!synth) return;
-        state.audio.voices = synth.getVoices();
+        if (synth) {
+            state.audio.voices = synth.getVoices() || [];
+        }
     }
 
     if (synth) {
@@ -107,20 +89,67 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Match SpeechSynthesis voice based on voiceConfig.langMatch rules from allBooks.json
-    function findVoiceForConfig(voiceConfig) {
-        if (!state.audio.voices || state.audio.voices.length === 0) {
-            populateVoices();
-        }
+    // --- Voice & Script Matching System ---
+    // Precise matching: lang code must START with prefix (e.g. 'hi-IN' matches 'hi' but NOT 'chi-nese')
+    // Name keyword must appear as a whole word (e.g. 'hindi' matches 'Google हिन्दी' but NOT 'Ting-Ting')
+    function findVoiceForLangMatches(langPrefixes, nameKeywords) {
+        populateVoices();
         const voices = state.audio.voices || [];
-        if (!voiceConfig || !voiceConfig.langMatch) return null;
-
         return voices.find(v => {
-            const vLang = (v.lang || '').toLowerCase();
-            const vName = (v.name || '').toLowerCase();
-            return voiceConfig.langMatch.some(m => vLang.includes(m.toLowerCase()) || vName.includes(m.toLowerCase()));
+            const l = (v.lang || '').toLowerCase();
+            const n = (v.name || '').toLowerCase();
+            const langMatch = (langPrefixes || []).some(p => l === p.toLowerCase() || l.startsWith(p.toLowerCase() + '-'));
+            const nameMatch = (nameKeywords || []).some(k => {
+                const kl = k.toLowerCase();
+                return n === kl || n.startsWith(kl + ' ') || n.endsWith(' ' + kl) || n.includes(' ' + kl + ' ');
+            });
+            return langMatch || nameMatch;
         });
     }
+
+    // Build voice priority chain from allBooks.json voice config for the requested language code
+    function getSpeechConfigForVerse(verse, reqLang) {
+        const currentBook = allBooks[state.currentBookKey] || {};
+        const voices = (currentBook.audioOptions && currentBook.audioOptions.voices) || [];
+        const voiceConfig = voices.find(v => v.code === reqLang) || voices[0];
+
+        if (!voiceConfig) {
+            // Absolute fallback if config missing
+            const allVoices = state.audio.voices || [];
+            const enVoice = allVoices.find(v => (v.lang || '').toLowerCase().startsWith('en-')) || allVoices[0] || null;
+            const text = cleanSpeechText([verse.english, verse.englishMeaning].filter(Boolean).join('. '));
+            return { voice: enVoice, lang: enVoice ? enVoice.lang : 'en-US', text };
+        }
+
+        // Build ordered priority chain: primary voice config + its fallbackChain entries
+        const priorityChain = [
+            { langPrefixes: voiceConfig.langPrefixes || [], nameKeywords: voiceConfig.nameKeywords || [], fields: voiceConfig.textFields || [] },
+            ...(voiceConfig.fallbackChain || []).map(fb => ({
+                langPrefixes: fb.langPrefixes || [],
+                nameKeywords: fb.nameKeywords || [],
+                fields: fb.textFields || []
+            }))
+        ];
+
+        for (const step of priorityChain) {
+            const voice = findVoiceForLangMatches(step.langPrefixes, step.nameKeywords);
+            if (voice) {
+                const text = cleanSpeechText(step.fields.map(f => verse[f]).filter(Boolean).join('. '));
+                if (text) {
+                    console.log(`[TTS] reqLang=${reqLang} voice="${voice.name}" (${voice.lang}) text: ${text.slice(0, 60)}`);
+                    return { voice, lang: voice.lang, text };
+                }
+            }
+        }
+
+        // No voice found for any step — use English TTS + English text (avoids Indic script silence)
+        const allVoices = state.audio.voices || [];
+        const enVoice = allVoices.find(v => (v.lang || '').toLowerCase().startsWith('en-')) || allVoices[0] || null;
+        const fallbackText = cleanSpeechText([verse.english, verse.englishMeaning].filter(Boolean).join('. '));
+        console.warn(`[TTS] No native voice for "${reqLang}", using "${enVoice ? enVoice.name : 'none'}" with English text.`);
+        return { voice: enVoice, lang: enVoice ? enVoice.lang : 'en-US', text: fallbackText };
+    }
+
 
     // --- Application Initialization ---
     async function initApp() {
@@ -143,10 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loadAng(1);
     }
 
-    // Populate book dropdown dynamically from allBooks object
+    // Dynamic Book Selector Population
     function populateBookSelect() {
-        if (!bookSelect) return;
-        bookSelect.innerHTML = '';
+        if (!dom.bookSelect) return;
+        dom.bookSelect.innerHTML = '';
         Object.keys(allBooks).forEach(key => {
             const book = allBooks[key];
             const opt = document.createElement('option');
@@ -155,11 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (key === state.currentBookKey) {
                 opt.selected = true;
             }
-            bookSelect.appendChild(opt);
+            dom.bookSelect.appendChild(opt);
         });
     }
 
-    // Set up display checkboxes and audio options based on selected book configuration
+    // Dynamic Book Configuration Setup
     function setupBookConfig(bookKey) {
         const book = allBooks[bookKey] || allBooks[Object.keys(allBooks)[0]];
         if (!book) return;
@@ -167,13 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentBookKey = bookKey;
         state.totalAngs = book.totalFiles || 1430;
 
-        if (totalAngsSpan) totalAngsSpan.textContent = `of ${state.totalAngs}`;
-        if (angInput) angInput.max = state.totalAngs;
+        if (dom.totalAngsSpan) dom.totalAngsSpan.textContent = `of ${state.totalAngs}`;
+        if (dom.angInput) dom.angInput.max = state.totalAngs;
 
-        // Setup display options state & DOM checkboxes
+        // Setup Display Filters Checkboxes Grid
         state.displayOptions = {};
-        if (viewFiltersGrid && book.displayOptions) {
-            viewFiltersGrid.innerHTML = '';
+        if (dom.viewFiltersGrid && book.displayOptions) {
+            dom.viewFiltersGrid.innerHTML = '';
             book.displayOptions.forEach(opt => {
                 state.displayOptions[opt.key] = opt.default !== false;
 
@@ -183,21 +212,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     <input type="checkbox" class="view-toggle" data-key="${opt.key}" ${state.displayOptions[opt.key] ? 'checked' : ''}>
                     <span>${opt.label}</span>
                 `;
-                viewFiltersGrid.appendChild(label);
+                dom.viewFiltersGrid.appendChild(label);
             });
 
-            viewFiltersGrid.querySelectorAll('.view-toggle').forEach(chk => {
+            dom.viewFiltersGrid.querySelectorAll('.view-toggle').forEach(chk => {
                 chk.addEventListener('change', (e) => {
-                    const key = e.target.dataset.key;
-                    state.displayOptions[key] = e.target.checked;
+                    state.displayOptions[e.target.dataset.key] = e.target.checked;
                     renderVerses();
                 });
             });
         }
 
-        // Setup Audio Voice options dropdown
-        if (ttsLangSelect && book.audioOptions && book.audioOptions.voices) {
-            ttsLangSelect.innerHTML = '';
+        // Setup Audio Voice Options Selector
+        if (dom.ttsLangSelect && book.audioOptions && book.audioOptions.voices) {
+            dom.ttsLangSelect.innerHTML = '';
             book.audioOptions.voices.forEach(v => {
                 const option = document.createElement('option');
                 option.value = v.code;
@@ -205,23 +233,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (v.code === (book.audioOptions.defaultLang || 'pa')) {
                     option.selected = true;
                 }
-                ttsLangSelect.appendChild(option);
+                dom.ttsLangSelect.appendChild(option);
             });
-            state.audio.ttsLanguage = ttsLangSelect.value || (book.audioOptions.voices[0] ? book.audioOptions.voices[0].code : 'pa');
+            state.audio.ttsLanguage = dom.ttsLangSelect.value || 'pa';
             if (book.audioOptions.defaultRate) {
                 state.audio.ttsRate = book.audioOptions.defaultRate;
             }
         }
-    }
-
-    if (bookSelect) {
-        bookSelect.addEventListener('change', (e) => {
-            const key = e.target.value;
-            if (allBooks[key]) {
-                setupBookConfig(key);
-                loadAng(1);
-            }
-        });
     }
 
     // --- Data Loading ---
@@ -232,14 +250,14 @@ document.addEventListener('DOMContentLoaded', () => {
         state.totalAngs = currentBook.totalFiles || 1430;
 
         state.currentAng = angNum;
-        if (angInput) angInput.value = angNum;
-        if (prevAngBtn) prevAngBtn.disabled = angNum <= 1;
-        if (nextAngBtn) nextAngBtn.disabled = angNum >= state.totalAngs;
-        if (totalAngsSpan) totalAngsSpan.textContent = `of ${state.totalAngs}`;
+        if (dom.angInput) dom.angInput.value = angNum;
+        if (dom.prevAngBtn) dom.prevAngBtn.disabled = angNum <= 1;
+        if (dom.nextAngBtn) dom.nextAngBtn.disabled = angNum >= state.totalAngs;
+        if (dom.totalAngsSpan) dom.totalAngsSpan.textContent = `of ${state.totalAngs}`;
 
         stopSpeech();
 
-        versesContainer.innerHTML = `
+        dom.versesContainer.innerHTML = `
             <div class="loading-box">
                 <div class="spinner"></div>
                 <p>Loading Ang ${angNum} (${currentBook.name || ''})...</p>
@@ -249,19 +267,17 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const fileName = `${folderName}/${fileNameAlias}${angNum}.json`;
             const response = await fetch(fileName);
-            if (!response.ok) {
-                throw new Error(`Failed to load ${fileName}`);
-            }
+            if (!response.ok) throw new Error(`Failed to load ${fileName}`);
             const data = await response.json();
             state.verses = data;
             renderVerses();
         } catch (err) {
-            console.warn('Could not fetch JSON file directly, trying fallback/current Ang data:', err);
+            console.warn('Could not fetch JSON file directly, trying fallback data:', err);
             if (angNum === 1 && typeof fallbackAng1Data !== 'undefined') {
                 state.verses = fallbackAng1Data;
                 renderVerses();
             } else {
-                versesContainer.innerHTML = `
+                dom.versesContainer.innerHTML = `
                     <div class="loading-box" style="color: #e74c3c;">
                         <p>⚠️ Ang ${angNum} data file not available yet.</p>
                         <p style="font-size:0.85rem; color:#888; margin-top:6px;">Check if ${folderName}/${fileNameAlias}${angNum}.json exists.</p>
@@ -274,12 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Render Verses ---
     function renderVerses() {
         if (!state.verses || state.verses.length === 0) {
-            versesContainer.innerHTML = `<div class="loading-box"><p>No verses found for this Ang.</p></div>`;
+            dom.versesContainer.innerHTML = `<div class="loading-box"><p>No verses found for this Ang.</p></div>`;
             return;
         }
 
-        versesContainer.innerHTML = '';
-
+        dom.versesContainer.innerHTML = '';
         const currentBook = allBooks[state.currentBookKey] || {};
         const displayConfig = currentBook.displayOptions || [];
 
@@ -289,9 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.id = `verse-card-${index}`;
 
             const isCurrentPlaying = (state.audio.currentVerseIndex === index);
-            if (isCurrentPlaying) {
-                card.classList.add('active-playing');
-            }
+            if (isCurrentPlaying) card.classList.add('active-playing');
 
             const headerHtml = `
                 <div class="verse-header">
@@ -305,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             let bodyHtml = `<div class="verse-body">`;
-
             displayConfig.forEach(opt => {
                 const isEnabled = state.displayOptions[opt.key] !== false;
                 const val = verse[opt.key];
@@ -323,11 +335,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
-
             bodyHtml += `</div>`;
             card.innerHTML = headerHtml + bodyHtml;
 
-            // Speaker button click handler
+            // Speaker Button Handler
             const speakerBtn = card.querySelector('.btn-speaker');
             speakerBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -339,17 +350,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            versesContainer.appendChild(card);
+            dom.versesContainer.appendChild(card);
         });
     }
 
     function cleanSpeechText(str) {
         if (!str) return '';
-        return str
-            .replace(/[॥|]+/g, ' ')
-            .replace(/~+/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
+        return str.replace(/[॥|]+/g, ' ').replace(/~+/g, '').replace(/\s+/g, ' ').trim();
     }
 
     function cancelSpeechOnly() {
@@ -361,70 +368,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (synth) {
             synth.cancel();
-            if (synth.paused) {
-                synth.resume();
-            }
+            if (synth.paused) synth.resume();
         }
     }
 
-    // Select voice and compatible script text for requested language
-    function getSpeechConfigForVerse(verse, reqLang) {
-        populateVoices();
-        const voices = state.audio.voices || [];
-
-        // 1. Punjabi Requested
-        if (reqLang === 'pa') {
-            // Check for native Punjabi voice
-            const paVoice = voices.find(v => {
-                const l = (v.lang || '').toLowerCase();
-                const n = (v.name || '').toLowerCase();
-                return l.includes('pa') || n.includes('punjabi') || n.includes('gurmukhi');
-            });
-            if (paVoice) {
-                const text = cleanSpeechText([verse.punjabi, verse.punjabiArth].filter(Boolean).join('. '));
-                if (text) return { voice: paVoice, lang: paVoice.lang, text };
-            }
-
-            // Fallback for Punjabi if no Punjabi voice: Use Hindi voice with Hindi Devanagari text (Hindi engines read Devanagari cleanly)
-            const hiVoice = voices.find(v => {
-                const l = (v.lang || '').toLowerCase();
-                const n = (v.name || '').toLowerCase();
-                return l.includes('hi') || n.includes('hindi');
-            });
-            if (hiVoice) {
-                const text = cleanSpeechText([verse.hindi, verse.hindiArth].filter(Boolean).join('. '));
-                if (text) return { voice: hiVoice, lang: hiVoice.lang, text };
-            }
-
-            // Fallback if neither Punjabi nor Hindi voice is installed: Use English voice with English transliteration & meaning
-            const enVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('en')) || voices[0];
-            const text = cleanSpeechText([verse.english, verse.englishMeaning].filter(Boolean).join('. '));
-            return { voice: enVoice, lang: enVoice ? enVoice.lang : 'en-US', text };
+    function handleSpeechNext(index) {
+        if (state.audio.isPlayingAll && index < state.verses.length - 1) {
+            speakVerse(index + 1);
+        } else {
+            stopSpeech();
         }
-
-        // 2. Hindi Requested
-        if (reqLang === 'hi') {
-            // Check for native Hindi voice
-            const hiVoice = voices.find(v => {
-                const l = (v.lang || '').toLowerCase();
-                const n = (v.name || '').toLowerCase();
-                return l.includes('hi') || n.includes('hindi');
-            });
-            if (hiVoice) {
-                const text = cleanSpeechText([verse.hindi, verse.hindiArth].filter(Boolean).join('. '));
-                if (text) return { voice: hiVoice, lang: hiVoice.lang, text };
-            }
-
-            // Fallback if no Hindi voice: Use English voice with English transliteration & meaning
-            const enVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('en')) || voices[0];
-            const text = cleanSpeechText([verse.english, verse.englishMeaning].filter(Boolean).join('. '));
-            return { voice: enVoice, lang: enVoice ? enVoice.lang : 'en-US', text };
-        }
-
-        // 3. English Requested
-        const enVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('en')) || voices[0];
-        const text = cleanSpeechText([verse.english, verse.englishMeaning].filter(Boolean).join('. '));
-        return { voice: enVoice, lang: enVoice ? enVoice.lang : 'en-US', text };
     }
 
     // --- Speech Control Functions ---
@@ -437,25 +390,17 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelSpeechOnly();
 
         if (index < 0 || index >= state.verses.length) {
-            state.audio.isPlayingAll = false;
-            state.audio.currentVerseIndex = -1;
-            updateAudioUI();
-            unhighlightAllVerseCards();
+            stopSpeech();
             return;
         }
 
         state.audio.currentVerseIndex = index;
         const verse = state.verses[index];
-        const reqLang = state.audio.ttsLanguage; // 'pa', 'hi', or 'en'
-
+        const reqLang = state.audio.ttsLanguage;
         const speechConfig = getSpeechConfigForVerse(verse, reqLang);
 
         if (!speechConfig || !speechConfig.text) {
-            if (state.audio.isPlayingAll && index < state.verses.length - 1) {
-                speakVerse(index + 1);
-            } else {
-                stopSpeech();
-            }
+            handleSpeechNext(index);
             return;
         }
 
@@ -469,7 +414,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         utterance.rate = state.audio.ttsRate || 1.0;
         utterance.volume = 1.0;
-
         activeUtterance = utterance;
 
         utterance.onstart = () => {
@@ -479,50 +423,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         utterance.onend = () => {
             activeUtterance = null;
-            if (state.audio.isPlayingAll && index < state.verses.length - 1) {
-                speakVerse(index + 1);
-            } else {
-                state.audio.isPlayingAll = false;
-                state.audio.currentVerseIndex = -1;
-                updateAudioUI();
-                unhighlightAllVerseCards();
-            }
+            handleSpeechNext(index);
         };
 
         utterance.onerror = (err) => {
             activeUtterance = null;
-            if (err.error === 'canceled' || err.error === 'interrupted') {
-                return;
-            }
+            if (err.error === 'canceled' || err.error === 'interrupted') return;
             console.warn('Speech synthesis utterance error:', err.error || err);
-            if (state.audio.isPlayingAll && index < state.verses.length - 1) {
-                speakVerse(index + 1);
-            } else {
-                stopSpeech();
-            }
+            handleSpeechNext(index);
         };
 
-        // Immediately update UI for instant user feedback
+        // Instant UI feedback & synchronous gesture execution
         updateAudioUI();
         highlightVerseCard(index);
 
-        // Execute speak synchronously within click gesture thread
         synth.speak(utterance);
-        if (synth.paused) {
-            synth.resume();
-        }
+        if (synth.paused) synth.resume();
     }
 
     function stopSpeech() {
-        if (activeUtterance) {
-            activeUtterance.onstart = null;
-            activeUtterance.onend = null;
-            activeUtterance.onerror = null;
-            activeUtterance = null;
-        }
-        if (synth) {
-            synth.cancel();
-        }
+        cancelSpeechOnly();
         state.audio.isPlayingAll = false;
         state.audio.currentVerseIndex = -1;
         updateAudioUI();
@@ -551,49 +471,50 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateAudioUI() {
         if (state.audio.currentVerseIndex >= 0) {
             if (state.audio.isPlayingAll) {
-                btnPlayAll.classList.add('playing');
-                btnPlayAll.innerHTML = `⏸️ Pause Auto-Play`;
+                dom.btnPlayAll.classList.add('playing');
+                dom.btnPlayAll.innerHTML = `⏸️ Pause Auto-Play`;
             } else {
-                btnPlayAll.classList.remove('playing');
-                btnPlayAll.innerHTML = `▶️ Play Full Page`;
+                dom.btnPlayAll.classList.remove('playing');
+                dom.btnPlayAll.innerHTML = `▶️ Play Full Page`;
             }
-            if (floatingAudioStatus && floatingAudioText) {
-                floatingAudioStatus.classList.remove('hidden');
-                floatingAudioText.textContent = `Playing Verse #${state.audio.currentVerseIndex + 1} of ${state.verses.length}`;
+            if (dom.floatingAudioStatus && dom.floatingAudioText) {
+                dom.floatingAudioStatus.classList.remove('hidden');
+                dom.floatingAudioText.textContent = `Playing Verse #${state.audio.currentVerseIndex + 1} of ${state.verses.length}`;
             }
         } else {
-            btnPlayAll.classList.remove('playing');
-            btnPlayAll.innerHTML = `▶️ Play Full Page`;
-            if (floatingAudioStatus) {
-                floatingAudioStatus.classList.add('hidden');
-            }
+            dom.btnPlayAll.classList.remove('playing');
+            dom.btnPlayAll.innerHTML = `▶️ Play Full Page`;
+            if (dom.floatingAudioStatus) dom.floatingAudioStatus.classList.add('hidden');
         }
     }
 
-    // --- Event Listeners ---
+    // --- Centralized Event Listeners ---
+    if (dom.bookSelect) {
+        dom.bookSelect.addEventListener('change', (e) => {
+            const key = e.target.value;
+            if (allBooks[key]) {
+                setupBookConfig(key);
+                loadAng(1);
+            }
+        });
+    }
 
-    // Page navigation
-    prevAngBtn.addEventListener('click', () => {
-        if (state.currentAng > 1) {
-            loadAng(state.currentAng - 1);
-        }
+    dom.prevAngBtn.addEventListener('click', () => {
+        if (state.currentAng > 1) loadAng(state.currentAng - 1);
     });
 
-    nextAngBtn.addEventListener('click', () => {
-        if (state.currentAng < state.totalAngs) {
-            loadAng(state.currentAng + 1);
-        }
+    dom.nextAngBtn.addEventListener('click', () => {
+        if (state.currentAng < state.totalAngs) loadAng(state.currentAng + 1);
     });
 
-    angInput.addEventListener('change', (e) => {
+    dom.angInput.addEventListener('change', (e) => {
         let val = parseInt(e.target.value);
         if (isNaN(val) || val < 1) val = 1;
         if (val > state.totalAngs) val = state.totalAngs;
         loadAng(val);
     });
 
-    // Audio controls
-    btnPlayAll.addEventListener('click', () => {
+    dom.btnPlayAll.addEventListener('click', () => {
         if (synth.speaking && state.audio.isPlayingAll) {
             stopSpeech();
         } else {
@@ -603,11 +524,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    btnStopAudio.addEventListener('click', () => {
+    dom.btnStopAudio.addEventListener('click', () => {
         stopSpeech();
     });
 
-    ttsLangSelect.addEventListener('change', (e) => {
+    dom.ttsLangSelect.addEventListener('change', (e) => {
         state.audio.ttsLanguage = e.target.value;
         if (synth.speaking) {
             const curr = state.audio.currentVerseIndex;
@@ -615,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    ttsRateSelect.addEventListener('change', (e) => {
+    dom.ttsRateSelect.addEventListener('change', (e) => {
         state.audio.ttsRate = parseFloat(e.target.value);
         if (synth.speaking) {
             const curr = state.audio.currentVerseIndex;
@@ -623,6 +544,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initialize application
+    // Start Application
     initApp();
 });

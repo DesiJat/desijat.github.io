@@ -21,23 +21,31 @@
         {
           "code": "pa",
           "label": "Punjabi (ਪੰਜਾਬੀ)",
-          "langMatch": ["pa", "punjabi", "gurmukhi"],
+          "langPrefixes": ["pa"],
+          "nameKeywords": ["punjabi", "gurmukhi"],
           "textFields": ["punjabi", "punjabiArth"],
-          "fallbackText": ["hindi", "english"]
+          "fallbackChain": [
+            { "langPrefixes": ["hi"], "nameKeywords": ["hindi", "lekha"], "textFields": ["hindi", "hindiArth"] },
+            { "langPrefixes": ["en"], "nameKeywords": ["english"],        "textFields": ["english", "englishMeaning"] }
+          ]
         },
         {
           "code": "hi",
           "label": "Hindi (हिंदी)",
-          "langMatch": ["hi", "hindi"],
+          "langPrefixes": ["hi"],
+          "nameKeywords": ["hindi", "lekha"],
           "textFields": ["hindi", "hindiArth"],
-          "fallbackText": ["english", "punjabi"]
+          "fallbackChain": [
+            { "langPrefixes": ["en"], "nameKeywords": ["english"], "textFields": ["english", "englishMeaning"] }
+          ]
         },
         {
           "code": "en",
           "label": "English",
-          "langMatch": ["en", "english"],
+          "langPrefixes": ["en"],
+          "nameKeywords": ["english"],
           "textFields": ["english", "englishMeaning"],
-          "fallbackText": ["punjabi", "hindi"]
+          "fallbackChain": []
         }
       ]
     }
@@ -64,23 +72,31 @@
         {
           "code": "pa",
           "label": "Punjabi (ਪੰਜਾਬੀ)",
-          "langMatch": ["pa", "punjabi", "gurmukhi"],
+          "langPrefixes": ["pa"],
+          "nameKeywords": ["punjabi", "gurmukhi"],
           "textFields": ["punjabi", "punjabiArth"],
-          "fallbackText": ["hindi", "english"]
+          "fallbackChain": [
+            { "langPrefixes": ["hi"], "nameKeywords": ["hindi", "lekha"], "textFields": ["hindi", "hindiArth"] },
+            { "langPrefixes": ["en"], "nameKeywords": ["english"],        "textFields": ["english", "englishMeaning"] }
+          ]
         },
         {
           "code": "hi",
           "label": "Hindi (हिंदी)",
-          "langMatch": ["hi", "hindi"],
+          "langPrefixes": ["hi"],
+          "nameKeywords": ["hindi", "lekha"],
           "textFields": ["hindi", "hindiArth"],
-          "fallbackText": ["english", "punjabi"]
+          "fallbackChain": [
+            { "langPrefixes": ["en"], "nameKeywords": ["english"], "textFields": ["english", "englishMeaning"] }
+          ]
         },
         {
           "code": "en",
           "label": "English",
-          "langMatch": ["en", "english"],
+          "langPrefixes": ["en"],
+          "nameKeywords": ["english"],
           "textFields": ["english", "englishMeaning"],
-          "fallbackText": ["punjabi", "hindi"]
+          "fallbackChain": []
         }
       ]
     }
