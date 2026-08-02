@@ -194,6 +194,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function cleanSpeechText(str) {
+        if (!str) return '';
+        return str
+            .replace(/[॥|]+/g, ' ')
+            .replace(/~+/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
     // --- Speech Control Functions ---
     function speakVerse(index) {
         if (!synth) {
@@ -202,8 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Cancel any active/pending speech without resetting state.audio.isPlayingAll
-        if (synth.speaking || synth.pending) {
+        if (synth) {
             synth.cancel();
+            if (synth.paused) {
+                synth.resume();
+            }
         }
 
         if (index < 0 || index >= state.verses.length) {
@@ -218,43 +230,49 @@ document.addEventListener('DOMContentLoaded', () => {
         const verse = state.verses[index];
         const reqLang = state.audio.ttsLanguage; // 'pa', 'hi', or 'en'
 
+        const rawPaText = [verse.punjabi, verse.punjabiArth].filter(Boolean).join('. ');
+        const rawHiText = [verse.hindi, verse.hindiArth].filter(Boolean).join('. ');
+        const rawEnText = [verse.english, verse.englishMeaning].filter(Boolean).join('. ');
+
         let textToSpeak = '';
         let targetLangCode = 'en-US';
-        let matchedVoice = findVoiceForLang(reqLang);
+        let matchedVoice = null;
 
         if (reqLang === 'pa') {
-            if (matchedVoice) {
-                textToSpeak = verse.punjabi || verse.punjabiArth || verse.english;
-                targetLangCode = matchedVoice.lang || 'pa-IN';
+            const paVoice = findVoiceForLang('pa');
+            if (paVoice) {
+                textToSpeak = cleanSpeechText(rawPaText) || cleanSpeechText(rawEnText);
+                targetLangCode = paVoice.lang || 'pa-IN';
+                matchedVoice = paVoice;
             } else {
-                // If system lacks native Punjabi TTS voice, use Hindi voice with Hindi script or English transliteration fallback
-                const hindiVoice = findVoiceForLang('hi');
-                if (hindiVoice) {
-                    textToSpeak = verse.hindi || verse.hindiArth || verse.english;
-                    targetLangCode = hindiVoice.lang || 'hi-IN';
-                    matchedVoice = hindiVoice;
+                const hiVoice = findVoiceForLang('hi');
+                if (hiVoice) {
+                    textToSpeak = cleanSpeechText(rawHiText) || cleanSpeechText(rawEnText);
+                    targetLangCode = hiVoice.lang || 'hi-IN';
+                    matchedVoice = hiVoice;
                 } else {
-                    textToSpeak = verse.english || verse.englishMeaning || verse.punjabi;
+                    textToSpeak = cleanSpeechText(rawEnText) || cleanSpeechText(rawPaText);
                     targetLangCode = 'en-US';
                     matchedVoice = findVoiceForLang('en');
                 }
             }
         } else if (reqLang === 'hi') {
-            if (matchedVoice) {
-                textToSpeak = verse.hindi || verse.hindiArth || verse.english;
-                targetLangCode = matchedVoice.lang || 'hi-IN';
+            const hiVoice = findVoiceForLang('hi');
+            if (hiVoice) {
+                textToSpeak = cleanSpeechText(rawHiText) || cleanSpeechText(rawEnText);
+                targetLangCode = hiVoice.lang || 'hi-IN';
+                matchedVoice = hiVoice;
             } else {
                 const enVoice = findVoiceForLang('en');
-                textToSpeak = verse.english || verse.englishMeaning || verse.hindi;
+                textToSpeak = cleanSpeechText(rawEnText) || cleanSpeechText(rawHiText);
                 targetLangCode = 'en-US';
                 matchedVoice = enVoice;
             }
         } else if (reqLang === 'en') {
-            textToSpeak = verse.english || verse.englishMeaning || verse.punjabi;
+            const enVoice = findVoiceForLang('en');
+            textToSpeak = cleanSpeechText(rawEnText) || cleanSpeechText(rawPaText);
             targetLangCode = 'en-US';
-            if (matchedVoice) {
-                targetLangCode = matchedVoice.lang || 'en-US';
-            }
+            matchedVoice = enVoice;
         }
 
         if (!textToSpeak) {
@@ -264,17 +282,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Resume synthesis if browser audio context paused
-        if (synth.paused) {
-            synth.resume();
-        }
-
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
         utterance.lang = targetLangCode;
         if (matchedVoice) {
             utterance.voice = matchedVoice;
         }
         utterance.rate = state.audio.ttsRate;
+        utterance.volume = 1.0;
 
         // Save global reference to prevent Chrome Garbage Collection mid-speech
         activeUtterance = utterance;
@@ -297,8 +311,12 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         utterance.onerror = (err) => {
-            console.warn('Speech synthesis utterance error:', err);
             activeUtterance = null;
+            // Ignore normal cancellation/interruption events when switching verses or languages
+            if (err.error === 'canceled' || err.error === 'interrupted') {
+                return;
+            }
+            console.warn('Speech synthesis utterance error:', err.error || err);
             if (state.audio.isPlayingAll && index < state.verses.length - 1) {
                 speakVerse(index + 1);
             } else {
@@ -307,13 +325,21 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         synth.speak(utterance);
+        if (synth.paused) {
+            synth.resume();
+        }
     }
 
     function stopSpeech() {
+        if (activeUtterance) {
+            activeUtterance.onstart = null;
+            activeUtterance.onend = null;
+            activeUtterance.onerror = null;
+            activeUtterance = null;
+        }
         if (synth) {
             synth.cancel();
         }
-        activeUtterance = null;
         state.audio.isPlayingAll = false;
         state.audio.currentVerseIndex = -1;
         updateAudioUI();

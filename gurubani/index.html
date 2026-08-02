@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sri Guru Granth Sahib Ji - Interactive Gurbani Reader with Audio TTS</title>
-    <meta name="description" content="Read and listen to Sri Guru Granth Sahib Ji with multi-language scripts (Punjabi, Hindi, English) and meanings with audio playback support.">
+    <meta name="description"
+        content="Read and listen to Sri Guru Granth Sahib Ji with multi-language scripts (Punjabi, Hindi, English) and meanings with audio playback support.">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <!-- Sticky Navigation Header with Audio Controls -->
@@ -38,9 +41,17 @@
                 <div class="audio-control-item">
                     <label for="ttsRateSelect">Speed:</label>
                     <select id="ttsRateSelect" class="audio-select">
+                        <option value="0.4">0.4x Slow</option>
+                        <option value="0.6">0.6x Slow</option>
                         <option value="0.8">0.8x Slow</option>
                         <option value="1.0" selected>1.0x Normal</option>
                         <option value="1.2">1.2x Fast</option>
+                        <option value="1.4">1.4x Fast</option>
+                        <option value="1.6">1.6x Fast</option>
+                        <option value="1.8">1.8x Fast</option>
+                        <option value="2.0">2.0x Fast</option>
+                        <option value="2.5">2.5x Fast</option>
+                        <option value="3.0">3.0x Fast</option>
                     </select>
                 </div>
             </div>
@@ -119,4 +130,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>
