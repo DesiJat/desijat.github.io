@@ -7,7 +7,7 @@
     <title>Sri Guru Granth Sahib Ji - Interactive Gurbani Reader with Audio TTS</title>
     <meta name="description"
         content="Read and listen to Sri Guru Granth Sahib Ji with multi-language scripts (Punjabi, Hindi, English) and meanings with audio playback support.">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style1.css">
 </head>
 
 <body>
@@ -75,8 +75,41 @@
             <!-- View Checkboxes Grid -->
             <div>
                 <div class="filter-group-title">Display Options</div>
-                <div class="view-filters-grid" id="viewFiltersGrid">
-                    <!-- Populated dynamically by app.js from allBooks.json -->
+                <div class="view-filters-grid">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="punjabi" checked>
+                        <span>ਪੰਜਾਬੀ (Punjabi Script)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="hindi" checked>
+                        <span>हिंदी (Hindi Script)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="english" checked>
+                        <span>English (Transliteration)</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="punjabiArth" checked>
+                        <span>ਪੰਜਾਬੀ ਅਰਥ (Punjabi Arth)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="hindiArth" checked>
+                        <span>हिंदी अर्थ (Hindi Arth)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="englishMeaning" checked>
+                        <span>Eng Meaning (English)</span>
+                    </label>
+
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="info" checked>
+                        <span>Info (Author/Bani)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="view-toggle" data-key="teekas" checked>
+                        <span>ਟੀਕਾ / पद अर्थ (Teekas)</span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -99,7 +132,7 @@
         </span>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app1.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,88 @@
+{
+  "srigranth": {
+    "name": "Sri Guru Granth Sahib (SriGranth)",
+    "folderName": "srigranth",
+    "fileNameAlias": "gurbani_sggs-",
+    "totalFiles": 1430,
+    "displayOptions": [
+      { "key": "punjabi", "label": "ਪੰਜਾਬੀ (Punjabi Script)", "default": true, "class": "punjabi", "type": "line" },
+      { "key": "hindi", "label": "हिंदी (Hindi Script)", "default": true, "class": "hindi", "type": "line" },
+      { "key": "english", "label": "English (Transliteration)", "default": true, "class": "english", "type": "line" },
+      { "key": "punjabiArth", "label": "ਪੰਜਾਬੀ ਅਰਥ (Punjabi Arth)", "default": true, "class": "punjabi-arth", "type": "arth" },
+      { "key": "hindiArth", "label": "हिंदी अर्थ (Hindi Arth)", "default": true, "class": "hindi-arth", "type": "arth" },
+      { "key": "englishMeaning", "label": "Eng Meaning (English)", "default": true, "class": "english-meaning", "type": "arth" },
+      { "key": "teekas", "label": "ਟੀਕਾ / पद अर्थ (Teekas)", "default": true, "class": "verse-teekas", "type": "teekas" },
+      { "key": "info", "label": "Info (Author/Bani)", "default": true, "class": "verse-info", "type": "info" }
+    ],
+    "audioOptions": {
+      "defaultLang": "pa",
+      "defaultRate": 1.0,
+      "voices": [
+        {
+          "code": "pa",
+          "label": "Punjabi (ਪੰਜਾਬੀ)",
+          "langMatch": ["pa", "punjabi", "gurmukhi"],
+          "textFields": ["punjabi", "punjabiArth"],
+          "fallbackText": ["hindi", "english"]
+        },
+        {
+          "code": "hi",
+          "label": "Hindi (हिंदी)",
+          "langMatch": ["hi", "hindi"],
+          "textFields": ["hindi", "hindiArth"],
+          "fallbackText": ["english", "punjabi"]
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "langMatch": ["en", "english"],
+          "textFields": ["english", "englishMeaning"],
+          "fallbackText": ["punjabi", "hindi"]
+        }
+      ]
+    }
+  },
+  "gurbani": {
+    "name": "Gurbani",
+    "folderName": "gurbani",
+    "fileNameAlias": "gurbani_sggs-",
+    "totalFiles": 1410,
+    "displayOptions": [
+      { "key": "punjabi", "label": "ਪੰਜਾਬੀ (Punjabi Script)", "default": true, "class": "punjabi", "type": "line" },
+      { "key": "hindi", "label": "हिंदी (Hindi Script)", "default": true, "class": "hindi", "type": "line" },
+      { "key": "english", "label": "English (Transliteration)", "default": true, "class": "english", "type": "line" },
+      { "key": "punjabiArth", "label": "ਪੰਜਾਬੀ ਅਰਥ (Punjabi Arth)", "default": true, "class": "punjabi-arth", "type": "arth" },
+      { "key": "hindiArth", "label": "हिंदी अर्थ (Hindi Arth)", "default": true, "class": "hindi-arth", "type": "arth" },
+      { "key": "englishMeaning", "label": "Eng Meaning (English)", "default": true, "class": "english-meaning", "type": "arth" },
+      { "key": "teekas", "label": "ਟੀਕਾ / पद अर्थ (Teekas)", "default": true, "class": "verse-teekas", "type": "teekas" },
+      { "key": "info", "label": "Info (Author/Bani)", "default": true, "class": "verse-info", "type": "info" }
+    ],
+    "audioOptions": {
+      "defaultLang": "pa",
+      "defaultRate": 1.0,
+      "voices": [
+        {
+          "code": "pa",
+          "label": "Punjabi (ਪੰਜਾਬੀ)",
+          "langMatch": ["pa", "punjabi", "gurmukhi"],
+          "textFields": ["punjabi", "punjabiArth"],
+          "fallbackText": ["hindi", "english"]
+        },
+        {
+          "code": "hi",
+          "label": "Hindi (हिंदी)",
+          "langMatch": ["hi", "hindi"],
+          "textFields": ["hindi", "hindiArth"],
+          "fallbackText": ["english", "punjabi"]
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "langMatch": ["en", "english"],
+          "textFields": ["english", "englishMeaning"],
+          "fallbackText": ["punjabi", "hindi"]
+        }
+      ]
+    }
+  }
+}
