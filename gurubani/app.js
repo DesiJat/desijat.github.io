@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name: "Gurbani",
             folderName: "gurbani",
             fileNameAlias: "gurbani_sggs-",
-            totalFiles: 1410
+            totalFiles: 1430
         }
     };
 
