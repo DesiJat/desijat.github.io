@@ -89,6 +89,7 @@ function initialize() {
     };
     const loadUrlDB = $.urlParam("url");
     if (loadUrlDB != null) {
+        console.log("Loading remote DB from url: " + decodeURIComponent(loadUrlDB));
         setIsLoading(true);
         const xhr = new XMLHttpRequest();
         xhr.open("GET", decodeURIComponent(loadUrlDB), true);
@@ -149,9 +150,9 @@ function loadDB(arrayBuffer) {
         $("#output-box").fadeIn();
         $(".nouploadinfo").hide();
         $("#sample-db-link").hide();
-        $("#dropzone").delay(50).animate({height: 75}, 500);
+        // $("#dropzone").delay(50).animate({height: 75}, 500);
+        $("#dropzone, #dropzone-dialog").hide();
         $("#success-box").show();
-
         setIsLoading(false);
     });
 }
