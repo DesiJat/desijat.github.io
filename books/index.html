@@ -12,7 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <!-- Marked.js for Markdown Parsing -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="./marked.min.js"></script>
 
     <style>
         :root {
@@ -531,6 +531,50 @@
                 height: 40px;
             }
         }
+
+        /* Reading Comfort Controller */
+        .reading-controls {
+            padding: 15px 20px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .reading-control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .reading-level {
+            color: var(--accent-color);
+        }
+
+        .brightness-slider {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        .brightness-help {
+            font-size: 0.72rem;
+            opacity: 0.7;
+            margin-top: 6px;
+            line-height: 1.35;
+        }
+
+        /* Screen dimming overlay for reading comfort */
+        #readingFilter {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: #000;
+            opacity: 0;
+            z-index: 9999;
+            transition: opacity 0.2s ease;
+        }
+
     </style>
 </head>
 
@@ -569,6 +613,28 @@
         <ul class="file-list" id="fileList">
             <!-- Files will be injected here -->
         </ul>
+
+        <div class="reading-controls">
+            <div class="reading-control-label">
+                <span>☀️ Reading Brightness</span>
+                <span class="reading-level" id="brightnessValue">10 / 10</span>
+            </div>
+
+            <input
+                id="brightnessSlider"
+                class="brightness-slider"
+                type="range"
+                min="1"
+                max="10"
+                value="10"
+                step="1"
+                aria-label="Reading brightness from 1 to 10">
+
+            <div class="brightness-help">
+                10 = normal brightness · lower levels reduce screen glare for comfortable reading
+            </div>
+        </div>
+
         <div class="theme-switcher">
             <button class="theme-btn active" onclick="setTheme('light')">Light</button>
             <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
@@ -588,6 +654,8 @@
         <ul class="toc-list" id="tocList"></ul>
     </div>
 
+    <div id="readingFilter" aria-hidden="true"></div>
+
     <!-- Scroll to Top Button -->
     <button class="scroll-top-btn" onclick="scrollToTop()" aria-label="Scroll to Top">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -599,14 +667,14 @@
 
     <script>
         // Configuration: List of files to include
-        const files = [
-            { name: "Tech questions", path: "ResumeInterviewPrep.md" },
-            { name: "Vigyan Bhairav Tantra", path: "vigyanBharvTantar.md" },
+        const files = [            
+            { name: "yoga-sutra-Samadhi-Pada", path: "yoga-sutra-Samadhi-Pada.md" },
             { name: "Patanjali Yoga Sutras", path: "patanjaliYogsutr.md" },
-            { name: "Vedic Time Table", path: "timeTable.md" },
             { name: "Shreemad Bhagwad Geeta", path: "shreemadBhagwadGeeta.md" },
-            { name: "Vedic Mathematics", path: "vedicMath.md" },
+            { name: "Vedic Time Table", path: "timeTable.md" },
+            { name: "Vigyan Bhairav Tantra", path: "vigyanBharvTantar.md" },
             { name: "Maharishi Panini Ashtadhyayi", path: "maharishiPaniniAshtadhyayi.md" },
+            { name: "Vedic Mathematics", path: "vedicMath.md" },
         ];
 
         const fileListEl = document.getElementById('fileList');
@@ -615,9 +683,34 @@
         const overlayEl = document.querySelector('.overlay');
         let currentTheme = localStorage.getItem('theme') || 'light';
 
+        // Reading Brightness / Eye Comfort
+        const brightnessSlider = document.getElementById('brightnessSlider');
+        const brightnessValue = document.getElementById('brightnessValue');
+        const readingFilter = document.getElementById('readingFilter');
+
+        function setReadingBrightness(level) {
+            level = Math.max(1, Math.min(10, Number(level)));
+
+            brightnessSlider.value = level;
+            brightnessValue.textContent = `${level} / 10`;
+
+            // Level 10 = normal screen appearance.
+            // Level 1 = maximum reading dimming.
+            const opacity = ((10 - level) / 9) * 0.55;
+            readingFilter.style.opacity = opacity.toFixed(3);
+
+            localStorage.setItem('readingBrightness', level);
+        }
+
+        brightnessSlider.addEventListener('input', (event) => {
+            setReadingBrightness(event.target.value);
+        });
+
+
         // Initialize
         function init() {
             setTheme(currentTheme);
+            setReadingBrightness(localStorage.getItem('readingBrightness') || 10);
             renderFileList();
 
             // Load the first file by default
