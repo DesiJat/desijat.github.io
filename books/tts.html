@@ -566,18 +566,87 @@
 
 
         /* Text-to-Speech Controller */
-        .tts-controls { padding: 15px 20px 20px; border-top: 1px solid var(--border-color); }
-        .tts-title { font-weight: 700; margin-bottom: 10px; color: var(--accent-color); }
-        .tts-buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px; }
-        .tts-btn { padding:8px 5px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-color); border-radius:6px; cursor:pointer; font-size:.78rem; }
-        .tts-btn:hover,.tts-btn.active { background:var(--accent-color); color:white; border-color:var(--accent-color); }
-        .tts-select { width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-color); color:var(--text-color); margin-bottom:8px; }
-        .tts-row { display:flex; align-items:center; gap:8px; margin:8px 0; font-size:.8rem; }
-        .tts-row label { min-width:48px; font-weight:600; }
-        .tts-row input { flex:1; accent-color:var(--accent-color); }
-        .tts-value { min-width:34px; text-align:right; color:var(--accent-color); font-weight:600; }
-        .tts-status { font-size:.72rem; opacity:.75; margin-top:8px; line-height:1.4; }
-        .speaking-highlight { background: rgba(99,102,241,.18); border-radius:3px; }
+        .tts-controls {
+            padding: 15px 20px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .tts-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .tts-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .tts-btn {
+            padding: 8px 5px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: .78rem;
+        }
+
+        .tts-btn:hover,
+        .tts-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .tts-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .tts-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            font-size: .8rem;
+        }
+
+        .tts-row label {
+            min-width: 48px;
+            font-weight: 600;
+        }
+
+        .tts-row input {
+            flex: 1;
+            accent-color: var(--accent-color);
+        }
+
+        .tts-value {
+            min-width: 34px;
+            text-align: right;
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .tts-status {
+            font-size: .72rem;
+            opacity: .75;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .speaking-highlight {
+            background: rgba(99, 102, 241, .18);
+            border-radius: 3px;
+        }
 
         /* Screen dimming overlay for reading comfort */
         #readingFilter {
@@ -590,157 +659,716 @@
             transition: opacity 0.2s ease;
         }
 
-    
+
         /* ===== A–Z Easy Reader Upgrade ===== */
-        .sidebar { min-height:0; }
-        .sidebar-header { position:sticky; top:0; z-index:3; background:var(--sidebar-bg); }
-        .file-list { min-height:220px; }
+        .sidebar {
+            min-height: 0;
+        }
+
+        .sidebar-header {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background: var(--sidebar-bg);
+        }
+
+        .file-list {
+            min-height: 220px;
+        }
+
         .reader-toolbar {
-            position: sticky; top: 0; z-index: 90; display:flex; align-items:center;
-            gap:10px; padding:10px 14px; background:color-mix(in srgb, var(--header-bg) 96%, transparent);
-            backdrop-filter: blur(10px); border-bottom:1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: color-mix(in srgb, var(--header-bg) 96%, transparent);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
         }
-        .reader-toolbar-title { font-weight:800; white-space:nowrap; }
-        .reader-toolbar-actions { display:flex; flex-wrap:wrap; gap:7px; }
+
+        .reader-toolbar-title {
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .reader-toolbar-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
         .reader-action {
-            min-height:42px; padding:8px 12px; border:1px solid var(--border-color);
-            border-radius:10px; background:var(--bg-color); color:var(--text-color);
-            cursor:pointer; font-size:.9rem; font-weight:600;
+            min-height: 42px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 600;
         }
-        .reader-action:hover,.reader-action.primary { background:var(--accent-color); color:#fff; border-color:var(--accent-color); }
-        .reader-progress { margin-left:auto; font-size:.78rem; opacity:.75; white-space:nowrap; }
-        .tts-controls { padding:12px 14px; }
-        .tts-buttons { grid-template-columns:repeat(4,1fr); }
-        .tts-btn { min-height:42px; font-size:.82rem; font-weight:600; border-radius:9px; }
-        .tts-select { min-height:42px; font-size:.9rem; }
-        .tts-row { min-height:36px; }
+
+        .reader-action:hover,
+        .reader-action.primary {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+        }
+
+        .reader-progress {
+            margin-left: auto;
+            font-size: .78rem;
+            opacity: .75;
+            white-space: nowrap;
+        }
+
+        .tts-controls {
+            padding: 12px 14px;
+        }
+
+        .tts-buttons {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .tts-btn {
+            min-height: 42px;
+            font-size: .82rem;
+            font-weight: 600;
+            border-radius: 9px;
+        }
+
+        .tts-select {
+            min-height: 42px;
+            font-size: .9rem;
+        }
+
+        .tts-row {
+            min-height: 36px;
+        }
+
         .reading-unit {
             transition: background .25s ease, box-shadow .25s ease, transform .25s ease;
-            scroll-margin-top:85px;
+            scroll-margin-top: 85px;
         }
+
         .reading-unit.tts-current {
-            background:rgba(99,102,241,.16);
-            box-shadow:0 0 0 3px rgba(99,102,241,.20);
-            border-radius:10px;
-            padding:4px 8px;
+            background: rgba(99, 102, 241, .16);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .20);
+            border-radius: 10px;
+            padding: 4px 8px;
         }
-        .reading-unit.tts-current::selection { background:rgba(99,102,241,.35); }
+
+        .reading-unit.tts-current::selection {
+            background: rgba(99, 102, 241, .35);
+        }
+
         .resume-card {
-            max-width:800px; margin:12px auto; padding:14px 16px; border:1px solid var(--border-color);
-            border-radius:12px; background:var(--quote-bg); display:flex; align-items:center; gap:12px;
+            max-width: 800px;
+            margin: 12px auto;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--quote-bg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .resume-card.hidden { display:none; }
-        .resume-card strong { display:block; }
-        .resume-card small { opacity:.75; }
-        .resume-card button { margin-left:auto; }
-        @media(max-width:768px){
-            .reader-toolbar { top:60px; padding:8px 10px; overflow-x:auto; }
-            .reader-toolbar-title { display:none; }
-            .reader-toolbar-actions { flex-wrap:nowrap; }
-            .reader-action { min-height:40px; white-space:nowrap; }
-            .reader-progress { display:none; }
-            .main-content { padding-top:80px; }
-            .resume-card { margin:8px 0; align-items:flex-start; flex-wrap:wrap; }
-            .resume-card button { margin-left:0; }
-            .tts-buttons { grid-template-columns:repeat(2,1fr); }
+
+        .resume-card.hidden {
+            display: none;
+        }
+
+        .resume-card strong {
+            display: block;
+        }
+
+        .resume-card small {
+            opacity: .75;
+        }
+
+        .resume-card button {
+            margin-left: auto;
+        }
+
+        @media(max-width:768px) {
+            .reader-toolbar {
+                top: 60px;
+                padding: 8px 10px;
+                overflow-x: auto;
+            }
+
+            .reader-toolbar-title {
+                display: none;
+            }
+
+            .reader-toolbar-actions {
+                flex-wrap: nowrap;
+            }
+
+            .reader-action {
+                min-height: 40px;
+                white-space: nowrap;
+            }
+
+            .reader-progress {
+                display: none;
+            }
+
+            .main-content {
+                padding-top: 80px;
+            }
+
+            .resume-card {
+                margin: 8px 0;
+                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .resume-card button {
+                margin-left: 0;
+            }
+
+            .tts-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
 
         /* ===== Pro Reader v2: accessible top TTS control center ===== */
-        .main-content { padding:0 !important; }
+        .main-content {
+            padding: 0 !important;
+        }
+
         .reader-toolbar {
-            top:0; margin:0; width:100%; padding:10px 14px;
-            background:var(--header-bg); box-shadow:0 2px 10px rgba(0,0,0,.06);
-            display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:center;
+            top: 0;
+            margin: 0;
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--header-bg);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
         }
-        .reader-toolbar-title { display:flex; align-items:center; gap:7px; font-size:.95rem; }
-        .reader-toolbar-actions { display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:thin; padding-bottom:2px; }
-        .reader-toolbar-actions::-webkit-scrollbar{height:5px}.reader-toolbar-actions::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:9px}
-        .reader-action { min-height:42px; min-width:42px; padding:8px 11px; white-space:nowrap; }
-        .reader-action.is-active { background:var(--accent-color); color:#fff; border-color:var(--accent-color); }
-        .toolbar-prefs { display:flex; align-items:center; gap:8px; }
-        .toolbar-field { display:flex; align-items:center; gap:5px; font-size:.78rem; font-weight:700; white-space:nowrap; }
-        .toolbar-field select { min-height:40px; max-width:125px; padding:6px 8px; border:1px solid var(--border-color); border-radius:9px; background:var(--bg-color); color:var(--text-color); }
-        .speed-control { display:flex; align-items:center; gap:5px; min-width:155px; }
-        .speed-control input { width:92px; accent-color:var(--accent-color); }
-        .speed-badge { min-width:38px; text-align:center; color:var(--accent-color); font-weight:800; }
+
+        .reader-toolbar-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: .95rem;
+        }
+
+        .reader-toolbar-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding-bottom: 2px;
+        }
+
+        .reader-toolbar-actions::-webkit-scrollbar {
+            height: 5px
+        }
+
+        .reader-toolbar-actions::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 9px
+        }
+
+        .reader-action {
+            min-height: 42px;
+            min-width: 42px;
+            padding: 8px 11px;
+            white-space: nowrap;
+        }
+
+        .reader-action.is-active {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+        }
+
+        .toolbar-prefs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-field {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: .78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .toolbar-field select {
+            min-height: 40px;
+            max-width: 125px;
+            padding: 6px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 9px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 155px;
+        }
+
+        .speed-control input {
+            width: 92px;
+            accent-color: var(--accent-color);
+        }
+
+        .speed-badge {
+            min-width: 38px;
+            text-align: center;
+            color: var(--accent-color);
+            font-weight: 800;
+        }
+
         .reader-settings {
-            position:sticky; top:63px; z-index:88; padding:10px 14px; background:var(--header-bg);
-            border-bottom:1px solid var(--border-color); display:none; gap:12px; align-items:center; flex-wrap:wrap;
+            position: sticky;
+            top: 63px;
+            z-index: 88;
+            padding: 10px 14px;
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: none;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
         }
-        .reader-settings.open { display:flex; }
-        .reader-settings .setting-group { display:flex; align-items:center; gap:7px; min-width:180px; flex:1; }
-        .reader-settings label { font-size:.8rem; font-weight:700; white-space:nowrap; }
-        .reader-settings select,.reader-settings input[type=range] { flex:1; min-height:36px; }
-        .reader-settings select { padding:7px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-color); color:var(--text-color); }
-        .reader-content-shell { padding:22px 60px 40px; }
-        .reader-statusbar { max-width:800px; margin:0 auto 10px; display:flex; align-items:center; gap:8px; font-size:.8rem; opacity:.8; }
-        .reader-statusbar .status-spacer{flex:1}.reader-statusbar strong{color:var(--accent-color)}
-        .reading-unit { position:relative; scroll-margin-top:150px; }
-        .reading-unit.read-start-selected { outline:2px dashed var(--accent-color); outline-offset:4px; border-radius:8px; }
+
+        .reader-settings.open {
+            display: flex;
+        }
+
+        .reader-settings .setting-group {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-width: 180px;
+            flex: 1;
+        }
+
+        .reader-settings label {
+            font-size: .8rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .reader-settings select,
+        .reader-settings input[type=range] {
+            flex: 1;
+            min-height: 36px;
+        }
+
+        .reader-settings select {
+            padding: 7px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .reader-content-shell {
+            padding: 22px 60px 40px;
+        }
+
+        .reader-statusbar {
+            max-width: 800px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .8rem;
+            opacity: .8;
+        }
+
+        .reader-statusbar .status-spacer {
+            flex: 1
+        }
+
+        .reader-statusbar strong {
+            color: var(--accent-color)
+        }
+
+        .reading-unit {
+            position: relative;
+            scroll-margin-top: 150px;
+        }
+
+        .reading-unit.read-start-selected {
+            outline: 2px dashed var(--accent-color);
+            outline-offset: 4px;
+            border-radius: 8px;
+        }
+
         .unit-play-btn {
-            position:absolute; right:-44px; top:2px; width:34px; height:34px; border-radius:50%;
-            border:1px solid var(--border-color); background:var(--bg-color); color:var(--accent-color);
-            cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; transform:scale(.9);
-            transition:.18s; z-index:2; box-shadow:0 2px 8px rgba(0,0,0,.08);
+            position: absolute;
+            right: -44px;
+            top: 2px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--accent-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(.9);
+            transition: .18s;
+            z-index: 2;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
         }
-        .reading-unit:hover>.unit-play-btn,.unit-play-btn:focus { opacity:1; transform:scale(1); }
-        .unit-play-btn:hover { background:var(--accent-color); color:#fff; }
-        .tts-current { scroll-margin-top:170px !important; }
-        .tts-current.tts-wording { box-shadow:0 0 0 3px rgba(99,102,241,.22), 0 8px 24px rgba(0,0,0,.08); }
-        .selection-tip { max-width:800px; margin:0 auto 10px; padding:8px 12px; border-radius:9px; background:var(--quote-bg); font-size:.8rem; display:none; }
-        .selection-tip.show { display:block; }
-        @media(max-width:1099px){
-            .reader-toolbar { grid-template-columns:auto minmax(0,1fr); }
-            .toolbar-prefs { grid-column:1 / -1; justify-content:flex-start; overflow-x:auto; }
-            .reader-settings { top:105px; }
-            .unit-play-btn { right:4px; opacity:.82; }
-            .reading-unit { padding-right:42px; }
+
+        .reading-unit:hover>.unit-play-btn,
+        .unit-play-btn:focus {
+            opacity: 1;
+            transform: scale(1);
         }
-        @media(max-width:768px){
-            .main-content { margin-top:60px; padding:0 !important; width:100%; }
-            .reader-toolbar { top:0; padding:7px 8px; grid-template-columns:1fr; gap:6px; }
-            .reader-toolbar-title { display:none; }
-            .reader-toolbar-actions { width:100%; order:1; }
-            .toolbar-prefs { grid-column:auto; order:2; width:100%; gap:6px; }
-            .toolbar-field { font-size:.72rem; }
-            .toolbar-field select { min-height:36px; max-width:105px; }
-            .speed-control { min-width:145px; }
-            .speed-control input { width:78px; }
-            .reader-action { min-height:38px; padding:6px 9px; font-size:.82rem; }
-            .reader-settings { top:92px; padding:8px; }
-            .reader-content-shell { padding:14px 18px 80px; }
-            .reading-unit { scroll-margin-top:190px; padding-right:40px; }
-            .unit-play-btn { right:0; top:0; width:32px; height:32px; opacity:.72; }
-            .resume-card { margin:8px 0; }
-            .reader-statusbar { flex-wrap:wrap; }
+
+        .unit-play-btn:hover {
+            background: var(--accent-color);
+            color: #fff;
         }
-        @media(max-width:420px){
-            .toolbar-prefs { display:grid; grid-template-columns:auto 1fr auto; }
-            .speed-control { min-width:0; }
-            .speed-control input { width:100%; min-width:65px; }
-            .reader-content-shell { padding-left:12px; padding-right:12px; }
+
+        .tts-current {
+            scroll-margin-top: 170px !important;
+        }
+
+        .tts-current.tts-wording {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .22), 0 8px 24px rgba(0, 0, 0, .08);
+        }
+
+        .selection-tip {
+            max-width: 800px;
+            margin: 0 auto 10px;
+            padding: 8px 12px;
+            border-radius: 9px;
+            background: var(--quote-bg);
+            font-size: .8rem;
+            display: none;
+        }
+
+        .selection-tip.show {
+            display: block;
+        }
+
+        @media(max-width:1099px) {
+            .reader-toolbar {
+                grid-template-columns: auto minmax(0, 1fr);
+            }
+
+            .toolbar-prefs {
+                grid-column: 1 / -1;
+                justify-content: flex-start;
+                overflow-x: auto;
+            }
+
+            .reader-settings {
+                top: 105px;
+            }
+
+            .unit-play-btn {
+                right: 4px;
+                opacity: .82;
+            }
+
+            .reading-unit {
+                padding-right: 42px;
+            }
+        }
+
+        @media(max-width:768px) {
+            .main-content {
+                margin-top: 60px;
+                padding: 0 !important;
+                width: 100%;
+            }
+
+            .reader-toolbar {
+                top: 0;
+                padding: 7px 8px;
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+
+            .reader-toolbar-title {
+                display: none;
+            }
+
+            .reader-toolbar-actions {
+                width: 100%;
+                order: 1;
+            }
+
+            .toolbar-prefs {
+                grid-column: auto;
+                order: 2;
+                width: 100%;
+                gap: 6px;
+            }
+
+            .toolbar-field {
+                font-size: .72rem;
+            }
+
+            .toolbar-field select {
+                min-height: 36px;
+                max-width: 105px;
+            }
+
+            .speed-control {
+                min-width: 145px;
+            }
+
+            .speed-control input {
+                width: 78px;
+            }
+
+            .reader-action {
+                min-height: 38px;
+                padding: 6px 9px;
+                font-size: .82rem;
+            }
+
+            .reader-settings {
+                top: 92px;
+                padding: 8px;
+            }
+
+            .reader-content-shell {
+                padding: 14px 18px 80px;
+            }
+
+            .reading-unit {
+                scroll-margin-top: 190px;
+                padding-right: 40px;
+            }
+
+            .unit-play-btn {
+                right: 0;
+                top: 0;
+                width: 32px;
+                height: 32px;
+                opacity: .72;
+            }
+
+            .resume-card {
+                margin: 8px 0;
+            }
+
+            .reader-statusbar {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media(max-width:420px) {
+            .toolbar-prefs {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+            }
+
+            .speed-control {
+                min-width: 0;
+            }
+
+            .speed-control input {
+                width: 100%;
+                min-width: 65px;
+            }
+
+            .reader-content-shell {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
         }
 
         /* ===== Senior QA layout fixes: no overlap, no hidden controls ===== */
-        .reader-toolbar{display:flex!important;flex-wrap:wrap!important;align-items:center;gap:10px!important;position:sticky!important;overflow:visible!important}
-        .reader-toolbar-actions{display:flex!important;flex:1 1 620px!important;flex-wrap:wrap!important;overflow:visible!important;min-width:0}
-        .toolbar-prefs{flex:0 1 auto!important;flex-wrap:wrap!important;overflow:visible!important}
-        .reader-action{flex:0 0 auto!important;min-width:0!important}
-        .reader-toolbar-title{flex:0 0 auto!important}
-        .reader-content-shell{padding-top:20px!important}
-        .unit-play-btn{display:none!important}
-        .reading-unit{padding-right:0!important;cursor:pointer}
-        .tts-side-panel{padding:12px;margin:0 0 14px;border:1px solid var(--border-color);border-radius:12px;background:var(--quote-bg)}
-        .tts-side-title{font-weight:800;color:var(--accent-color);margin-bottom:10px}
-        .tts-side-panel .setting-group{display:grid;grid-template-columns:1fr;gap:6px;margin:10px 0}
-        .tts-side-panel label{font-size:.85rem;font-weight:700}
-        .tts-side-panel select{width:100%;min-height:42px;padding:8px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color)}
-        .tts-side-panel input[type=range]{width:100%;min-height:36px;accent-color:var(--accent-color)}
-        .tts-help{font-size:.78rem;line-height:1.45;opacity:.8;margin-top:8px}
-        @media(max-width:1099px){.reader-toolbar{display:grid!important;grid-template-columns:1fr!important}.reader-toolbar-title{display:none!important}.reader-toolbar-actions{width:100%!important}.toolbar-prefs{width:100%!important}.toc-sidebar{width:min(340px,90vw)!important}}
-        @media(max-width:600px){.reader-toolbar{gap:7px!important;padding:8px!important}.reader-toolbar-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}.reader-action{width:100%;min-height:44px!important;padding:7px 4px!important;font-size:.74rem!important;white-space:normal!important;line-height:1.1}.toolbar-prefs{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}.toolbar-field,.speed-control{width:100%!important;min-width:0!important}.speed-control input{flex:1;width:auto!important}.toolbar-field select{max-width:none!important;flex:1}.reader-content-shell{padding:12px 14px 80px!important}.main-content{margin-top:60px!important}}
+        .reader-toolbar {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: center;
+            gap: 10px !important;
+            position: sticky !important;
+            overflow: visible !important
+        }
 
+        .reader-toolbar-actions {
+            display: flex !important;
+            flex: 1 1 620px !important;
+            flex-wrap: wrap !important;
+            overflow: visible !important;
+            min-width: 0
+        }
+
+        .toolbar-prefs {
+            flex: 0 1 auto !important;
+            flex-wrap: wrap !important;
+            overflow: visible !important
+        }
+
+        .reader-action {
+            flex: 0 0 auto !important;
+            min-width: 0 !important
+        }
+
+        .reader-toolbar-title {
+            flex: 0 0 auto !important
+        }
+
+        .reader-content-shell {
+            padding-top: 20px !important
+        }
+
+        .unit-play-btn {
+            display: none !important
+        }
+
+        .reading-unit {
+            padding-right: 0 !important;
+            cursor: pointer
+        }
+
+        .tts-side-panel {
+            padding: 12px;
+            margin: 0 0 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--quote-bg)
+        }
+
+        .tts-side-title {
+            font-weight: 800;
+            color: var(--accent-color);
+            margin-bottom: 10px
+        }
+
+        .tts-side-panel .setting-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin: 10px 0
+        }
+
+        .tts-side-panel label {
+            font-size: .85rem;
+            font-weight: 700
+        }
+
+        .tts-side-panel select {
+            width: 100%;
+            min-height: 42px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-color)
+        }
+
+        .tts-side-panel input[type=range] {
+            width: 100%;
+            min-height: 36px;
+            accent-color: var(--accent-color)
+        }
+
+        .tts-help {
+            font-size: .78rem;
+            line-height: 1.45;
+            opacity: .8;
+            margin-top: 8px
+        }
+
+        @media(max-width:1099px) {
+            .reader-toolbar {
+                display: grid !important;
+                grid-template-columns: 1fr !important
+            }
+
+            .reader-toolbar-title {
+                display: none !important
+            }
+
+            .reader-toolbar-actions {
+                width: 100% !important
+            }
+
+            .toolbar-prefs {
+                width: 100% !important
+            }
+
+            .toc-sidebar {
+                width: min(340px, 90vw) !important
+            }
+        }
+
+        @media(max-width:600px) {
+            .reader-toolbar {
+                gap: 7px !important;
+                padding: 8px !important
+            }
+
+            .reader-toolbar-actions {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 6px !important
+            }
+
+            .reader-action {
+                width: 100%;
+                min-height: 44px !important;
+                padding: 7px 4px !important;
+                font-size: .74rem !important;
+                white-space: normal !important;
+                line-height: 1.1
+            }
+
+            .toolbar-prefs {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 8px !important
+            }
+
+            .toolbar-field,
+            .speed-control {
+                width: 100% !important;
+                min-width: 0 !important
+            }
+
+            .speed-control input {
+                flex: 1;
+                width: auto !important
+            }
+
+            .toolbar-field select {
+                max-width: none !important;
+                flex: 1
+            }
+
+            .reader-content-shell {
+                padding: 12px 14px 80px !important
+            }
+
+            .main-content {
+                margin-top: 60px !important
+            }
+        }
     </style>
 </head>
 
@@ -786,14 +1414,7 @@
                 <span class="reading-level" id="brightnessValue">10 / 10</span>
             </div>
 
-            <input
-                id="brightnessSlider"
-                class="brightness-slider"
-                type="range"
-                min="1"
-                max="10"
-                value="10"
-                step="1"
+            <input id="brightnessSlider" class="brightness-slider" type="range" min="1" max="10" value="10" step="1"
                 aria-label="Reading brightness from 1 to 10">
 
             <div class="brightness-help">
@@ -813,28 +1434,43 @@
         <div class="reader-toolbar" role="toolbar" aria-label="Read aloud controls">
             <div class="reader-toolbar-title">🎧 <span>Read Aloud</span></div>
             <div class="reader-toolbar-actions">
-                <button id="ttsPlayBtn" class="reader-action primary" onclick="ttsPlay()" title="Play or continue">▶️ Play</button>
+                <button id="ttsPlayBtn" class="reader-action primary" onclick="ttsPlay()" title="Play or continue">▶️
+                    Play</button>
                 <button class="reader-action" onclick="ttsPause()" title="Pause">⏸ Pause</button>
                 <button class="reader-action" onclick="ttsResume()" title="Resume paused speech">▶️ Resume</button>
                 <button class="reader-action" onclick="ttsStop()" title="Stop">⏹ Stop</button>
-                <button class="reader-action" onclick="ttsReadSelected()" title="Read highlighted text">🔎 Selected</button>
-                <button class="reader-action" onclick="ttsReadChapter()" title="Read from chapter beginning">📄 Full chapter</button>
-                <button class="reader-action" onclick="ttsStartFromChosen()" title="Read from the paragraph you chose">📍 Start here</button>
-                <button class="reader-action" onclick="resumeSavedPosition()" title="Go to last saved reading place">↩️ Last place</button>
+                <button class="reader-action" onclick="ttsReadSelected()" title="Read highlighted text">🔎
+                    Selected</button>
+                <button class="reader-action" onclick="ttsReadChapter()" title="Read from chapter beginning">📄 Full
+                    chapter</button>
+                <button class="reader-action" onclick="ttsStartFromChosen()"
+                    title="Read from the paragraph you chose">📍 Start here</button>
+                <button class="reader-action" onclick="resumeSavedPosition()" title="Go to last saved reading place">↩️
+                    Last place</button>
             </div>
             <div class="toolbar-prefs">
-                <div class="toolbar-field"><span>🌐</span><select id="ttsLanguage" aria-label="Reading language"><option value="auto">Auto</option><option value="en">English</option><option value="hi">हिन्दी</option></select></div>
-                <div class="speed-control toolbar-field"><span>🎚</span><input id="ttsRate" type="range" min="0.5" max="2" value="1" step="0.1" aria-label="Speech speed"><span id="ttsRateValue" class="speed-badge">1.0×</span></div>
+                <div class="toolbar-field"><span>🌐</span><select id="ttsLanguage" aria-label="Reading language">
+                        <option value="auto">Auto</option>
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी</option>
+                    </select></div>
+                <div class="speed-control toolbar-field"><span>🎚</span><input id="ttsRate" type="range" min="0.5"
+                        max="2" value="1" step="0.1" aria-label="Speech speed"><span id="ttsRateValue"
+                        class="speed-badge">1.0×</span></div>
                 <div class="reader-progress" id="readerProgress">Ready</div>
             </div>
         </div>
         <div class="reader-content-shell">
-            <div id="selectionTip" class="selection-tip">Text selected. Press <strong>🔎 Selected</strong> to hear only the selected text.</div>
+            <div id="selectionTip" class="selection-tip">Text selected. Press <strong>🔎 Selected</strong> to hear only
+                the selected text.</div>
             <div id="resumeCard" class="resume-card hidden">
-                <div><strong>📍 Continue where you left off?</strong><small id="resumeText">Your reading position has been saved.</small></div>
+                <div><strong>📍 Continue where you left off?</strong><small id="resumeText">Your reading position has
+                        been saved.</small></div>
                 <button class="reader-action primary" onclick="resumeSavedPosition()">Resume Reading</button>
             </div>
-            <div class="reader-statusbar"><span>Tap/click any paragraph to choose a start point. No extra play icons.</span><span class="status-spacer"></span><strong id="startPointLabel">Start: beginning</strong></div>
+            <div class="reader-statusbar"><span>Tap/click any paragraph to choose a start point. No extra play
+                    icons.</span><span class="status-spacer"></span><strong id="startPointLabel">Start:
+                    beginning</strong></div>
             <div id="content" class="markdown-body">
                 <div class="loading">Select a book to start reading...</div>
             </div>
@@ -846,8 +1482,11 @@
         <div class="toc-title">Table of Contents</div>
         <div class="tts-side-panel" aria-label="Read aloud settings">
             <div class="tts-side-title">🎧 Read Aloud Settings</div>
-            <div class="setting-group"><label for="ttsVoice">🎙 Voice</label><select id="ttsVoice"><option value="">Automatic voice</option></select></div>
-            <div class="setting-group"><label for="ttsVolume">🔊 Volume</label><input id="ttsVolume" type="range" min="0" max="1" value="1" step="0.05"><span id="ttsVolumeValue">100%</span></div>
+            <div class="setting-group"><label for="ttsVoice">🎙 Voice</label><select id="ttsVoice">
+                    <option value="">Automatic voice</option>
+                </select></div>
+            <div class="setting-group"><label for="ttsVolume">🔊 Volume</label><input id="ttsVolume" type="range"
+                    min="0" max="1" value="1" step="0.05"><span id="ttsVolumeValue">100%</span></div>
             <div class="tts-help">Tap any paragraph to choose the starting point, then press <b>📍 Start here</b>.</div>
         </div>
         <ul class="toc-list" id="tocList"></ul>
@@ -863,20 +1502,9 @@
             <polyline points="5 12 12 5 19 12"></polyline>
         </svg>
     </button>
-
+    <script src="./books.js"></script>
     <script>
         // Configuration: List of files to include
-        const files = [                        
-            { name: "Patanjali Yoga Sutras", path: "patanjaliYogsutr.md" },
-            { name: "Shreemad Bhagwad Geeta", path: "shreemadBhagwadGeeta.md" },
-            { name: "Vedic Time Table", path: "timeTable.md" },
-            { name: "Vigyan Bhairav Tantra", path: "vigyanBharvTantar.md" },
-            { name: "Maharishi Panini Ashtadhyayi", path: "maharishiPaniniAshtadhyayi.md" },
-            { name: "Vedic Mathematics", path: "vedicMath.md" },            
-            { name: "72-Karikas", path: "72-Karikas.md" },
-            { name: "yoga-sutra-Google", path: "yoga-sutra-Google.md" },
-            { name: "YogaSutrasStudy", path: "YogaSutrasStudy.md" },
-        ];
 
         const fileListEl = document.getElementById('fileList');
         const contentEl = document.getElementById('content');
@@ -987,7 +1615,7 @@
                 const index = readingUnits.length;
                 el.classList.add('reading-unit');
                 el.dataset.readingIndex = index;
-                readingUnits.push({ el, text:value });
+                readingUnits.push({ el, text: value });
 
                 el.addEventListener('click', (event) => {
                     if (event.target.closest('a,button,input,select,textarea')) return;
@@ -997,7 +1625,7 @@
             updateStartPointLabel();
         }
 
-        function chooseStartUnit(index, playNow=false) {
+        function chooseStartUnit(index, playNow = false) {
             index = Math.max(0, Math.min(readingUnits.length - 1, Number(index) || 0));
             chosenStartUnit = index;
             readingUnits.forEach(u => u.el.classList.remove('read-start-selected'));
@@ -1016,9 +1644,9 @@
             label.textContent = chosenStartUnit ? `Start: ${pct}%` : 'Start: beginning';
         }
 
-        function ttsStartFromChosen(){ ttsStartFromUnit(chosenStartUnit || 0); }
-        function ttsStartFromUnit(index){
-            if(!ttsSupported()){ alert('Text-to-Speech is not supported by this browser.'); return; }
+        function ttsStartFromChosen() { ttsStartFromUnit(chosenStartUnit || 0); }
+        function ttsStartFromUnit(index) {
+            if (!ttsSupported()) { alert('Text-to-Speech is not supported by this browser.'); return; }
             chooseStartUnit(index, false);
             speechSynthesis.cancel();
             ttsStopped = false;
@@ -1036,41 +1664,41 @@
             if (index === null) {
                 let best = 0;
                 const rootTop = mainContent.getBoundingClientRect().top;
-                readingUnits.forEach((u,i) => {
+                readingUnits.forEach((u, i) => {
                     if (u.el.getBoundingClientRect().top - rootTop <= 130) best = i;
                 });
                 index = best;
             }
-            const data = { file: currentFile.path, name: currentFile.name, unit:index, scrollTop:mainContent.scrollTop, updated:Date.now() };
+            const data = { file: currentFile.path, name: currentFile.name, unit: index, scrollTop: mainContent.scrollTop, updated: Date.now() };
             localStorage.setItem('vedicReaderPosition', JSON.stringify(data));
-            const pct = readingUnits.length ? Math.round(((index+1)/readingUnits.length)*100) : 0;
+            const pct = readingUnits.length ? Math.round(((index + 1) / readingUnits.length) * 100) : 0;
             document.getElementById('readerProgress').textContent = `📍 ${pct}%`;
         }
 
-        function restorePositionFromSaved(smooth=true) {
+        function restorePositionFromSaved(smooth = true) {
             const saved = getSavedPosition();
             if (!saved) return;
             if (currentFile && saved.file === currentFile.path) {
                 const unit = readingUnits[saved.unit];
-                if (unit) unit.el.scrollIntoView({behavior:smooth?'smooth':'auto', block:'center'});
-                else mainContent.scrollTo({top:saved.scrollTop||0,behavior:smooth?'smooth':'auto'});
+                if (unit) unit.el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' });
+                else mainContent.scrollTo({ top: saved.scrollTop || 0, behavior: smooth ? 'smooth' : 'auto' });
                 ttsStatus.textContent = 'Resumed from your saved reading position.';
                 chooseStartUnit(saved.unit, false);
                 saveReadingPosition(saved.unit);
                 return;
             }
-            const file = files.find(f=>f.path===saved.file);
+            const file = files.find(f => f.path === saved.file);
             if (file) loadFile(file, true);
         }
 
         function resumeSavedPosition() { restorePositionFromSaved(true); }
 
         function updateResumeCard() {
-            const card=document.getElementById('resumeCard'), label=document.getElementById('resumeText');
-            const saved=getSavedPosition();
-            if (saved && currentFile && saved.file===currentFile.path && saved.unit>0) {
+            const card = document.getElementById('resumeCard'), label = document.getElementById('resumeText');
+            const saved = getSavedPosition();
+            if (saved && currentFile && saved.file === currentFile.path && saved.unit > 0) {
                 card.classList.remove('hidden');
-                label.textContent = `${saved.name} • Continue from approximately ${Math.round(((saved.unit+1)/Math.max(1,readingUnits.length))*100)}%`;
+                label.textContent = `${saved.name} • Continue from approximately ${Math.round(((saved.unit + 1) / Math.max(1, readingUnits.length)) * 100)}%`;
             } else card.classList.add('hidden');
         }
 
@@ -1196,121 +1824,121 @@
         const ttsVolume = document.getElementById('ttsVolume');
         const ttsRateValue = document.getElementById('ttsRateValue');
         const ttsVolumeValue = document.getElementById('ttsVolumeValue');
-        const ttsStatus = { set textContent(v){ document.getElementById('readerProgress').textContent=v; }, get textContent(){return document.getElementById('readerProgress').textContent;} };
+        const ttsStatus = { set textContent(v) { document.getElementById('readerProgress').textContent = v; }, get textContent() { return document.getElementById('readerProgress').textContent; } };
 
-        function ttsSupported(){ return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window; }
-        function loadVoices(){
-            if(!ttsSupported()) return;
+        function ttsSupported() { return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window; }
+        function loadVoices() {
+            if (!ttsSupported()) return;
             ttsVoices = speechSynthesis.getVoices();
             const previous = localStorage.getItem('ttsVoice') || '';
             const wanted = ttsLanguage.value;
             const filtered = wanted === 'auto' ? ttsVoices : ttsVoices.filter(v => v.lang.toLowerCase().startsWith(wanted));
             ttsVoice.innerHTML = '<option value="">Automatic voice</option>';
             filtered.forEach(v => {
-                const o=document.createElement('option'); o.value=v.name; o.textContent=`${v.name} — ${v.lang}`; ttsVoice.appendChild(o);
+                const o = document.createElement('option'); o.value = v.name; o.textContent = `${v.name} — ${v.lang}`; ttsVoice.appendChild(o);
             });
-            if ([...ttsVoice.options].some(o=>o.value===previous)) ttsVoice.value=previous;
+            if ([...ttsVoice.options].some(o => o.value === previous)) ttsVoice.value = previous;
         }
-        function detectLanguage(text){
-            const d=(text.match(/[\u0900-\u097F]/g)||[]).length, l=(text.match(/[A-Za-z]/g)||[]).length;
-            return ttsLanguage.value==='hi'?'hi-IN':ttsLanguage.value==='en'?'en-US':d>l?'hi-IN':'en-US';
+        function detectLanguage(text) {
+            const d = (text.match(/[\u0900-\u097F]/g) || []).length, l = (text.match(/[A-Za-z]/g) || []).length;
+            return ttsLanguage.value === 'hi' ? 'hi-IN' : ttsLanguage.value === 'en' ? 'en-US' : d > l ? 'hi-IN' : 'en-US';
         }
-        function getVoice(lang){
-            if(ttsVoice.value){ const exact=ttsVoices.find(v=>v.name===ttsVoice.value); if(exact)return exact; }
-            return ttsVoices.find(v=>v.lang.toLowerCase().startsWith(lang.slice(0,2).toLowerCase())) || null;
+        function getVoice(lang) {
+            if (ttsVoice.value) { const exact = ttsVoices.find(v => v.name === ttsVoice.value); if (exact) return exact; }
+            return ttsVoices.find(v => v.lang.toLowerCase().startsWith(lang.slice(0, 2).toLowerCase())) || null;
         }
-        function splitTtsText(text){
-            const max=220, sentences=text.match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g)||[text], out=[]; let cur='';
-            for(const s of sentences){ if((cur+' '+s).length>max&&cur){out.push(cur.trim());cur=s}else cur+=' '+s; }
-            if(cur.trim())out.push(cur.trim()); return out;
+        function splitTtsText(text) {
+            const max = 220, sentences = text.match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g) || [text], out = []; let cur = '';
+            for (const s of sentences) { if ((cur + ' ' + s).length > max && cur) { out.push(cur.trim()); cur = s } else cur += ' ' + s; }
+            if (cur.trim()) out.push(cur.trim()); return out;
         }
-        function clearHighlight(){ readingUnits.forEach(u=>u.el.classList.remove('tts-current','tts-wording')); }
-        function highlightUnit(i){
-            if(i < 0) return;
-            clearHighlight(); ttsCurrentUnit=i;
-            const unit=readingUnits[i]; if(!unit)return;
-            unit.el.classList.add('tts-current','tts-wording');
-            unit.el.scrollIntoView({behavior:'smooth',block:'center'});
+        function clearHighlight() { readingUnits.forEach(u => u.el.classList.remove('tts-current', 'tts-wording')); }
+        function highlightUnit(i) {
+            if (i < 0) return;
+            clearHighlight(); ttsCurrentUnit = i;
+            const unit = readingUnits[i]; if (!unit) return;
+            unit.el.classList.add('tts-current', 'tts-wording');
+            unit.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             saveReadingPosition(i);
         }
-        function buildQueue(start=0){
-            ttsQueue=[];
-            for(let i=start;i<readingUnits.length;i++) splitTtsText(readingUnits[i].text).forEach(text=>ttsQueue.push({text,unit:i}));
-            ttsIndex=0;
+        function buildQueue(start = 0) {
+            ttsQueue = [];
+            for (let i = start; i < readingUnits.length; i++) splitTtsText(readingUnits[i].text).forEach(text => ttsQueue.push({ text, unit: i }));
+            ttsIndex = 0;
         }
-        function speakNext(){
-            if(ttsStopped || ttsIndex>=ttsQueue.length){
-                if(!ttsStopped){ ttsStatus.textContent='Finished ✓'; clearHighlight(); }
+        function speakNext() {
+            if (ttsStopped || ttsIndex >= ttsQueue.length) {
+                if (!ttsStopped) { ttsStatus.textContent = 'Finished ✓'; clearHighlight(); }
                 document.getElementById('ttsPlayBtn')?.classList.remove('is-active');
                 return;
             }
-            const item=ttsQueue[ttsIndex];
+            const item = ttsQueue[ttsIndex];
             highlightUnit(item.unit);
-            const u=new SpeechSynthesisUtterance(item.text);
-            u.lang=detectLanguage(item.text);
-            u.rate=Math.max(.5,Math.min(2,Number(ttsRate.value)||1));
-            u.volume=Math.max(0,Math.min(1,Number(ttsVolume.value)||1));
-            const v=getVoice(u.lang); if(v)u.voice=v;
-            const pct=item.unit>=0&&readingUnits.length?Math.round(((item.unit+1)/readingUnits.length)*100):0;
-            ttsStatus.textContent=item.unit>=0?`🎧 ${pct}%`:'🎧 Selected';
+            const u = new SpeechSynthesisUtterance(item.text);
+            u.lang = detectLanguage(item.text);
+            u.rate = Math.max(.5, Math.min(2, Number(ttsRate.value) || 1));
+            u.volume = Math.max(0, Math.min(1, Number(ttsVolume.value) || 1));
+            const v = getVoice(u.lang); if (v) u.voice = v;
+            const pct = item.unit >= 0 && readingUnits.length ? Math.round(((item.unit + 1) / readingUnits.length) * 100) : 0;
+            ttsStatus.textContent = item.unit >= 0 ? `🎧 ${pct}%` : '🎧 Selected';
             document.getElementById('ttsPlayBtn')?.classList.add('is-active');
-            u.onend=()=>{ttsIndex++; if(!ttsStopped)speakNext();};
-            u.onerror=e=>{ if(!['interrupted','canceled'].includes(e.error)){ttsIndex++;if(!ttsStopped)speakNext();} };
+            u.onend = () => { ttsIndex++; if (!ttsStopped) speakNext(); };
+            u.onerror = e => { if (!['interrupted', 'canceled'].includes(e.error)) { ttsIndex++; if (!ttsStopped) speakNext(); } };
             speechSynthesis.speak(u);
         }
-        function ttsPlay(){
-            if(!ttsSupported()){alert('Text-to-Speech is not supported by this browser.');return;}
-            if(speechSynthesis.paused){ttsResume();return;}
-            const saved=getSavedPosition();
-            let start=chosenStartUnit || 0;
-            if(!chosenStartUnit && currentFile&&saved&&saved.file===currentFile.path) start=saved.unit||0;
+        function ttsPlay() {
+            if (!ttsSupported()) { alert('Text-to-Speech is not supported by this browser.'); return; }
+            if (speechSynthesis.paused) { ttsResume(); return; }
+            const saved = getSavedPosition();
+            let start = chosenStartUnit || 0;
+            if (!chosenStartUnit && currentFile && saved && saved.file === currentFile.path) start = saved.unit || 0;
             ttsStartFromUnit(start);
         }
-        function ttsPause(){ if(ttsSupported()&&speechSynthesis.speaking){speechSynthesis.pause();ttsStatus.textContent='⏸ Paused';document.getElementById('ttsPlayBtn')?.classList.remove('is-active');} }
-        function ttsResume(){ if(ttsSupported()&&speechSynthesis.paused){speechSynthesis.resume();ttsStatus.textContent='▶️ Resumed';document.getElementById('ttsPlayBtn')?.classList.add('is-active');} }
-        function ttsStop(show=true){ ttsStopped=true;if(ttsSupported())speechSynthesis.cancel();clearHighlight();document.getElementById('ttsPlayBtn')?.classList.remove('is-active');if(show)ttsStatus.textContent='⏹ Stopped'; }
-        function ttsReadSelected(){
-            const selected=window.getSelection().toString().trim();
-            if(!selected){ttsStatus.textContent='Select text first';return;}
-            if(!ttsSupported())return;
-            speechSynthesis.cancel(); ttsStopped=false; ttsQueue=splitTtsText(selected).map(text=>({text,unit:-1}));ttsIndex=0;speakNext();
+        function ttsPause() { if (ttsSupported() && speechSynthesis.speaking) { speechSynthesis.pause(); ttsStatus.textContent = '⏸ Paused'; document.getElementById('ttsPlayBtn')?.classList.remove('is-active'); } }
+        function ttsResume() { if (ttsSupported() && speechSynthesis.paused) { speechSynthesis.resume(); ttsStatus.textContent = '▶️ Resumed'; document.getElementById('ttsPlayBtn')?.classList.add('is-active'); } }
+        function ttsStop(show = true) { ttsStopped = true; if (ttsSupported()) speechSynthesis.cancel(); clearHighlight(); document.getElementById('ttsPlayBtn')?.classList.remove('is-active'); if (show) ttsStatus.textContent = '⏹ Stopped'; }
+        function ttsReadSelected() {
+            const selected = window.getSelection().toString().trim();
+            if (!selected) { ttsStatus.textContent = 'Select text first'; return; }
+            if (!ttsSupported()) return;
+            speechSynthesis.cancel(); ttsStopped = false; ttsQueue = splitTtsText(selected).map(text => ({ text, unit: -1 })); ttsIndex = 0; speakNext();
         }
-        function ttsReadChapter(){ if(!readingUnits.length){ttsStatus.textContent='Load a chapter first';return;} ttsStartFromUnit(0); }
-        function toggleReaderSettings(){
-            const box=document.getElementById('readerSettings'), btn=document.getElementById('ttsSettingsBtn');
-            if(!box) return; const open=box.classList.toggle('open'); if(btn) btn.setAttribute('aria-expanded',String(open));
+        function ttsReadChapter() { if (!readingUnits.length) { ttsStatus.textContent = 'Load a chapter first'; return; } ttsStartFromUnit(0); }
+        function toggleReaderSettings() {
+            const box = document.getElementById('readerSettings'), btn = document.getElementById('ttsSettingsBtn');
+            if (!box) return; const open = box.classList.toggle('open'); if (btn) btn.setAttribute('aria-expanded', String(open));
         }
-        function saveTtsPreferences(){
-            localStorage.setItem('ttsLanguage',ttsLanguage.value); localStorage.setItem('ttsVoice',ttsVoice.value);
-            localStorage.setItem('ttsRate',ttsRate.value); localStorage.setItem('ttsVolume',ttsVolume.value);
+        function saveTtsPreferences() {
+            localStorage.setItem('ttsLanguage', ttsLanguage.value); localStorage.setItem('ttsVoice', ttsVoice.value);
+            localStorage.setItem('ttsRate', ttsRate.value); localStorage.setItem('ttsVolume', ttsVolume.value);
         }
-        function initTtsPreferences(){
-            ttsLanguage.value=localStorage.getItem('ttsLanguage')||'auto';
-            ttsRate.value=localStorage.getItem('ttsRate')||'1';
-            ttsVolume.value=localStorage.getItem('ttsVolume')||'1';
-            ttsRateValue.textContent=`${Number(ttsRate.value).toFixed(1)}×`;
-            ttsVolumeValue.textContent=`${Math.round(Number(ttsVolume.value)*100)}%`;
+        function initTtsPreferences() {
+            ttsLanguage.value = localStorage.getItem('ttsLanguage') || 'auto';
+            ttsRate.value = localStorage.getItem('ttsRate') || '1';
+            ttsVolume.value = localStorage.getItem('ttsVolume') || '1';
+            ttsRateValue.textContent = `${Number(ttsRate.value).toFixed(1)}×`;
+            ttsVolumeValue.textContent = `${Math.round(Number(ttsVolume.value) * 100)}%`;
             loadVoices();
         }
-        ttsLanguage.addEventListener('change',()=>{saveTtsPreferences();loadVoices();});
-        ttsVoice.addEventListener('change',saveTtsPreferences);
-        ttsRate.addEventListener('input',()=>{ttsRateValue.textContent=`${Number(ttsRate.value).toFixed(1)}×`;saveTtsPreferences();});
-        ttsVolume.addEventListener('input',()=>{ttsVolumeValue.textContent=`${Math.round(Number(ttsVolume.value)*100)}%`;saveTtsPreferences();});
-        document.addEventListener('selectionchange',()=>{
-            const sel=window.getSelection(); const tip=document.getElementById('selectionTip');
-            if(!tip)return; const text=sel?sel.toString().trim():'';
-            const inside=text && sel.anchorNode && contentEl.contains(sel.anchorNode.nodeType===1?sel.anchorNode:sel.anchorNode.parentElement);
-            tip.classList.toggle('show',!!inside);
+        ttsLanguage.addEventListener('change', () => { saveTtsPreferences(); loadVoices(); });
+        ttsVoice.addEventListener('change', saveTtsPreferences);
+        ttsRate.addEventListener('input', () => { ttsRateValue.textContent = `${Number(ttsRate.value).toFixed(1)}×`; saveTtsPreferences(); });
+        ttsVolume.addEventListener('input', () => { ttsVolumeValue.textContent = `${Math.round(Number(ttsVolume.value) * 100)}%`; saveTtsPreferences(); });
+        document.addEventListener('selectionchange', () => {
+            const sel = window.getSelection(); const tip = document.getElementById('selectionTip');
+            if (!tip) return; const text = sel ? sel.toString().trim() : '';
+            const inside = text && sel.anchorNode && contentEl.contains(sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+            tip.classList.toggle('show', !!inside);
         });
         // Save reading position while the user reads manually.
         let saveTimer;
-        mainContent.addEventListener('scroll',()=>{
+        mainContent.addEventListener('scroll', () => {
             clearTimeout(saveTimer);
-            saveTimer=setTimeout(()=>{saveReadingPosition();updateResumeCard();},350);
+            saveTimer = setTimeout(() => { saveReadingPosition(); updateResumeCard(); }, 350);
         });
 
         initTtsPreferences();
-        if(ttsSupported()) speechSynthesis.onvoiceschanged=loadVoices;
+        if (ttsSupported()) speechSynthesis.onvoiceschanged = loadVoices;
 
 
         // Start

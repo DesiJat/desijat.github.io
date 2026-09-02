@@ -722,6 +722,25 @@
             .reader-content-shell { padding-left:12px; padding-right:12px; }
         }
 
+        /* ===== Senior QA layout fixes: no overlap, no hidden controls ===== */
+        .reader-toolbar{display:flex!important;flex-wrap:wrap!important;align-items:center;gap:10px!important;position:sticky!important;overflow:visible!important}
+        .reader-toolbar-actions{display:flex!important;flex:1 1 620px!important;flex-wrap:wrap!important;overflow:visible!important;min-width:0}
+        .toolbar-prefs{flex:0 1 auto!important;flex-wrap:wrap!important;overflow:visible!important}
+        .reader-action{flex:0 0 auto!important;min-width:0!important}
+        .reader-toolbar-title{flex:0 0 auto!important}
+        .reader-content-shell{padding-top:20px!important}
+        .unit-play-btn{display:none!important}
+        .reading-unit{padding-right:0!important;cursor:pointer}
+        .tts-side-panel{padding:12px;margin:0 0 14px;border:1px solid var(--border-color);border-radius:12px;background:var(--quote-bg)}
+        .tts-side-title{font-weight:800;color:var(--accent-color);margin-bottom:10px}
+        .tts-side-panel .setting-group{display:grid;grid-template-columns:1fr;gap:6px;margin:10px 0}
+        .tts-side-panel label{font-size:.85rem;font-weight:700}
+        .tts-side-panel select{width:100%;min-height:42px;padding:8px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color)}
+        .tts-side-panel input[type=range]{width:100%;min-height:36px;accent-color:var(--accent-color)}
+        .tts-help{font-size:.78rem;line-height:1.45;opacity:.8;margin-top:8px}
+        @media(max-width:1099px){.reader-toolbar{display:grid!important;grid-template-columns:1fr!important}.reader-toolbar-title{display:none!important}.reader-toolbar-actions{width:100%!important}.toolbar-prefs{width:100%!important}.toc-sidebar{width:min(340px,90vw)!important}}
+        @media(max-width:600px){.reader-toolbar{gap:7px!important;padding:8px!important}.reader-toolbar-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}.reader-action{width:100%;min-height:44px!important;padding:7px 4px!important;font-size:.74rem!important;white-space:normal!important;line-height:1.1}.toolbar-prefs{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}.toolbar-field,.speed-control{width:100%!important;min-width:0!important}.speed-control input{flex:1;width:auto!important}.toolbar-field select{max-width:none!important;flex:1}.reader-content-shell{padding:12px 14px 80px!important}.main-content{margin-top:60px!important}}
+
     </style>
 </head>
 
@@ -802,7 +821,6 @@
                 <button class="reader-action" onclick="ttsReadChapter()" title="Read from chapter beginning">📄 Full chapter</button>
                 <button class="reader-action" onclick="ttsStartFromChosen()" title="Read from the paragraph you chose">📍 Start here</button>
                 <button class="reader-action" onclick="resumeSavedPosition()" title="Go to last saved reading place">↩️ Last place</button>
-                <button class="reader-action" onclick="toggleReaderSettings()" title="More voice settings" aria-expanded="false" id="ttsSettingsBtn">⚙️</button>
             </div>
             <div class="toolbar-prefs">
                 <div class="toolbar-field"><span>🌐</span><select id="ttsLanguage" aria-label="Reading language"><option value="auto">Auto</option><option value="en">English</option><option value="hi">हिन्दी</option></select></div>
@@ -810,18 +828,13 @@
                 <div class="reader-progress" id="readerProgress">Ready</div>
             </div>
         </div>
-        <div class="reader-settings" id="readerSettings">
-            <div class="setting-group"><label for="ttsVoice">🎙 Voice</label><select id="ttsVoice"><option value="">Automatic voice</option></select></div>
-            <div class="setting-group"><label for="ttsVolume">🔊 Volume</label><input id="ttsVolume" type="range" min="0" max="1" value="1" step="0.05"><span id="ttsVolumeValue">100%</span></div>
-            <small>Tip: tap the ▶ button beside any paragraph or heading to start reading exactly there.</small>
-        </div>
         <div class="reader-content-shell">
             <div id="selectionTip" class="selection-tip">Text selected. Press <strong>🔎 Selected</strong> to hear only the selected text.</div>
             <div id="resumeCard" class="resume-card hidden">
                 <div><strong>📍 Continue where you left off?</strong><small id="resumeText">Your reading position has been saved.</small></div>
                 <button class="reader-action primary" onclick="resumeSavedPosition()">Resume Reading</button>
             </div>
-            <div class="reader-statusbar"><span>Tap/click any paragraph to choose a start point.</span><span class="status-spacer"></span><strong id="startPointLabel">Start: beginning</strong></div>
+            <div class="reader-statusbar"><span>Tap/click any paragraph to choose a start point. No extra play icons.</span><span class="status-spacer"></span><strong id="startPointLabel">Start: beginning</strong></div>
             <div id="content" class="markdown-body">
                 <div class="loading">Select a book to start reading...</div>
             </div>
@@ -831,6 +844,12 @@
     <!-- Right Sidebar for TOC -->
     <div class="toc-sidebar" id="tocSidebar">
         <div class="toc-title">Table of Contents</div>
+        <div class="tts-side-panel" aria-label="Read aloud settings">
+            <div class="tts-side-title">🎧 Read Aloud Settings</div>
+            <div class="setting-group"><label for="ttsVoice">🎙 Voice</label><select id="ttsVoice"><option value="">Automatic voice</option></select></div>
+            <div class="setting-group"><label for="ttsVolume">🔊 Volume</label><input id="ttsVolume" type="range" min="0" max="1" value="1" step="0.05"><span id="ttsVolumeValue">100%</span></div>
+            <div class="tts-help">Tap any paragraph to choose the starting point, then press <b>📍 Start here</b>.</div>
+        </div>
         <ul class="toc-list" id="tocList"></ul>
     </div>
 
@@ -969,15 +988,6 @@
                 el.classList.add('reading-unit');
                 el.dataset.readingIndex = index;
                 readingUnits.push({ el, text:value });
-
-                const play = document.createElement('button');
-                play.type = 'button';
-                play.className = 'unit-play-btn';
-                play.textContent = '▶';
-                play.title = 'Read aloud from here';
-                play.setAttribute('aria-label', `Read aloud from this section: ${value.slice(0,60)}`);
-                play.onclick = (event) => { event.preventDefault(); event.stopPropagation(); chooseStartUnit(index, true); };
-                el.appendChild(play);
 
                 el.addEventListener('click', (event) => {
                     if (event.target.closest('a,button,input,select,textarea')) return;
@@ -1268,7 +1278,7 @@
         function ttsReadChapter(){ if(!readingUnits.length){ttsStatus.textContent='Load a chapter first';return;} ttsStartFromUnit(0); }
         function toggleReaderSettings(){
             const box=document.getElementById('readerSettings'), btn=document.getElementById('ttsSettingsBtn');
-            const open=box.classList.toggle('open'); btn.setAttribute('aria-expanded',String(open));
+            if(!box) return; const open=box.classList.toggle('open'); if(btn) btn.setAttribute('aria-expanded',String(open));
         }
         function saveTtsPreferences(){
             localStorage.setItem('ttsLanguage',ttsLanguage.value); localStorage.setItem('ttsVoice',ttsVoice.value);

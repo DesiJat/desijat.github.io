@@ -574,7 +574,6 @@
             z-index: 9999;
             transition: opacity 0.2s ease;
         }
-
     </style>
 </head>
 
@@ -620,14 +619,7 @@
                 <span class="reading-level" id="brightnessValue">10 / 10</span>
             </div>
 
-            <input
-                id="brightnessSlider"
-                class="brightness-slider"
-                type="range"
-                min="1"
-                max="10"
-                value="10"
-                step="1"
+            <input id="brightnessSlider" class="brightness-slider" type="range" min="1" max="10" value="10" step="1"
                 aria-label="Reading brightness from 1 to 10">
 
             <div class="brightness-help">
@@ -664,20 +656,10 @@
             <polyline points="5 12 12 5 19 12"></polyline>
         </svg>
     </button>
-
+    <script src="./books.js"></script>
     <script>
         // Configuration: List of files to include
-        const files = [                        
-            { name: "Patanjali Yoga Sutras", path: "patanjaliYogsutr.md" },
-            { name: "Shreemad Bhagwad Geeta", path: "shreemadBhagwadGeeta.md" },
-            { name: "Vedic Time Table", path: "timeTable.md" },
-            { name: "Vigyan Bhairav Tantra", path: "vigyanBharvTantar.md" },
-            { name: "Maharishi Panini Ashtadhyayi", path: "maharishiPaniniAshtadhyayi.md" },
-            { name: "Vedic Mathematics", path: "vedicMath.md" },            
-            { name: "72-Karikas", path: "72-Karikas.md" },
-            { name: "yoga-sutra-Google", path: "yoga-sutra-Google.md" },
-            { name: "YogaSutrasStudy", path: "YogaSutrasStudy.md" },
-        ];
+
 
         const fileListEl = document.getElementById('fileList');
         const contentEl = document.getElementById('content');
