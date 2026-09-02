@@ -1,4 +1,4 @@
-const files = [
+const files = [        
     { name: "Patanjali Yoga Sutras", path: "files/patanjaliYogsutr.md" },
     { name: "Shreemad Bhagwad Geeta", path: "files/shreemadBhagwadGeeta.md" },
     { name: "Vedic Time Table", path: "files/timeTable.md" },
@@ -7,5 +7,11 @@ const files = [
     { name: "Vedic Mathematics", path: "files/vedicMath.md" },
     { name: "72-Karikas", path: "files/72-Karikas.md" },
     { name: "yoga-sutra-Google", path: "files/yoga-sutra-Google.md" },
-    { name: "YogaSutrasStudy", path: "files/YogaSutrasStudy.md" }
+    { name: "YogaSutrasStudy", path: "files/YogaSutrasStudy.md" },
+    { name: "Best Book Formate", path: "files/yogsutra/bestBookFormate.md" },
+    { name: "Yoga Sutras", path: "files/yogsutra/yogsutra.md" },
+    { name: "yogsutra adhyay 1", path: "files/yogsutra/yogsutra-adhyay-1.md" },
+    { name: "yogsutra adhyay 2", path: "files/yogsutra/yogsutra-adhyay-2.md" },
+    { name: "yogsutra adhyay 3", path: "files/yogsutra/yogsutra-adhyay-3.md" },
+    { name: "yogsutra adhyay 4", path: "files/yogsutra/yogsutra-adhyay-4.md" },
 ];
