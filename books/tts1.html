@@ -987,6 +987,24 @@
             padding: 22px 60px 40px;
         }
 
+        .reader-statusbar {
+            max-width: 800px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .8rem;
+            opacity: .8;
+        }
+
+        .reader-statusbar .status-spacer {
+            flex: 1
+        }
+
+        .reader-statusbar strong {
+            color: var(--accent-color)
+        }
+
         .reading-unit {
             position: relative;
             scroll-margin-top: 150px;
@@ -1155,6 +1173,10 @@
             .resume-card {
                 margin: 8px 0;
             }
+
+            .reader-statusbar {
+                flex-wrap: wrap;
+            }
         }
 
         @media(max-width:420px) {
@@ -1273,38 +1295,6 @@
             margin-top: 8px
         }
 
-        /* sound menu start */
-.tts-toggle-btn {
-    /* border: none;
-    background: var(--accent-color);
-    color: white;
-    width: 46px;
-    height: 46px;    
-    font-size: 1.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease, opacity 0.2s ease; */
-
-    border-radius: 50%;
-    cursor: pointer;
-    position: fixed;
-    z-index: 9999;
-}
-
-.tts-toggle-btn:hover {
-    transform: scale(1.08);
-}
-
-.tts-toggle-btn:active {
-    transform: scale(0.95);
-}
-
-/* Hidden state */
-.reader-toolbar.toolbar-hidden {
-    display: none !important;    
-}        
-        /* sound menu end*/
         @media(max-width:1099px) {
             .reader-toolbar {
                 display: grid !important;
@@ -1441,10 +1431,6 @@
     </div>
 
     <div class="main-content">
-        <button id="ttsToggleBtn" class="tts-toggle-btn" type="button" onclick="toggleReaderToolbar()"
-            aria-label="Show or hide Read Aloud controls" title="Show / Hide Read Aloud Controls">
-            🔊
-        </button>
         <div class="reader-toolbar" role="toolbar" aria-label="Read aloud controls">
             <div class="reader-toolbar-title">🎧 <span>Read Aloud</span></div>
             <div class="reader-toolbar-actions">
@@ -1482,7 +1468,9 @@
                         been saved.</small></div>
                 <button class="reader-action primary" onclick="resumeSavedPosition()">Resume Reading</button>
             </div>
-            
+            <div class="reader-statusbar"><span>Tap/click any paragraph to choose a start point. No extra play
+                    icons.</span><span class="status-spacer"></span><strong id="startPointLabel">Start:
+                    beginning</strong></div>
             <div id="content" class="markdown-body">
                 <div class="loading">Select a book to start reading...</div>
             </div>
@@ -1553,7 +1541,7 @@
             setTheme(currentTheme);
             setReadingBrightness(localStorage.getItem('readingBrightness') || 10);
             renderFileList();
-            restoreReaderToolbarState();
+
             // Restore the last opened book, otherwise open the first one
             const lastPath = localStorage.getItem('readerLastFile');
             const lastFile = files.find(f => f.path === lastPath);
@@ -1932,48 +1920,6 @@
             ttsVolumeValue.textContent = `${Math.round(Number(ttsVolume.value) * 100)}%`;
             loadVoices();
         }
-
-function toggleReaderToolbar() {
-
-    const toolbar = document.querySelector('.reader-toolbar');
-    const button = document.getElementById('ttsToggleBtn');
-
-    if (!toolbar) return;
-
-    const isHidden = toolbar.classList.toggle('toolbar-hidden');
-
-    // Change icon
-    button.textContent = isHidden ? '🔇' : '🔊';
-
-    // Accessibility
-    button.setAttribute(
-        'aria-label',
-        isHidden
-            ? 'Show Read Aloud controls'
-            : 'Hide Read Aloud controls'
-    );
-
-    // Save preference
-    localStorage.setItem(
-        'readerToolbarHidden',
-        isHidden ? 'true' : 'false'
-    );
-}       
-
-function restoreReaderToolbarState() {
-
-    const toolbar = document.querySelector('.reader-toolbar');
-    const button = document.getElementById('ttsToggleBtn');
-
-    if (!toolbar || !button) return;
-
-    const isHidden =
-        localStorage.getItem('readerToolbarHidden') === 'true';
-
-    toolbar.classList.toggle('toolbar-hidden', isHidden);
-
-    button.textContent = isHidden ? '🔇' : '🔊';
-}
         ttsLanguage.addEventListener('change', () => { saveTtsPreferences(); loadVoices(); });
         ttsVoice.addEventListener('change', saveTtsPreferences);
         ttsRate.addEventListener('input', () => { ttsRateValue.textContent = `${Number(ttsRate.value).toFixed(1)}×`; saveTtsPreferences(); });
