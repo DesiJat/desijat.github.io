@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vedic Books Reader</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Marked.js for Markdown Parsing -->
+    <script src="./marked.min.js"></script>
+
+    <style>
+        :root {
+            /* Light Theme (Default) */
+            --bg-color: #ffffff;
+            --text-color: #1a1a1a;
+            --sidebar-bg: #f5f5f5;
+            --sidebar-text: #333333;
+            --accent-color: #6366f1;
+            --border-color: #e5e7eb;
+            --code-bg: #f3f4f6;
+            --quote-bg: #f9fafb;
+            --quote-border: #6366f1;
+            --header-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #111827;
+            --text-color: #e5e7eb;
+            --sidebar-bg: #1f2937;
+            --sidebar-text: #d1d5db;
+            --accent-color: #818cf8;
+            --border-color: #374151;
+            --code-bg: #1f2937;
+            --quote-bg: #1f2937;
+            --quote-border: #818cf8;
+            --header-bg: #111827;
+        }
+
+        [data-theme="paper"] {
+            --bg-color: #fdf6e3;
+            --text-color: #3b2f2f;
+            --sidebar-bg: #eee8d5;
+            --sidebar-text: #586e75;
+            --accent-color: #d33682;
+            --border-color: #d2b48c;
+            --code-bg: #eee8d5;
+            --quote-bg: #fdf6e3;
+            --quote-border: #d33682;
+            --header-bg: #fdf6e3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            /* Fallback */
+            height: 100dvh;
+            /* Dynamic Viewport Height */
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            align-items: center;
+            padding: 0 15px;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .close-sidebar-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            list-style: none;
+        }
+
+        .file-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .file-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .file-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-item.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Theme Switcher */
+        .theme-switcher {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--sidebar-text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .theme-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .theme-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 60px;
+            scroll-behavior: smooth;
+            position: relative;
+        }
+
+        .markdown-body {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            padding-bottom: 100px;
+        }
+
+        /* Markdown Styles */
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .markdown-body h1 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.8rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.4rem;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1.2em;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            margin-bottom: 1.2em;
+            padding-left: 2em;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid var(--quote-border);
+            background-color: var(--quote-bg);
+            padding: 15px 20px;
+            margin: 1.5em 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+
+        .markdown-body code {
+            background-color: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        .markdown-body pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1.5em;
+        }
+
+        .markdown-body pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .markdown-body strong {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .markdown-body hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 2em 0;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 1.2rem;
+            color: var(--sidebar-text);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 85%;
+                /* Responsive width */
+                max-width: 300px;
+                transform: translateX(-100%);
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .close-sidebar-btn {
+                display: block;
+            }
+
+            .overlay.open {
+                display: block;
+                opacity: 1;
+            }
+
+            .main-content {
+                padding: 80px 20px 40px 20px;
+                /* Top padding for fixed header */
+                width: 100%;
+            }
+
+            .markdown-body {
+                font-size: 1rem;
+                /* Slightly smaller font on mobile */
+                padding-bottom: 60px;
+            }
+
+            .markdown-body h1 {
+                font-size: 1.8rem;
+                margin-top: 1em;
+            }
+
+            .markdown-body h2 {
+                font-size: 1.4rem;
+                margin-top: 1.2em;
+            }
+
+            .markdown-body h3 {
+                font-size: 1.2rem;
+            }
+
+            .markdown-body blockquote {
+                padding: 10px 15px;
+                margin: 1em 0;
+                border-left-width: 3px;
+            }
+
+            .markdown-body pre {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Scroll to Top Button */
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .scroll-top-btn.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* TOC Sidebar */
+        .toc-sidebar {
+            width: 250px;
+            background-color: var(--bg-color);
+            border-left: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+            overflow-y: auto;
+            /* display: none; Removed to allow mobile fixed positioning */
+            display: block;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+
+            /* Mobile Default: Fixed Drawer */
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            z-index: 200;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .toc-sidebar.open {
+            transform: translateX(0);
+        }
+
+        .toc-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--accent-color);
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .toc-item {
+            margin-bottom: 8px;
+        }
+
+        .toc-item a {
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .toc-item a:hover {
+            background-color: var(--sidebar-bg);
+            color: var(--accent-color);
+        }
+
+        .toc-item a.active {
+            background-color: var(--accent-color);
+            color: white;
+            padding-left: 12px;
+        }
+
+        .toc-item.level-2 {
+            padding-left: 10px;
+        }
+
+        .toc-item.level-3 {
+            padding-left: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (min-width: 1100px) {
+            .toc-sidebar {
+                position: static;
+                transform: none;
+                box-shadow: none;
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .scroll-top-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* Reading Comfort Controller */
+        .reading-controls {
+            padding: 15px 20px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .reading-control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .reading-level {
+            color: var(--accent-color);
+        }
+
+        .brightness-slider {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        .brightness-help {
+            font-size: 0.72rem;
+            opacity: 0.7;
+            margin-top: 6px;
+            line-height: 1.35;
+        }
+
+
+        /* Text-to-Speech Controller */
+        .tts-controls { padding: 15px 20px 20px; border-top: 1px solid var(--border-color); }
+        .tts-title { font-weight: 700; margin-bottom: 10px; color: var(--accent-color); }
+        .tts-buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px; }
+        .tts-btn { padding:8px 5px; border:1px solid var(--border-color); background:var(--bg-color); color:var(--text-color); border-radius:6px; cursor:pointer; font-size:.78rem; }
+        .tts-btn:hover,.tts-btn.active { background:var(--accent-color); color:white; border-color:var(--accent-color); }
+        .tts-select { width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-color); color:var(--text-color); margin-bottom:8px; }
+        .tts-row { display:flex; align-items:center; gap:8px; margin:8px 0; font-size:.8rem; }
+        .tts-row label { min-width:48px; font-weight:600; }
+        .tts-row input { flex:1; accent-color:var(--accent-color); }
+        .tts-value { min-width:34px; text-align:right; color:var(--accent-color); font-weight:600; }
+        .tts-status { font-size:.72rem; opacity:.75; margin-top:8px; line-height:1.4; }
+        .speaking-highlight { background: rgba(99,102,241,.18); border-radius:3px; }
+
+        /* Screen dimming overlay for reading comfort */
+        #readingFilter {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: #000;
+            opacity: 0;
+            z-index: 9999;
+            transition: opacity 0.2s ease;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="mobile-header">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <div class="mobile-title">Vedic Reader</div>
+        <button class="menu-btn" onclick="toggleTOC()" aria-label="Open Table of Contents">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <div class="overlay" onclick="closeSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span>📚 Vedic Reader</span>
+            <button class="close-sidebar-btn" onclick="closeSidebar()" aria-label="Close Menu">✕</button>
+        </div>
+        <ul class="file-list" id="fileList">
+            <!-- Files will be injected here -->
+        </ul>
+
+        <div class="reading-controls">
+            <div class="reading-control-label">
+                <span>☀️ Reading Brightness</span>
+                <span class="reading-level" id="brightnessValue">10 / 10</span>
+            </div>
+
+            <input
+                id="brightnessSlider"
+                class="brightness-slider"
+                type="range"
+                min="1"
+                max="10"
+                value="10"
+                step="1"
+                aria-label="Reading brightness from 1 to 10">
+
+            <div class="brightness-help">
+                10 = normal brightness · lower levels reduce screen glare for comfortable reading
+            </div>
+        </div>
+
+
+        <div class="tts-controls">
+            <div class="tts-title">🎧 Listen / Read Aloud</div>
+            <div class="tts-buttons">
+                <button class="tts-btn" onclick="ttsPlay()">▶️ Play</button>
+                <button class="tts-btn" onclick="ttsPause()">⏸ Pause</button>
+                <button class="tts-btn" onclick="ttsResume()">▶️ Resume</button>
+                <button class="tts-btn" onclick="ttsStop()">⏹ Stop</button>
+            </div>
+            <button class="tts-btn" style="width:100%;margin-bottom:8px" onclick="ttsReadSelected()">📖 Read Selected Text</button>
+            <button class="tts-btn" style="width:100%;margin-bottom:10px" onclick="ttsReadChapter()">📄 Read Complete Current Chapter</button>
+            <select id="ttsLanguage" class="tts-select" onchange="updateVoiceList()">
+                <option value="auto">🌐 Auto detect language</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="hi">🇮🇳 Hindi</option>
+            </select>
+            <select id="ttsVoice" class="tts-select"></select>
+            <div class="tts-row"><label>🎚 Speed</label><input id="ttsRate" type="range" min="0.5" max="2" step="0.1"><span id="ttsRateValue" class="tts-value"></span></div>
+            <div class="tts-row"><label>🔊 Volume</label><input id="ttsVolume" type="range" min="0" max="1" step="0.1"><span id="ttsVolumeValue" class="tts-value"></span></div>
+            <div class="tts-status" id="ttsStatus">Ready. Preferences are saved automatically. Hindi/English voices depend on your browser/device.</div>
+        </div>
+
+        <div class="theme-switcher">
+            <button class="theme-btn active" onclick="setTheme('light')">Light</button>
+            <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
+            <button class="theme-btn" onclick="setTheme('paper')">Paper</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="content" class="markdown-body">
+            <div class="loading">Select a book to start reading...</div>
+        </div>
+    </div>
+
+    <!-- Right Sidebar for TOC -->
+    <div class="toc-sidebar" id="tocSidebar">
+        <div class="toc-title">Table of Contents</div>
+        <ul class="toc-list" id="tocList"></ul>
+    </div>
+
+    <div id="readingFilter" aria-hidden="true"></div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top-btn" onclick="scrollToTop()" aria-label="Scroll to Top">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+    </button>
+
+    <script>
+        // Configuration: List of files to include
+        const files = [                        
+            { name: "Patanjali Yoga Sutras", path: "patanjaliYogsutr.md" },
+            { name: "Shreemad Bhagwad Geeta", path: "shreemadBhagwadGeeta.md" },
+            { name: "Vedic Time Table", path: "timeTable.md" },
+            { name: "Vigyan Bhairav Tantra", path: "vigyanBharvTantar.md" },
+            { name: "Maharishi Panini Ashtadhyayi", path: "maharishiPaniniAshtadhyayi.md" },
+            { name: "Vedic Mathematics", path: "vedicMath.md" },            
+            { name: "72-Karikas", path: "72-Karikas.md" },
+            { name: "yoga-sutra-Google", path: "yoga-sutra-Google.md" },
+            { name: "YogaSutrasStudy", path: "YogaSutrasStudy.md" },
+        ];
+
+        const fileListEl = document.getElementById('fileList');
+        const contentEl = document.getElementById('content');
+        const sidebarEl = document.getElementById('sidebar');
+        const overlayEl = document.querySelector('.overlay');
+        let currentTheme = localStorage.getItem('theme') || 'light';
+
+        // Reading Brightness / Eye Comfort
+        const brightnessSlider = document.getElementById('brightnessSlider');
+        const brightnessValue = document.getElementById('brightnessValue');
+        const readingFilter = document.getElementById('readingFilter');
+
+        function setReadingBrightness(level) {
+            level = Math.max(1, Math.min(10, Number(level)));
+
+            brightnessSlider.value = level;
+            brightnessValue.textContent = `${level} / 10`;
+
+            // Level 10 = normal screen appearance.
+            // Level 1 = maximum reading dimming.
+            const opacity = ((10 - level) / 9) * 0.55;
+            readingFilter.style.opacity = opacity.toFixed(3);
+
+            localStorage.setItem('readingBrightness', level);
+        }
+
+        brightnessSlider.addEventListener('input', (event) => {
+            setReadingBrightness(event.target.value);
+        });
+
+
+        // Initialize
+        function init() {
+            setTheme(currentTheme);
+            setReadingBrightness(localStorage.getItem('readingBrightness') || 10);
+            renderFileList();
+
+            // Load the first file by default
+            if (files.length > 0) {
+                loadFile(files[0]);
+            }
+        }
+
+        // Render Sidebar List
+        function renderFileList() {
+            fileListEl.innerHTML = '';
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                li.textContent = file.name;
+                li.onclick = () => {
+                    loadFile(file);
+                    closeSidebar(); // Close sidebar on mobile after selection
+                };
+                li.dataset.path = file.path;
+                fileListEl.appendChild(li);
+            });
+        }
+
+        // Load and Render File
+        async function loadFile(file) {
+            // Update Active State
+            document.querySelectorAll('.file-item').forEach(el => {
+                el.classList.remove('active');
+                if (el.dataset.path === file.path) el.classList.add('active');
+            });
+
+            ttsStop();
+            currentChapterText = '';
+            contentEl.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const response = await fetch(file.path);
+                if (!response.ok) throw new Error('Failed to load file');
+                const text = await response.text();
+                currentChapterText = text;
+
+                // Parse Markdown
+                contentEl.innerHTML = marked.parse(text);
+
+                // Generate TOC
+                generateTOC();
+
+                // Scroll to top
+                document.querySelector('.main-content').scrollTop = 0;
+
+            } catch (error) {
+                contentEl.innerHTML = `
+                    <div style="text-align:center; padding: 50px;">
+                        <h2>⚠️ Error Loading File</h2>
+                        <p>Could not load <strong>${file.name}</strong>.</p>
+                        <p style="font-size: 0.9rem; color: var(--sidebar-text); margin-top: 10px;">
+                            If you are opening this file directly, please use the <code>start_server.py</code> script.
+                            <br>Browsers block local file access for security.
+                        </p>
+                    </div>
+                `;
+                console.error(error);
+                console.error(error);
+            }
+        }
+
+        // Generate Table of Contents
+        function generateTOC() {
+            const tocList = document.getElementById('tocList');
+            tocList.innerHTML = '';
+
+            const headers = contentEl.querySelectorAll('h1, h2, h3');
+
+            if (headers.length === 0) return;
+
+            headers.forEach((header, index) => {
+                // Ignore title if it's h1
+                if (header.tagName === 'H1' && index === 0) return;
+
+                const id = 'section-' + index;
+                header.id = id;
+
+                const li = document.createElement('li');
+                li.className = `toc-item level-${header.tagName.toLowerCase().replace('h', '')}`;
+
+                const a = document.createElement('a');
+                a.href = '#' + id;
+                a.textContent = header.textContent;
+                a.onclick = (e) => {
+                    e.preventDefault();
+                    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+                    // Update URL fragment without jumping
+                    history.pushState(null, null, '#' + id);
+                    closeMenus(); // Close mobile drawer
+                };
+
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+
+            setupIntersectionObserver();
+        }
+
+        // Active Section Highlighting
+        function setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Remove active class from all links
+                        document.querySelectorAll('.toc-item a').forEach(link => link.classList.remove('active'));
+
+                        // Add active class to current link
+                        const id = entry.target.id;
+                        const activeLink = document.querySelector(`.toc-item a[href="#${id}"]`);
+                        if (activeLink) activeLink.classList.add('active');
+                    }
+                });
+            }, { root: document.querySelector('.main-content'), threshold: 0.1, rootMargin: "-10% 0px -80% 0px" });
+
+            document.querySelectorAll('h1, h2, h3').forEach(section => observer.observe(section));
+        }
+
+        // Scroll to Top Logic
+        const mainContent = document.querySelector('.main-content');
+        const scrollTopBtn = document.querySelector('.scroll-top-btn');
+
+        mainContent.addEventListener('scroll', () => {
+            if (mainContent.scrollTop > 300) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        });
+
+        function scrollToTop() {
+            mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Theme Handling
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+
+            // Update Buttons
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase() === theme) btn.classList.add('active');
+            });
+        }
+
+        // Mobile Sidebar/TOC Toggle
+        function toggleSidebar() {
+            sidebarEl.classList.toggle('open');
+            overlayEl.classList.toggle('open');
+            document.getElementById('tocSidebar').classList.remove('open'); // Ensure TOC is closed
+        }
+
+        function toggleTOC() {
+            document.getElementById('tocSidebar').classList.toggle('open');
+            overlayEl.classList.toggle('open');
+            sidebarEl.classList.remove('open'); // Ensure Left Sidebar is closed
+        }
+
+        function closeSidebar() {
+            closeMenus();
+        }
+
+        function closeMenus() {
+            sidebarEl.classList.remove('open');
+            document.getElementById('tocSidebar').classList.remove('open');
+            overlayEl.classList.remove('open');
+        }
+
+
+
+        // =========================
+        // Text-to-Speech (Web Speech API)
+        // =========================
+        let ttsVoices = [];
+        let ttsQueue = [];
+        let ttsIndex = 0;
+        let ttsStopped = false;
+        let ttsMode = null;
+        let currentChapterText = '';
+
+        const ttsLanguage = document.getElementById('ttsLanguage');
+        const ttsVoice = document.getElementById('ttsVoice');
+        const ttsRate = document.getElementById('ttsRate');
+        const ttsVolume = document.getElementById('ttsVolume');
+        const ttsRateValue = document.getElementById('ttsRateValue');
+        const ttsVolumeValue = document.getElementById('ttsVolumeValue');
+        const ttsStatus = document.getElementById('ttsStatus');
+
+        function ttsSupported() { return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window; }
+
+        function loadTtsPreferences() {
+            ttsLanguage.value = localStorage.getItem('ttsLanguage') || 'auto';
+            ttsRate.value = localStorage.getItem('ttsRate') || '1';
+            ttsVolume.value = localStorage.getItem('ttsVolume') || '1';
+            updateTtsLabels();
+        }
+        function updateTtsLabels() {
+            ttsRateValue.textContent = Number(ttsRate.value).toFixed(1) + 'x';
+            ttsVolumeValue.textContent = Math.round(Number(ttsVolume.value) * 100) + '%';
+        }
+        function saveTtsPreferences() {
+            localStorage.setItem('ttsLanguage', ttsLanguage.value);
+            localStorage.setItem('ttsVoice', ttsVoice.value);
+            localStorage.setItem('ttsRate', ttsRate.value);
+            localStorage.setItem('ttsVolume', ttsVolume.value);
+        }
+        function loadVoices() {
+            ttsVoices = speechSynthesis.getVoices();
+            updateVoiceList();
+        }
+        function updateVoiceList() {
+            if (!ttsSupported()) return;
+            const previous = localStorage.getItem('ttsVoice') || ttsVoice.value;
+            const lang = ttsLanguage.value;
+            const filtered = lang === 'auto' ? ttsVoices : ttsVoices.filter(v => v.lang.toLowerCase().startsWith(lang));
+            ttsVoice.innerHTML = '';
+            const list = filtered.length ? filtered : ttsVoices;
+            list.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = voice.name + '||' + voice.lang;
+                option.textContent = `${voice.name} (${voice.lang})${voice.default ? ' — Default' : ''}`;
+                ttsVoice.appendChild(option);
+            });
+            if (previous && [...ttsVoice.options].some(o => o.value === previous)) ttsVoice.value = previous;
+            saveTtsPreferences();
+        }
+        function detectLanguage(text) {
+            const devanagari = (text.match(/[\u0900-\u097F]/g) || []).length;
+            const latin = (text.match(/[A-Za-z]/g) || []).length;
+            if (ttsLanguage.value === 'hi') return 'hi-IN';
+            if (ttsLanguage.value === 'en') return 'en-US';
+            return devanagari > latin ? 'hi-IN' : 'en-US';
+        }
+        function cleanMarkdownText(text) {
+            return text.replace(/```[\s\S]*?```/g, ' ').replace(/`([^`]+)`/g, '$1').replace(/!\[[^\]]*\]\([^)]*\)/g, ' ').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[>#*_~|]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+        function splitTtsText(text) {
+            const max = 220;
+            const sentences = text.match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g) || [text];
+            const chunks = []; let current = '';
+            for (const sentence of sentences) {
+                if ((current + ' ' + sentence).length > max && current) { chunks.push(current.trim()); current = sentence; }
+                else current += ' ' + sentence;
+            }
+            if (current.trim()) chunks.push(current.trim());
+            return chunks;
+        }
+        function getSelectedVoice(lang) {
+            const selected = ttsVoice.value;
+            return ttsVoices.find(v => (v.name + '||' + v.lang) === selected) || ttsVoices.find(v => v.lang.toLowerCase().startsWith(lang.slice(0,2))) || null;
+        }
+        function ttsSpeakText(text, mode='selection') {
+            if (!ttsSupported()) { alert('Text-to-Speech is not supported by this browser.'); return; }
+            text = cleanMarkdownText(text);
+            if (!text) { alert('Please select some text or load a chapter first.'); return; }
+            speechSynthesis.cancel();
+            ttsQueue = splitTtsText(text); ttsIndex = 0; ttsStopped = false; ttsMode = mode;
+            speakNext();
+        }
+        function speakNext() {
+            if (ttsStopped || ttsIndex >= ttsQueue.length) { if (!ttsStopped) ttsStatus.textContent = 'Finished reading.'; return; }
+            const text = ttsQueue[ttsIndex];
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = detectLanguage(text);
+            utterance.rate = Number(ttsRate.value); utterance.volume = Number(ttsVolume.value);
+            const voice = getSelectedVoice(utterance.lang); if (voice) utterance.voice = voice;
+            ttsStatus.textContent = `Reading ${ttsIndex + 1} / ${ttsQueue.length}...`;
+            utterance.onend = () => { ttsIndex++; if (!ttsStopped) speakNext(); };
+            utterance.onerror = e => { if (e.error !== 'interrupted' && e.error !== 'canceled') { ttsStatus.textContent = 'Speech error: ' + e.error; } };
+            speechSynthesis.speak(utterance);
+        }
+        function ttsPlay() { if (speechSynthesis.paused) ttsResume(); else if (currentChapterText) ttsSpeakText(currentChapterText, 'chapter'); else ttsStatus.textContent = 'Load a chapter first.'; }
+        function ttsPause() { if (ttsSupported() && speechSynthesis.speaking) { speechSynthesis.pause(); ttsStatus.textContent = 'Paused.'; } }
+        function ttsResume() { if (ttsSupported() && speechSynthesis.paused) { speechSynthesis.resume(); ttsStatus.textContent = 'Resumed.'; } }
+        function ttsStop() { ttsStopped = true; if (ttsSupported()) speechSynthesis.cancel(); ttsStatus.textContent = 'Stopped.'; }
+        function ttsReadSelected() { const selected = window.getSelection().toString().trim(); if (!selected) { ttsStatus.textContent = 'Select text in the chapter, then press Read Selected Text.'; return; } ttsSpeakText(selected, 'selection'); }
+        function ttsReadChapter() { ttsSpeakText(currentChapterText || contentEl.innerText, 'chapter'); }
+        ttsRate.addEventListener('input', () => { updateTtsLabels(); saveTtsPreferences(); });
+        ttsVolume.addEventListener('input', () => { updateTtsLabels(); saveTtsPreferences(); });
+        ttsVoice.addEventListener('change', saveTtsPreferences);
+        ttsLanguage.addEventListener('change', saveTtsPreferences);
+        if (ttsSupported()) { loadTtsPreferences(); loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+        else { ttsStatus.textContent = 'Your browser does not support the Web Speech API.'; }
+
+
+        // Start
+        init();
+    </script>
+</body>
+
+</html>
