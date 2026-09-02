@@ -443,7 +443,6 @@
             border-left: 1px solid var(--border-color);
             padding: 20px;
             overflow-y: auto;
-            overflow-y: auto;
             /* display: none; Removed to allow mobile fixed positioning */
             display: block;
             flex-shrink: 0;
@@ -684,8 +683,7 @@
             align-items: center;
             gap: 10px;
             padding: 10px 14px;
-            background: color-mix(in srgb, var(--header-bg) 96%, transparent);
-            backdrop-filter: blur(10px);
+            background: var(--header-bg);
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -1275,25 +1273,30 @@
 
         /* sound menu start */
 .tts-toggle-btn {
-    /* border: none;
-    background: var(--accent-color);
-    color: white;
     width: 46px;
-    height: 46px;    
-    font-size: 1.25rem;
+    height: 46px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--header-bg);
+    color: var(--text-color);
+    font-size: 1.15rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s ease, opacity 0.2s ease; */
-
-    border-radius: 50%;
     cursor: pointer;
     position: fixed;
-    z-index: 9999;
+    right: 24px;
+    bottom: 92px;
+    z-index: 1100;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .16);
+    transition: transform .2s ease, background-color .2s ease;
 }
 
-.tts-toggle-btn:hover {
+.tts-toggle-btn:hover,
+.tts-toggle-btn:focus-visible {
     transform: scale(1.08);
+    background: var(--accent-color);
+    color: #fff;
 }
 
 .tts-toggle-btn:active {
@@ -1329,6 +1332,11 @@
         }
 
         @media(max-width:600px) {
+            .tts-toggle-btn {
+                right: 14px;
+                bottom: 74px;
+            }
+
             .reader-toolbar {
                 gap: 7px !important;
                 padding: 8px !important
@@ -1385,7 +1393,7 @@
 <body>
 
     <div class="mobile-header">
-        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open Menu">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open Menu" aria-expanded="false">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -1394,7 +1402,7 @@
             </svg>
         </button>
         <div class="mobile-title">Vedic Reader</div>
-        <button class="menu-btn" onclick="toggleTOC()" aria-label="Open Table of Contents">
+        <button class="menu-btn" onclick="toggleTOC()" aria-label="Open Table of Contents" aria-expanded="false">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -1579,9 +1587,10 @@
         // Load and Render File
         let currentFile = null;
         let readingUnits = [];
-        let pendingResume = false;
+        let loadRequestId = 0;
 
         async function loadFile(file, restorePosition = false) {
+            const requestId = ++loadRequestId;
             document.querySelectorAll('.file-item').forEach(el => {
                 el.classList.remove('active');
                 if (el.dataset.path === file.path) el.classList.add('active');
@@ -1590,14 +1599,13 @@
             ttsStop(false);
             currentFile = file;
             localStorage.setItem('readerLastFile', file.path);
-            pendingResume = restorePosition;
             contentEl.innerHTML = '<div class="loading">Loading...</div>';
 
             try {
                 const response = await fetch(file.path);
                 if (!response.ok) throw new Error('Failed to load file');
                 const text = await response.text();
-                currentChapterText = text;
+                if (requestId !== loadRequestId) return;
                 contentEl.innerHTML = marked.parse(text);
 
                 prepareReadingUnits();
@@ -1611,6 +1619,7 @@
                     mainContent.scrollTop = 0;
                 }
             } catch (error) {
+                if (requestId !== loadRequestId) return;
                 contentEl.innerHTML = `<div style="text-align:center;padding:50px"><h2>⚠️ Error Loading File</h2><p>Could not load <strong>${file.name}</strong>.</p></div>`;
                 console.error(error);
             }
@@ -1660,6 +1669,7 @@
         function ttsStartFromUnit(index) {
             if (!ttsSupported()) { alert('Text-to-Speech is not supported by this browser.'); return; }
             chooseStartUnit(index, false);
+            ttsSessionId++;
             speechSynthesis.cancel();
             ttsStopped = false;
             buildQueue(index);
@@ -1703,7 +1713,10 @@
             if (file) loadFile(file, true);
         }
 
-        function resumeSavedPosition() { restorePositionFromSaved(true); }
+        function resumeSavedPosition() {
+            document.getElementById('resumeCard')?.classList.add('hidden');
+            restorePositionFromSaved(true);
+        }
 
         function updateResumeCard() {
             const card = document.getElementById('resumeCard'), label = document.getElementById('resumeText');
@@ -1752,8 +1765,11 @@
         }
 
         // Active Section Highlighting
+        let tocObserver = null;
+
         function setupIntersectionObserver() {
-            const observer = new IntersectionObserver((entries) => {
+            if (tocObserver) tocObserver.disconnect();
+            tocObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         // Remove active class from all links
@@ -1767,7 +1783,7 @@
                 });
             }, { root: document.querySelector('.main-content'), threshold: 0.1, rootMargin: "-10% 0px -80% 0px" });
 
-            document.querySelectorAll('h1, h2, h3').forEach(section => observer.observe(section));
+            contentEl.querySelectorAll('h1, h2, h3').forEach(section => tocObserver.observe(section));
         }
 
         // Scroll to Top Logic
@@ -1801,15 +1817,18 @@
 
         // Mobile Sidebar/TOC Toggle
         function toggleSidebar() {
-            sidebarEl.classList.toggle('open');
+            const isOpen = sidebarEl.classList.toggle('open');
             overlayEl.classList.toggle('open');
             document.getElementById('tocSidebar').classList.remove('open'); // Ensure TOC is closed
+            document.querySelector('.menu-btn').setAttribute('aria-expanded', String(isOpen));
         }
 
         function toggleTOC() {
-            document.getElementById('tocSidebar').classList.toggle('open');
+            const toc = document.getElementById('tocSidebar');
+            const isOpen = toc.classList.toggle('open');
             overlayEl.classList.toggle('open');
             sidebarEl.classList.remove('open'); // Ensure Left Sidebar is closed
+            document.querySelectorAll('.menu-btn')[1].setAttribute('aria-expanded', String(isOpen));
         }
 
         function closeSidebar() {
@@ -1820,6 +1839,7 @@
             sidebarEl.classList.remove('open');
             document.getElementById('tocSidebar').classList.remove('open');
             overlayEl.classList.remove('open');
+            document.querySelectorAll('.menu-btn').forEach(button => button.setAttribute('aria-expanded', 'false'));
         }
 
 
@@ -1827,8 +1847,8 @@
         // =========================
         // Pro Text-to-Speech: language, voice, speed, volume, selection and start-anywhere
         // =========================
-        let ttsVoices = [], ttsQueue = [], ttsIndex = 0, ttsStopped = false;
-        let currentChapterText = '', ttsCurrentUnit = -1;
+        let ttsVoices = [], ttsQueue = [], ttsIndex = 0, ttsStopped = false, ttsSessionId = 0;
+        let ttsCurrentUnit = -1;
 
         const ttsLanguage = document.getElementById('ttsLanguage');
         const ttsVoice = document.getElementById('ttsVoice');
@@ -1885,6 +1905,7 @@
                 return;
             }
             const item = ttsQueue[ttsIndex];
+            const sessionId = ttsSessionId;
             highlightUnit(item.unit);
             const u = new SpeechSynthesisUtterance(item.text);
             u.lang = detectLanguage(item.text);
@@ -1894,8 +1915,16 @@
             const pct = item.unit >= 0 && readingUnits.length ? Math.round(((item.unit + 1) / readingUnits.length) * 100) : 0;
             ttsStatus.textContent = item.unit >= 0 ? `🎧 ${pct}%` : '🎧 Selected';
             document.getElementById('ttsPlayBtn')?.classList.add('is-active');
-            u.onend = () => { ttsIndex++; if (!ttsStopped) speakNext(); };
-            u.onerror = e => { if (!['interrupted', 'canceled'].includes(e.error)) { ttsIndex++; if (!ttsStopped) speakNext(); } };
+            u.onend = () => {
+                if (sessionId !== ttsSessionId) return;
+                ttsIndex++;
+                if (!ttsStopped) speakNext();
+            };
+            u.onerror = e => {
+                if (sessionId !== ttsSessionId || ['interrupted', 'canceled'].includes(e.error)) return;
+                ttsIndex++;
+                if (!ttsStopped) speakNext();
+            };
             speechSynthesis.speak(u);
         }
         function ttsPlay() {
@@ -1908,18 +1937,14 @@
         }
         function ttsPause() { if (ttsSupported() && speechSynthesis.speaking) { speechSynthesis.pause(); ttsStatus.textContent = '⏸ Paused'; document.getElementById('ttsPlayBtn')?.classList.remove('is-active'); } }
         function ttsResume() { if (ttsSupported() && speechSynthesis.paused) { speechSynthesis.resume(); ttsStatus.textContent = '▶️ Resumed'; document.getElementById('ttsPlayBtn')?.classList.add('is-active'); } }
-        function ttsStop(show = true) { ttsStopped = true; if (ttsSupported()) speechSynthesis.cancel(); clearHighlight(); document.getElementById('ttsPlayBtn')?.classList.remove('is-active'); if (show) ttsStatus.textContent = '⏹ Stopped'; }
+        function ttsStop(show = true) { ttsStopped = true; ttsSessionId++; if (ttsSupported()) speechSynthesis.cancel(); clearHighlight(); document.getElementById('ttsPlayBtn')?.classList.remove('is-active'); if (show) ttsStatus.textContent = '⏹ Stopped'; }
         function ttsReadSelected() {
             const selected = window.getSelection().toString().trim();
             if (!selected) { ttsStatus.textContent = 'Select text first'; return; }
             if (!ttsSupported()) return;
-            speechSynthesis.cancel(); ttsStopped = false; ttsQueue = splitTtsText(selected).map(text => ({ text, unit: -1 })); ttsIndex = 0; speakNext();
+            ttsSessionId++; speechSynthesis.cancel(); ttsStopped = false; ttsQueue = splitTtsText(selected).map(text => ({ text, unit: -1 })); ttsIndex = 0; speakNext();
         }
         function ttsReadChapter() { if (!readingUnits.length) { ttsStatus.textContent = 'Load a chapter first'; return; } ttsStartFromUnit(0); }
-        function toggleReaderSettings() {
-            const box = document.getElementById('readerSettings'), btn = document.getElementById('ttsSettingsBtn');
-            if (!box) return; const open = box.classList.toggle('open'); if (btn) btn.setAttribute('aria-expanded', String(open));
-        }
         function saveTtsPreferences() {
             localStorage.setItem('ttsLanguage', ttsLanguage.value); localStorage.setItem('ttsVoice', ttsVoice.value);
             localStorage.setItem('ttsRate', ttsRate.value); localStorage.setItem('ttsVolume', ttsVolume.value);
@@ -1973,6 +1998,7 @@ function restoreReaderToolbarState() {
     toolbar.classList.toggle('toolbar-hidden', isHidden);
 
     button.textContent = isHidden ? '🔇' : '🔊';
+    button.setAttribute('aria-label', isHidden ? 'Show Read Aloud controls' : 'Hide Read Aloud controls');
 }
         ttsLanguage.addEventListener('change', () => { saveTtsPreferences(); loadVoices(); });
         ttsVoice.addEventListener('change', saveTtsPreferences);
@@ -1988,11 +2014,14 @@ function restoreReaderToolbarState() {
         let saveTimer;
         mainContent.addEventListener('scroll', () => {
             clearTimeout(saveTimer);
-            saveTimer = setTimeout(() => { saveReadingPosition(); updateResumeCard(); }, 350);
+            saveTimer = setTimeout(() => { saveReadingPosition(); }, 350);
         });
 
         initTtsPreferences();
         if (ttsSupported()) speechSynthesis.onvoiceschanged = loadVoices;
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeMenus();
+        });
 
 
         // Start
