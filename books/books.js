@@ -1,4 +1,5 @@
 const files = [        
+    { name: "yog-sutra", path: "files/yogsutra/yog-sutra.md" },    
     { name: "Patanjali Yoga Sutras", path: "files/patanjaliYogsutr.md" },
     { name: "Shreemad Bhagwad Geeta", path: "files/shreemadBhagwadGeeta.md" },
     { name: "Vedic Time Table", path: "files/timeTable.md" },
