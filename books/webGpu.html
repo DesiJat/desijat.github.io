@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Transformers.js WebGPU Voice Agent</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #080d19;
+            --p: #10182b;
+            --l: #29385f;
+            --t: #edf2ff;
+            --m: #95a4c7;
+            --a: #708cff;
+            --ok: #48d98b;
+            --bad: #ff667b
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at 10% 0, #1b2b61 0, transparent 35%), radial-gradient(circle at 100% 0, #3a1b58 0, transparent 30%), var(--bg);
+            color: var(--t);
+            font: 14px system-ui, Arial
+        }
+
+        .app {
+            max-width: 1450px;
+            margin: auto;
+            padding: 15px
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px
+        }
+
+        .brand {
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            background: linear-gradient(135deg, var(--a), #a56cff);
+            display: grid;
+            place-items: center;
+            font-size: 22px
+        }
+
+        h1 {
+            font-size: 19px;
+            margin: 0
+        }
+
+        .sub,
+        .small {
+            font-size: 10px;
+            color: var(--m)
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 310px minmax(0, 1fr) 300px;
+            gap: 12px
+        }
+
+        .panel {
+            background: #10182bed;
+            border: 1px solid var(--l);
+            border-radius: 17px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px #0005
+        }
+
+        .ph {
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--l);
+            display: flex;
+            justify-content: space-between
+        }
+
+        .ph h2 {
+            font-size: 11px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            margin: 0
+        }
+
+        .pb {
+            padding: 13px
+        }
+
+        .stack {
+            display: grid;
+            gap: 9px
+        }
+
+        label {
+            display: grid;
+            gap: 5px;
+            font-size: 10px;
+            color: var(--m)
+        }
+
+        select,
+        input,
+        textarea,
+        button {
+            font: inherit
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            background: #080e20;
+            color: var(--t);
+            border: 1px solid #2b3a67;
+            border-radius: 9px;
+            padding: 8px
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px
+        }
+
+        button {
+            background: #172340;
+            color: var(--t);
+            border: 1px solid #344574;
+            border-radius: 9px;
+            padding: 8px 11px;
+            cursor: pointer
+        }
+
+        button:hover {
+            filter: brightness(1.15)
+        }
+
+        button:disabled {
+            opacity: .45
+        }
+
+        .primary {
+            background: linear-gradient(135deg, #536fe7, #855add);
+            border: 0
+        }
+
+        .row {
+            display: flex;
+            gap: 7px
+        }
+
+        .row>* {
+            flex: 1
+        }
+
+        .badge,
+        .pill {
+            border: 1px solid #344574;
+            border-radius: 99px;
+            padding: 5px 8px;
+            font-size: 10px;
+            display: inline-flex;
+            gap: 5px;
+            align-items: center
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #7683a5
+        }
+
+        .dot.ok {
+            background: var(--ok)
+        }
+
+        .dot.bad {
+            background: var(--bad)
+        }
+
+        .chat {
+            height: calc(100vh - 180px);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column
+        }
+
+        .messages {
+            flex: 1;
+            overflow: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px
+        }
+
+        .msg {
+            max-width: 86%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            white-space: pre-wrap;
+            line-height: 1.45
+        }
+
+        .msg.user {
+            margin-left: auto;
+            background: #29447f;
+            border: 1px solid #3b5ca2
+        }
+
+        .msg.assistant {
+            background: #15203c;
+            border: 1px solid #2b3c70
+        }
+
+        .msg.system {
+            max-width: 100%;
+            font-size: 10px;
+            color: #9fb0d3;
+            background: #101a2c;
+            border: 1px dashed #34466f
+        }
+
+        .meta {
+            font-size: 8px;
+            opacity: .6;
+            text-transform: uppercase;
+            margin-bottom: 4px
+        }
+
+        .composer {
+            border-top: 1px solid var(--l);
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr 50px;
+            gap: 7px
+        }
+
+        .composer textarea {
+            min-height: 50px
+        }
+
+        .call {
+            border-top: 1px solid var(--l);
+            padding: 10px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 9px;
+            align-items: center
+        }
+
+        .call button {
+            border-radius: 99px
+        }
+
+        .meter {
+            height: 8px;
+            background: #070b16;
+            border: 1px solid #293760;
+            border-radius: 99px;
+            overflow: hidden
+        }
+
+        .meter i {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #48d98b, #ffd166, #ff667b)
+        }
+
+        .orbwrap {
+            display: flex;
+            justify-content: center;
+            padding: 9px
+        }
+
+        .orb {
+            width: 135px;
+            height: 135px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle, #7891ff, #4a5fd0 55%, #18204c);
+            box-shadow: 0 0 45px #6880ff55;
+            transition: .15s
+        }
+
+        .orb.live {
+            animation: pulse 1.1s infinite
+        }
+
+        .orb.speaking {
+            background: radial-gradient(circle, #c07dff, #754bc8 55%, #271644)
+        }
+
+        @keyframes pulse {
+            50% {
+                transform: scale(1.035)
+            }
+        }
+
+        .orbtext {
+            font-size: 10px;
+            text-align: center
+        }
+
+        .status {
+            text-align: center;
+            color: var(--m);
+            font-size: 10px;
+            min-height: 16px
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 7px;
+            padding: 7px 0;
+            border-bottom: 1px solid #202d50;
+            font-size: 10px
+        }
+
+        .kv span {
+            color: var(--m)
+        }
+
+        .kv b {
+            max-width: 165px;
+            text-align: right;
+            overflow-wrap: anywhere
+        }
+
+        .progress {
+            height: 7px;
+            background: #080d1b;
+            border: 1px solid #26355d;
+            border-radius: 99px;
+            overflow: hidden
+        }
+
+        .progress i {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--a), #a46cff)
+        }
+
+        .log {
+            background: #070c18;
+            border: 1px solid #26355d;
+            border-radius: 9px;
+            padding: 8px;
+            font: 10px/1.45 monospace;
+            color: #b0bee0;
+            max-height: 250px;
+            overflow: auto
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 9px
+        }
+
+        .tabs button {
+            font-size: 9px;
+            padding: 6px
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        @media(max-width:1050px) {
+            .grid {
+                grid-template-columns: 285px 1fr
+            }
+
+            .right {
+                grid-column: 1/-1
+            }
+
+            .chat {
+                height: 650px
+            }
+        }
+
+        @media(max-width:700px) {
+            .grid {
+                grid-template-columns: 1fr
+            }
+
+            .top {
+                align-items: flex-start;
+                gap: 8px;
+                flex-direction: column
+            }
+
+            .chat {
+                height: 72vh
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="top">
+            <div class="brand">
+                <div class="logo">🎙️</div>
+                <div>
+                    <h1>Local WebGPU Voice Agent</h1>
+                    <div class="sub">Silero VAD → Whisper → WebGPU LLM → Kokoro TTS</div>
+                </div>
+            </div>
+            <div class="row" style="flex:0 0 auto"><span class="badge" id="gpu"><i class="dot"></i><span>GPU
+                        checking</span></span><span class="badge" id="ready"><i class="dot"></i><span>not
+                        loaded</span></span></div>
+        </div>
+        <div class="grid">
+            <section class="panel">
+                <div class="ph">
+                    <h2>Models</h2><span class="pill">Transformers.js</span>
+                </div>
+                <div class="pb stack"><label>LLM<select id="llm"></select></label>
+                    <div class="row"><button class="primary" id="load">Load</button><button id="reload">Reload</button>
+                    </div>
+                    <div class="progress"><i id="prog"></i></div>
+                    <div class="small" id="loadText">AUTO mode: if the model is not cached, it downloads online once and
+                        is then cached. Export/import the cache for offline use.</div><label>Whisper<select
+                            id="whisper">
+                            <option value="onnx-community/whisper-base">Whisper base</option>
+                            <option value="onnx-community/whisper-tiny.en">Whisper tiny.en</option>
+                            <option value="onnx-community/whisper-small">Whisper small</option>
+                        </select></label><label>Kokoro voice<select id="voice">
+                            <option>Loading…</option>
+                        </select></label><label>System prompt<textarea
+                            id="system">You are a helpful and conversational voice assistant. Keep spoken answers short, clear, natural and casual.</textarea></label>
+                    <div class="row"><label>Max tokens<input id="max" type="number" min="32" max="1024"
+                                value="256"></label><label>Temperature<input id="temp" type="number" min="0" max="2"
+                                step=".1" value=".7"></label></div>
+                    <div class="small">AUTO mode uses the browser cache automatically. No models folder is required.
+                        Export all cached model files to one .wgm file and import it later on another browser/origin.
+                    </div>
+                    <div class="row"><button id="exportModels">Export models</button><button id="importModels">Import
+                            models</button><input id="modelFile" type="file" accept=".wgm" hidden></div>
+                    <div class="row"><button id="offline" class="primary">Offline: OFF</button><button
+                            id="cacheInfo">Cache info</button></div>
+                    <div class="small" id="cacheText">Browser Cache Storage: checking…</div>
+                </div>
+            </section>
+            <main class="panel chat">
+                <div class="ph">
+                    <h2>Conversation</h2>
+                    <div class="row"><button id="clear">Clear</button><button id="interrupt" disabled>Stop</button>
+                    </div>
+                </div>
+                <div class="messages" id="messages">
+                    <div class="msg system">Load the models, then start a call. Silero VAD detects speech automatically.
+                    </div>
+                </div>
+                <div class="orbwrap">
+                    <div class="orb" id="orb">
+                        <div class="orbtext" id="orbText">READY</div>
+                    </div>
+                </div>
+                <div class="status" id="status">Models not loaded</div>
+                <div class="call"><button class="primary" id="call" disabled>🎤 Start call</button>
+                    <div class="meter"><i id="meter"></i></div><button id="mute" disabled>Mute</button>
+                </div>
+                <div class="composer"><textarea id="input"
+                        placeholder="Type a message… Enter to send"></textarea><button class="primary"
+                        id="send">➤</button></div>
+            </main>
+            <aside class="panel">
+                <div class="ph">
+                    <h2>Runtime</h2><span class="pill">Local</span>
+                </div>
+                <div class="pb">
+                    <div class="tabs"><button data-tab="s">Status</button><button data-tab="x">Settings</button><button
+                            data-tab="l">Logs</button></div>
+                    <div id="tabs">
+                        <div id="tab-s">
+                            <div class="kv"><span>WebGPU</span><b id="gs">—</b></div>
+                            <div class="kv"><span>Adapter</span><b id="gn">—</b></div>
+                            <div class="kv"><span>VAD</span><b id="vs">loading</b></div>
+                            <div class="kv"><span>Whisper</span><b id="ws">loading</b></div>
+                            <div class="kv"><span>LLM</span><b id="ls">loading</b></div>
+                            <div class="kv"><span>Kokoro</span><b id="ts">loading</b></div>
+                            <div class="kv"><span>Call</span><b id="cs">off</b></div>
+                            <div class="kv"><span>Storage</span><b id="storage">—</b></div>
+                        </div>
+                        <div id="tab-x" class="hidden stack"><label>Language<input id="lang"
+                                    value="en"></label><label>Auto-speak typed replies<input id="autos" type="checkbox"
+                                    checked style="width:auto"></label>
+                            <div class="row"><button id="export">Export conversation</button><button
+                                    id="importConv">Import conversation</button><input id="convFile" type="file"
+                                    accept=".json,application/json" hidden></div>
+                        </div>
+                        <div id="tab-l" class="hidden">
+                            <div class="log" id="log">boot</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+    <script type="module">
+        const $ = s => document.querySelector(s);
+        const T = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm";
+        const K = "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm";
+        const MODELS = {
+            "onnx-community/gemma-3-270m-it-ONNX": { name: "Gemma 3 270M", dtype: "q4f16" },
+            "onnx-community/gemma-3-1b-it-ONNX": { name: "Gemma 3 1B", dtype: "q4" },
+            "onnx-community/Qwen3-0.6B-ONNX": { name: "Qwen3 0.6B", dtype: "q4f16" },
+            "onnx-community/Qwen3-1.7B-ONNX": { name: "Qwen3 1.7B", dtype: "q4f16" },
+            "onnx-community/Qwen2.5-0.5B-Instruct": { name: "Qwen2.5 0.5B", dtype: "q4f16" },
+            "onnx-community/Llama-3.2-1B-Instruct-ONNX": { name: "Llama 3.2 1B", dtype: "q4f16" },
+            "onnx-community/LFM2-700M-ONNX": { name: "LFM2 700M", dtype: "q4" }
+        };
+        const E = { llm: $("#llm"), whisper: $("#whisper"), voice: $("#voice"), load: $("#load"), reload: $("#reload"), prog: $("#prog"), loadText: $("#loadText"), system: $("#system"), max: $("#max"), temp: $("#temp"), messages: $("#messages"), input: $("#input"), send: $("#send"), clear: $("#clear"), interrupt: $("#interrupt"), call: $("#call"), mute: $("#mute"), orb: $("#orb"), status: $("#status"), meter: $("#meter"), gpu: $("#gpu"), ready: $("#ready"), gs: $("#gs"), gn: $("#gn"), vs: $("#vs"), ws: $("#ws"), ls: $("#ls"), ts: $("#ts"), cs: $("#cs"), storage: $("#storage"), autos: $("#autos"), log: $("#log"), export: $("#export"), exportModels: $("#exportModels"), importModels: $("#importModels"), modelFile: $("#modelFile"), offline: $("#offline"), cacheInfo: $("#cacheInfo"), cacheText: $("#cacheText"), importConv: $("#importConv"), convFile: $("#convFile") };
+        for (const [id, m] of Object.entries(MODELS)) { const o = document.createElement('option'); o.value = id; o.textContent = m.name + ' — ' + m.dtype; E.llm.append(o) }
+        E.llm.value = localStorage.getItem('wgpuModel') || 'onnx-community/gemma-3-1b-it-ONNX';
+        let pipeline, AutoModel, Tensor, TextStreamer, KokoroTTS, TextSplitterStream, env;
+        let vad = null, asr = null, generator = null, tts = null, loaded = false, loading = false, busy = false, playing = false, calling = false, muted = false;
+        let currentVoice = 'af_heart', msgs = [], conv = JSON.parse(localStorage.getItem('wgpuVoiceChat') || '[]'), assistantBody = null, stopRequested = false;
+        let mic, ic, oc, src, iw, pb, an, raf, recording = false, B = new Float32Array(480000), bp = 0, post = 0, prev = [];
+        function log(...x) { E.log.textContent += '\n[' + new Date().toLocaleTimeString() + '] ' + x.join(' '); E.log.scrollTop = E.log.scrollHeight }
+        function save() { localStorage.setItem('wgpuVoiceChat', JSON.stringify(conv)) }
+        function bubble(r, t, saveIt = true) { const d = document.createElement('div'), m = document.createElement('div'), b = document.createElement('div'); d.className = 'msg ' + r; m.className = 'meta'; m.textContent = r; b.textContent = t; d.append(m, b); E.messages.append(d); E.messages.scrollTop = E.messages.scrollHeight; if (saveIt) { conv.push({ role: r, content: t }); save() } return b }
+        function render() { E.messages.innerHTML = ''; if (!conv.length) bubble('system', 'Load a model, then start a call. Speech is detected automatically.', false); else conv.forEach(x => bubble(x.role, x.content, false)) }
+        function dot(el, c) { const d = el.querySelector('.dot'); if (d) d.className = 'dot ' + c }
+        async function gpu() { if (!navigator.gpu) { E.gs.textContent = 'Unavailable'; E.gpu.querySelector('span').textContent = 'WebGPU unavailable'; dot(E.gpu, 'bad'); return } try { const a = await navigator.gpu.requestAdapter(); if (!a) throw Error('No WebGPU adapter'); const i = a.info || {}; E.gs.textContent = 'Available'; E.gn.textContent = i.description || i.device || i.vendor || 'WebGPU'; E.gpu.querySelector('span').textContent = 'WebGPU ready'; dot(E.gpu, 'ok') } catch (e) { E.gs.textContent = 'Error'; E.gn.textContent = e.message; dot(E.gpu, 'bad') } }
+        async function storage() { try { const x = await navigator.storage.estimate(); E.storage.textContent = ((x.usage || 0) / 1048576).toFixed(0) + ' / ' + ((x.quota || 0) / 1048576).toFixed(0) + ' MB' } catch { } }
+        const VAD_WORKLET = `class X extends AudioWorkletProcessor{constructor(){super();this.n=512;this.b=new Float32Array(this.n);this.p=0}process(i){const b=i[0]?.[0];if(!b)return true;let off=0;while(off<b.length){const n=Math.min(this.n-this.p,b.length-off);this.b.set(b.subarray(off,off+n),this.p);this.p+=n;off+=n;if(this.p===this.n){const out=this.b.slice();this.port.postMessage(out,[out.buffer]);this.b=new Float32Array(this.n);this.p=0}}return true}}registerProcessor('vad-input',X);`;
+        const PLAYER_WORKLET = `class P extends AudioWorkletProcessor{constructor(){super();this.q=[];this.o=0;this.h=false;this.port.onmessage=e=>{if(e.data instanceof Float32Array){this.q.push(e.data);this.h=true}else if(e.data==='stop'){this.q=[];this.o=0;this.h=false}}}process(i,o){const c=o[0]?.[0];if(!c)return true;if(this.h&&!this.q.length){this.port.postMessage({type:'ended'});this.h=false}let p=0;while(p<c.length){if(this.q.length){const x=this.q[0],n=Math.min(x.length-this.o,c.length-p);c.set(x.subarray(this.o,this.o+n),p);this.o+=n;p+=n;if(this.o>=x.length){this.q.shift();this.o=0}}else{c.fill(0,p);p=c.length}}return true}}registerProcessor('voice-player',P);`;
+        const CACHE_NAMES = ['transformers-cache', 'transformers'];
+        async function cacheEntries() { const names = await caches.keys(), out = []; for (const name of names) { if (!CACHE_NAMES.some(x => name.includes(x))) continue; const c = await caches.open(name); for (const req of await c.keys()) { const res = await c.match(req); if (res) out.push({ cache: name, url: req.url, status: res.status, type: res.headers.get('content-type') || '', headers: [...res.headers.entries()], blob: await res.blob() }) } } return out }
+        function progress(p, t) { E.prog.style.width = Math.max(1, Math.min(100, p * 100)) + '%'; E.loadText.textContent = t; E.status.textContent = t }
+        async function initLibs() { if (pipeline) return; progress(.01, 'Loading Transformers.js…'); const m = await import(T); pipeline = m.pipeline; AutoModel = m.AutoModel; Tensor = m.Tensor; TextStreamer = m.TextStreamer; env = m.env; env.useBrowserCache = true; env.useWasmCache = true; env.allowLocalModels = false; env.allowRemoteModels = true; env.cacheKey = 'transformers-cache'; const nativeFetch = globalThis.fetch.bind(globalThis); env.fetch = async (url, options = {}) => { const req = url instanceof Request ? url : new Request(url, options); try { const hit = await caches.match(req); if (hit) return hit.clone() } catch { } if (localStorage.getItem('wgpuOffline') === '1') throw Error('OFFLINE_CACHE_MISS: ' + req.url); const res = await nativeFetch(req); if (!res.ok) throw Error('HTTP ' + res.status + ' ' + req.url); return res }; progress(.03, 'Loading Kokoro library…'); const km = await import(K); KokoroTTS = km.KokoroTTS; TextSplitterStream = km.TextSplitterStream }
+        async function load() { if (loading) return; if (!navigator.gpu) { alert('WebGPU is required. Use current Chrome/Edge on a WebGPU-capable device.'); return } if (location.protocol === 'file:') { alert('Run this HTML from http://localhost or HTTPS.'); return } loading = true; loaded = false; E.call.disabled = true; E.interrupt.disabled = true; dot(E.ready, ''); E.ready.querySelector('span').textContent = 'loading'; try { await initLibs(); const offline = localStorage.getItem('wgpuOffline') === '1'; const cfg = MODELS[E.llm.value]; log('Loading', E.llm.value, 'mode', offline ? 'OFFLINE' : 'ONLINE+CACHE'); progress(.05, 'Loading Kokoro TTS…'); tts = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8', device: 'wasm' }); progress(.17, 'Loading Silero VAD…'); vad = await AutoModel.from_pretrained('onnx-community/silero-vad', { config: { model_type: 'custom' }, dtype: 'fp32' }); progress(.28, 'Loading Whisper…'); asr = await pipeline('automatic-speech-recognition', E.whisper.value, { device: 'webgpu', dtype: 'fp32', progress_callback: x => { if (x.status === 'progress_total') progress(.28 + x.progress * .001, 'Whisper ' + Math.round(x.progress) + '%'); else if (x.status === 'progress') progress(Math.min(.40, .28 + (x.progress || 0) * .001), 'Whisper ' + Math.round(x.progress || 0) + '%') } }); progress(.40, 'Loading LLM ' + cfg.name + '…'); generator = await pipeline('text-generation', E.llm.value, { device: 'webgpu', dtype: cfg.dtype, progress_callback: x => { if (x.status === 'progress_total') progress(.40 + x.progress * .004, 'LLM ' + Math.round(x.progress) + '%'); else if (x.status === 'progress') progress(Math.min(.80, .40 + (x.progress || 0) * .004), 'Downloading ' + (x.file || E.llm.value) + ' ' + Math.round(x.progress || 0) + '%') } }); progress(.84, 'Warming WebGPU…'); try { await generator([{ role: 'user', content: 'Hi' }], { max_new_tokens: 1, do_sample: false }) } catch (e) { log('Warmup warning', e.message) } msgs = [{ role: 'system', content: E.system.value }]; loaded = true; E.call.disabled = false; E.interrupt.disabled = false; dot(E.ready, 'ok'); E.ready.querySelector('span').textContent = offline ? 'offline ready' : 'models ready'; E.vs.textContent = E.ws.textContent = E.ls.textContent = E.ts.textContent = 'ready'; E.voice.innerHTML = ''; for (const [k, v] of Object.entries(tts?.voices || {})) { const o = document.createElement('option'); o.value = k; o.textContent = (v.name || k) + ' — ' + (v.language || ''); E.voice.append(o) } if (tts?.voices?.af_heart) { E.voice.value = 'af_heart'; currentVoice = 'af_heart' } progress(1, (cfg.name || E.llm.value) + ' ready'); E.status.textContent = offline ? 'OFFLINE READY' : 'READY'; log('READY', E.llm.value) } catch (e) { loaded = false; dot(E.ready, 'bad'); E.ready.querySelector('span').textContent = 'load failed'; E.status.textContent = 'ERROR'; const msg = (localStorage.getItem('wgpuOffline') === '1' ? 'Offline cache miss/incomplete. Turn Offline OFF and load once online.\n\n' : '') + (e?.stack || e?.message || String(e)); log('LOAD ERROR', msg); bubble('system', 'Model load failed: ' + msg); console.error(e) } finally { loading = false } }
+        let sr = null, state = null; function resetVad() { sr = new Tensor('int64', [16000], []); state = new Tensor('float32', new Float32Array(256), [2, 1, 128]) }
+        async function speech(b) { if (!sr || !state) resetVad(); const r = await vad({ input: new Tensor('float32', b, [1, b.length]), sr, state }); state = r.stateN; return Number(r.output.data[0]) > .3 || (recording && Number(r.output.data[0]) >= .1) }
+        function resetRec() { B.fill(0); bp = 0; post = 0; recording = false; prev = []; resetVad() }
+        async function transcribe(buf) { E.status.textContent = 'TRANSCRIBING'; const r = await asr(buf); return (r?.text || '').replace(/\s+/g, ' ').trim() }
+        async function generateAnswer(text) { if (busy || !text || !generator) return; busy = true; stopRequested = false; try { bubble('user', text); msgs.push({ role: 'user', content: text }); assistantBody = bubble('assistant', '', false); const streamer = new TextStreamer(generator.tokenizer, { skip_prompt: true, skip_special_tokens: true, callback_function: x => { if (!stopRequested && assistantBody) assistantBody.textContent += x } }); const r = await generator(msgs, { do_sample: Number(E.temp.value) > 0, temperature: Number(E.temp.value) || .7, max_new_tokens: Number(E.max.value) || 256, streamer }); let full = assistantBody?.textContent?.trim() || ''; if (!full) { const out = r?.[0]?.generated_text; full = Array.isArray(out) ? (out.at(-1)?.content || '') : (typeof out === 'string' ? out : '') } if (assistantBody) { assistantBody.textContent = full || 'I could not generate a response.'; conv.push({ role: 'assistant', content: assistantBody.textContent }); save(); assistantBody = null } if (full && !stopRequested && E.autos.checked) { await speak(full) } if (full) msgs.push({ role: 'assistant', content: full }) } catch (e) { if (assistantBody) { assistantBody.textContent = 'Generation failed: ' + (e.message || e); assistantBody = null } log('LLM ERROR', e.stack || e.message); console.error(e) } finally { busy = false; playing = false; E.interrupt.disabled = !loaded; E.status.textContent = calling ? 'LISTENING' : 'READY' } }
+        async function answer(buf) { if (busy || playing) return; try { const text = await transcribe(buf); if (text && text !== '[BLANK_AUDIO]') await generateAnswer(text) } catch (e) { log('ASR ERROR', e.stack || e.message) } }
+        function dispatch() { const b = B.slice(0, bp), n = prev.reduce((a, x) => a + x.length, 0), p = new Float32Array(n + b.length); let o = 0; for (const x of prev) { p.set(x, o); o += x.length } p.set(b, o); resetRec(); answer(p) }
+        async function audio(b) { if (playing || busy) return; let was = recording, s = false; try { s = await speech(b) } catch (e) { log('VAD ERROR', e.message); return } if (!was && !s) { if (prev.length > 12) prev.shift(); prev.push(b); return } const rem = B.length - bp; if (b.length >= rem) { B.set(b.subarray(0, rem), bp); bp += rem; dispatch(); return } B.set(b, bp); bp += b.length; if (s) { if (!recording) E.status.textContent = 'LISTENING'; recording = true; post = 0; return } post += b.length; if (post < 6400) return; if (bp < 4000) { resetRec(); return } dispatch() }
+        async function speak(text) { if (!text || !tts || playing) return; playing = true; const sp = new TextSplitterStream(), stream = tts.stream(sp, { voice: currentVoice }); const task = (async () => { for await (const x of stream) { if (x?.audio && !stopRequested) pb?.port.postMessage(new Float32Array(x.audio)) } })(); sp.push(text); sp.close(); await task; playing = false }
+        async function start() { try { if (!loaded) throw Error('Load the models first'); mic = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, autoGainControl: true, noiseSuppression: true, sampleRate: 16000 } }); ic = new AudioContext({ sampleRate: 16000 }); await ic.resume(); src = ic.createMediaStreamSource(mic); an = ic.createAnalyser(); an.fftSize = 256; src.connect(an); let u = URL.createObjectURL(new Blob([VAD_WORKLET], { type: 'text/javascript' })); await ic.audioWorklet.addModule(u); URL.revokeObjectURL(u); iw = new AudioWorkletNode(ic, 'vad-input'); src.connect(iw); iw.port.onmessage = e => { const ab = e.data; if (calling && !muted) audio(new Float32Array(ab)) }; oc = new AudioContext({ sampleRate: 24000 }); await oc.resume(); u = URL.createObjectURL(new Blob([PLAYER_WORKLET], { type: 'text/javascript' })); await oc.audioWorklet.addModule(u); URL.revokeObjectURL(u); pb = new AudioWorkletNode(oc, 'voice-player'); pb.connect(oc.destination); pb.port.onmessage = e => { if (e.data.type === 'ended') { playing = false; if (calling && !muted) E.status.textContent = 'LISTENING' } }; calling = true; E.call.textContent = '⏹ End call'; E.mute.disabled = false; E.cs.textContent = 'on'; resetRec(); meter(); E.status.textContent = 'LISTENING'; if (E.autos.checked) await speak('Hello! I am your local WebGPU voice assistant. How can I help you?') } catch (e) { bubble('system', 'Microphone error: ' + e.message); log('MIC ERROR', e.stack || e.message) } }
+        function end() { calling = false; try { iw?.disconnect(); src?.disconnect(); ic?.close(); oc?.close() } catch { } mic?.getTracks().forEach(t => t.stop()); cancelAnimationFrame(raf); E.meter.style.width = '0'; E.call.textContent = '🎤 Start call'; E.mute.disabled = true; E.cs.textContent = 'off'; E.status.textContent = loaded ? 'READY' : 'Models not loaded'; stopRequested = true; try { pb?.port.postMessage('stop') } catch { } playing = false; resetRec() }
+        function mute() { muted = !muted; mic?.getAudioTracks().forEach(t => t.enabled = !muted); E.mute.textContent = muted ? 'Unmute' : 'Mute'; E.status.textContent = muted ? 'MUTED' : 'LISTENING' }
+        function meter() { if (!an) return; const a = new Uint8Array(an.frequencyBinCount); an.getByteTimeDomainData(a); let s = 0; for (const x of a) { const n = x / 128 - 1; s += n * n } E.meter.style.width = Math.min(100, Math.sqrt(s / a.length) * 260) + '%'; raf = requestAnimationFrame(meter) }
+        function text() { const t = E.input.value.trim(); if (!t || !loaded || busy) return; E.input.value = ''; msgs[0] = { role: 'system', content: E.system.value }; generateAnswer(t) }
+        function u32(n) { const a = new Uint8Array(4); new DataView(a.buffer).setUint32(0, n, true); return a } function u64(n) { const a = new Uint8Array(8); new DataView(a.buffer).setBigUint64(0, BigInt(n), true); return a } function r32(a, o) { return new DataView(a.buffer, a.byteOffset + o, 4).getUint32(0, true) } function r64(a, o) { return Number(new DataView(a.buffer, a.byteOffset + o, 8).getBigUint64(0, true)) }
+        async function exportModels() { try { const es = await cacheEntries(); if (!es.length) { alert('No Transformers.js cache found. Load a model first.'); return } E.status.textContent = 'Preparing model export…'; const enc = new TextEncoder(), parts = [enc.encode('WGPUVOICE-MODELS-3\n'), u32(es.length)]; let total = 0; for (const e of es) { const b = new Uint8Array(await e.blob.arrayBuffer()), meta = enc.encode(JSON.stringify({ cache: e.cache, url: e.url, status: e.status, type: e.type, headers: e.headers })); parts.push(u32(meta.length), u64(b.byteLength), meta, b); total += b.byteLength } const a = document.createElement('a'), blob = new Blob(parts, { type: 'application/octet-stream' }); a.href = URL.createObjectURL(blob); a.download = 'webgpu-voice-models.wgm'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 30000); log('Exported', es.length, 'files', Math.round(total / 1048576) + 'MB') } catch (e) { alert('Model export failed: ' + e.message); log('EXPORT ERROR', e.stack || e.message) } }
+        async function importModels(file) { try { const a = new Uint8Array(await file.arrayBuffer()), dec = new TextDecoder(); let magic = 'WGPUVOICE-MODELS-3\n', o = magic.length; if (dec.decode(a.slice(0, o)) !== magic) { magic = 'WGPUVOICE-MODELS-2\n'; o = magic.length; if (dec.decode(a.slice(0, o)) !== magic) { magic = 'WGPUVOICE-MODELS-1\n'; o = magic.length; if (dec.decode(a.slice(0, o)) !== magic) throw Error('Invalid .wgm model bundle') } } const count = r32(a, o); o += 4; let total = 0; for (let i = 0; i < count; i++) { const ml = r32(a, o); o += 4; const bl = r64(a, o); o += 8; const meta = JSON.parse(dec.decode(a.slice(o, o + ml))); o += ml; const end = o + bl; if (end > a.length) throw Error('Corrupt bundle at entry ' + (i + 1)); const body = a.slice(o, end); o = end; const c = await caches.open(meta.cache || 'transformers-cache'); await c.put(meta.url, new Response(body, { status: meta.status || 200, headers: meta.headers || [] })); total += bl; E.prog.style.width = ((i + 1) / count * 100) + '%'; E.loadText.textContent = 'Imported ' + (i + 1) + ' / ' + count } await cacheInfo(); alert('Imported ' + count + ' cached files (' + (total / 1048576).toFixed(1) + ' MB). Now keep Offline OFF for the first verification load, then enable it.') } catch (e) { alert('Model import failed: ' + e.message); log('IMPORT ERROR', e.stack || e.message) } }
+        async function cacheInfo() { try { const es = await cacheEntries(), mb = es.reduce((n, e) => n + e.blob.size, 0) / 1048576; E.cacheText.textContent = es.length + ' cached files • ' + mb.toFixed(1) + ' MB' } catch (e) { E.cacheText.textContent = 'Cache unavailable: ' + e.message } }
+        E.load.onclick = load; E.reload.onclick = load; E.llm.onchange = () => localStorage.setItem('wgpuModel', E.llm.value); E.call.onclick = () => calling ? end() : start(); E.mute.onclick = mute; E.interrupt.onclick = () => { stopRequested = true; playing = false; try { pb?.port.postMessage('stop') } catch { } E.status.textContent = calling ? 'LISTENING' : 'READY' }; E.send.onclick = text; E.input.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); text() } }; E.clear.onclick = () => { conv = []; save(); render() }; E.voice.onchange = () => { currentVoice = E.voice.value }; E.exportModels.onclick = exportModels; E.importModels.onclick = () => E.modelFile.click(); E.modelFile.onchange = () => { if (E.modelFile.files[0]) importModels(E.modelFile.files[0]) }; E.offline.onclick = () => { const v = localStorage.getItem('wgpuOffline') !== '1'; localStorage.setItem('wgpuOffline', v ? '1' : '0'); E.offline.textContent = 'Offline: ' + (v ? 'ON' : 'OFF'); log('Offline', v ? 'enabled' : 'disabled') }; E.cacheInfo.onclick = cacheInfo; E.export.onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ version: 3, exportedAt: new Date().toISOString(), conversation: conv }, null, 2)], { type: 'application/json' })); a.download = 'voice-agent.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 10000) }; E.importConv.onclick = () => E.convFile.click(); E.convFile.onchange = async () => { const f = E.convFile.files[0]; if (!f) return; try { const d = JSON.parse(await f.text()), items = Array.isArray(d) ? d : d.conversation; if (!Array.isArray(items)) throw Error('Invalid conversation file'); conv = items.filter(x => x && typeof x.content === 'string' && ['user', 'assistant', 'system'].includes(x.role)).map(x => ({ role: x.role, content: x.content })); save(); render() } catch (e) { alert('Conversation import failed: ' + e.message) } finally { E.convFile.value = '' } }; document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => ['s', 'x', 'l'].forEach(x => $('#tab-' + x).classList.toggle('hidden', x !== b.dataset.tab))); render(); gpu(); storage(); cacheInfo(); E.offline.textContent = 'Offline: ' + (localStorage.getItem('wgpuOffline') === '1' ? 'ON' : 'OFF'); setInterval(storage, 15000); log('initialized • no Blob Worker • Transformers.js 4.2.0');
+    </script>
+</body>
+
+</html>
