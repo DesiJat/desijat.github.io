@@ -1,0 +1,10 @@
+{
+    "ok": true,
+    "uptime": 142.5,
+    "clients": {
+        "MacBook-Pro": 4
+    },
+    "routes": [],
+    "public_connections": 12,
+    "bytes": 542190
+}

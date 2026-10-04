@@ -1,0 +1,38 @@
+================================================
+  TWO-FILE REVERSE TUNNEL SERVER
+================================================
+Tunnel : 0.0.0.0:9000
+Public : 0.0.0.0:8080
+TLS tunnel : False
+TLS public : False
+Routes : 0
+Max streams : 10000
+================================================
+[server] CONNECTOR + Apples-MacBook-Pro.local/Apples-MacBook-Pro.local-1-60b5d5897d
+[server] CONNECTOR + Apples-MacBook-Pro.local/Apples-MacBook-Pro.local-2-f3a53e5d71
+[server] CONNECTOR + Apples-MacBook-Pro.local/Apples-MacBook-Pro.local-3-cfafa9eb8d
+[server] CONNECTOR + Apples-MacBook-Pro.local/Apples-MacBook-Pro.local-4-8984e83abe
+Task exception was never retrieved
+future: <Task finished name='Task-49' coro=<ReverseTunnelServer.status_handler() done, defined at /Users/apple/data/code/ai-library/pythonGateway/Cloudflare/testpy/server.py:478> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/streams.py", line 684, in read
+    await self._wait_for_data('read')
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/streams.py", line 517, in _wait_for_data
+    await self._waiter
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/tasks.py", line 492, in wait_for
+    fut.result()
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/apple/data/code/ai-library/pythonGateway/Cloudflare/testpy/server.py", line 480, in status_handler
+    req = await asyncio.wait_for(reader.read(8192), 3)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/tasks.py", line 494, in wait_for
+    raise exceptions.TimeoutError() from exc
+asyncio.exceptions.TimeoutError

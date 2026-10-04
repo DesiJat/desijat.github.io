@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zetameld File System Graph</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="cdn/inter.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Cytoscape.js -->
+    <script src="cdn/cytoscape.min.js"></script>
+    <script src="cdn/layout-base.js"></script>
+    <script src="cdn/cose-base.js"></script>
+    <script src="cdn/cytoscape-fcose.js"></script>
+    <script>
+        // Apply theme immediately to prevent flash
+        const savedTheme = localStorage.getItem('code-graph-theme') || 'light';
+        if (savedTheme !== 'light') {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</head>
+<body>
+    <div id="sidebar">
+        <h2>File System Graph</h2>
+        <p id="project-path" style="font-size: 12px; font-family: monospace; color: #3b82f6; word-break: break-all; margin-top: -10px; margin-bottom: 15px; font-weight: bold;"></p>
+        <p>Hover over a file or folder to see its exact size and path. The visual size of the circles represents their byte size.</p>
+        
+        <div class="nav-links" style="margin-top: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+            <a href="index.html" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 14px;">Switch to Code Graph &rarr;</a>
+            <a href="tree-view.html" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 14px;">Switch to Directory Tree &rarr;</a>
+            <a href="guide.html" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 14px;">View User Guide &rarr;</a>
+        </div>
+
+        <div style="margin-bottom: 20px; background-color: var(--panel-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <label for="analyze-path" style="font-size: 12px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase;">Analyze New Folder</label>
+            <input type="text" id="analyze-path" placeholder="/absolute/path/to/project" style="width: 100%; box-sizing: border-box; padding: 8px; margin-bottom: 10px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-main); font-family: monospace; font-size: 12px;">
+            <button id="analyze-btn" style="width: 100%; padding: 8px; background-color: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">Run Analyzer</button>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="theme-selector" style="font-size: 12px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase;">Theme</label>
+            <select id="theme-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-main); font-family: Inter, sans-serif;">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="e-paper">e-Paper</option>
+            </select>
+        </div>
+
+        <div id="details-panel">
+            <h3 id="panel-title">Select a Node</h3>
+            <div id="panel-content">
+                Hover or click on a node to view its size and absolute path.
+            </div>
+        </div>
+        <div style="margin-top: 20px;">
+            <button id="reset-btn">Reset View</button>
+        </div>
+    </div>
+    
+    <div id="cy"></div>
+
+    <script src="folder-viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zetameld Directory Tree</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="cdn/inter.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Apply theme immediately to prevent flash
+        const savedTheme = localStorage.getItem('code-graph-theme') || 'light';
+        if (savedTheme !== 'light') {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</head>
+<body style="overflow: auto;">
+    <div id="sidebar">
+        <h2>Directory Tree</h2>
+        <p id="project-path" style="font-size: 12px; font-family: monospace; color: var(--accent); word-break: break-all; margin-top: -10px; margin-bottom: 15px; font-weight: bold;"></p>
+        <p>A hierarchical view of your file system sizes. Click on folders to expand or collapse them.</p>
+        
+        <div class="nav-links" style="margin-top: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+            <a href="index.html" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 14px;">Switch to Code Graph &rarr;</a>
+            <a href="folder-graph.html" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 14px;">Switch to File System Graph &rarr;</a>
+            <a href="guide.html" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 14px;">View User Guide &rarr;</a>
+        </div>
+
+        <div style="margin-bottom: 20px; background-color: var(--panel-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <label for="analyze-path" style="font-size: 12px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase;">Analyze New Folder</label>
+            <input type="text" id="analyze-path" placeholder="/absolute/path/to/project" style="width: 100%; box-sizing: border-box; padding: 8px; margin-bottom: 10px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-main); font-family: monospace; font-size: 12px;">
+            <button id="analyze-btn" style="width: 100%; padding: 8px; background-color: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">Run Analyzer</button>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="theme-selector" style="font-size: 12px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase;">Theme</label>
+            <select id="theme-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-main); font-family: Inter, sans-serif;">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="e-paper">e-Paper</option>
+            </select>
+        </div>
+
+        <button id="expand-all-btn" style="margin-bottom: 10px;">Expand All</button>
+        <button id="collapse-all-btn">Collapse All</button>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div id="main-content" style="display: flex; flex-direction: row; flex-grow: 1; height: 100vh; overflow: hidden;">
+        <!-- Tree View Container -->
+        <div id="tree-container">
+            <!-- Will be populated by JS -->
+        </div>
+
+        <!-- Preview Pane -->
+        <div id="preview-panel">
+            <div id="preview-header">
+                <span id="preview-filename">Select a file to preview</span>
+            </div>
+            <div id="preview-content">
+                <div style="color: var(--text-muted); font-size: 14px;">No file selected</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="cdn/mammoth.browser.min.js"></script>
+    <script src="tree-viewer.js"></script>
+</body>
+</html>

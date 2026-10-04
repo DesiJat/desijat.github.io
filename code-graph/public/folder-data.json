@@ -1,0 +1,28 @@
+{
+  "projectPath": "/Users/apple/data/code/tts",
+  "elements": [
+    {
+      "data": {
+        "id": "dir_1",
+        "label": "tts",
+        "type": "folder",
+        "parent": null,
+        "fullPath": "/Users/apple/data/code/tts",
+        "size": 1046257704,
+        "humanSize": "997.8M"
+      }
+    },
+    {
+      "data": {
+        "id": "file_2",
+        "label": "TTS.zip",
+        "type": "file",
+        "ext": ".zip",
+        "size": 1046257704,
+        "humanSize": "997.8M",
+        "parent": "dir_1",
+        "fullPath": "/Users/apple/data/code/tts/TTS.zip"
+      }
+    }
+  ]
+}
