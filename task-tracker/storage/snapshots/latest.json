@@ -1,0 +1,189 @@
+{
+  "id": "2026-10-04_12-12-49",
+  "created_at": "2026-10-04T12:12:49.860358",
+  "label": "afternon",
+  "vscode": {
+    "count": 3,
+    "projects": [
+      {
+        "name": "apis",
+        "path": "/Users/apple/data/code/AI-chat/apis",
+        "type": "folder",
+        "git": null
+      },
+      {
+        "name": "koodo-reader",
+        "path": "/Users/apple/data/code/ai-library/koodo-reader",
+        "type": "folder",
+        "git": {
+          "is_git": true,
+          "branch": "master-local",
+          "dirty": false,
+          "modified_count": 0,
+          "untracked_count": 0,
+          "total_changes": 0,
+          "last_commit": "add export books as .pdf,.txt,.md,.json missing pending hindi txt issue (6 weeks ago)",
+          "status_samples": []
+        }
+      },
+      {
+        "name": "desijat.github.io",
+        "path": "/Users/apple/data/desijat.github.io",
+        "type": "folder",
+        "git": {
+          "is_git": true,
+          "branch": "feature/readBook",
+          "dirty": true,
+          "modified_count": 0,
+          "untracked_count": 1,
+          "total_changes": 1,
+          "last_commit": "update webGpu.html (4 weeks ago)",
+          "status_samples": [
+            "?? books/test/"
+          ]
+        }
+      }
+    ]
+  },
+  "antigravity": {
+    "count": 7,
+    "projects": [
+      {
+        "name": "non-internet-things",
+        "path": "/Users/apple/data/system-monitor/non-internet-things",
+        "type": "folder",
+        "git": null
+      },
+      {
+        "name": "ai-library",
+        "path": "/Users/apple/data/code/ai-library",
+        "type": "folder",
+        "git": null
+      },
+      {
+        "name": "markitdown",
+        "path": "/Users/apple/data/code/ai-library/markitdown",
+        "type": "folder",
+        "git": {
+          "is_git": true,
+          "branch": "main",
+          "dirty": true,
+          "modified_count": 164,
+          "untracked_count": 15,
+          "total_changes": 179,
+          "last_commit": "Pin GitHub Actions to full-length commit SHAs (#2316) (6 weeks ago)",
+          "status_samples": [
+            " D .devcontainer/devcontainer.json",
+            " D .dockerignore",
+            " D .gitattributes",
+            " D .github/dependabot.yml",
+            " D .github/workflows/pre-commit.yml"
+          ]
+        }
+      },
+      {
+        "name": "UIExample",
+        "path": "/Users/apple/data/code/ai-library/markitdown/UIExample",
+        "type": "folder",
+        "git": null
+      },
+      {
+        "name": "web-llm",
+        "path": "/Users/apple/data/code/ai-library/web-llm",
+        "type": "folder",
+        "git": null
+      },
+      {
+        "name": "task-tracker",
+        "path": "/Users/apple/data/task-tracker",
+        "type": "folder",
+        "git": null
+      },
+      {
+        "name": "desijat.github.io",
+        "path": "/Users/apple/data/desijat.github.io",
+        "type": "folder",
+        "git": {
+          "is_git": true,
+          "branch": "feature/readBook",
+          "dirty": true,
+          "modified_count": 0,
+          "untracked_count": 1,
+          "total_changes": 1,
+          "last_commit": "update webGpu.html (4 weeks ago)",
+          "status_samples": [
+            "?? books/test/"
+          ]
+        }
+      }
+    ]
+  },
+  "chrome": {
+    "window_count": 1,
+    "tab_count": 11,
+    "windows": [
+      {
+        "window_index": 1,
+        "tabs": [
+          {
+            "tab_index": 1,
+            "title": "What’s new",
+            "url": "chrome://whats-new/"
+          },
+          {
+            "tab_index": 2,
+            "title": "What’s new",
+            "url": "chrome://whats-new/"
+          },
+          {
+            "tab_index": 3,
+            "title": "GitHub - DesiJat/desijat.github.io · GitHub",
+            "url": "https://github.com/DesiJat/desijat.github.io"
+          },
+          {
+            "tab_index": 4,
+            "title": "Inbox (11,261) - choudharyskladwa@gmail.com - Gmail",
+            "url": "https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox"
+          },
+          {
+            "tab_index": 5,
+            "title": "LikeCloudflair - Google Drive",
+            "url": "https://drive.google.com/drive/folders/16lH4QcmicBiSrEwksNmKlGWCfxnjOYQg"
+          },
+          {
+            "tab_index": 6,
+            "title": "Colab Notebooks - Google Drive",
+            "url": "https://drive.google.com/drive/folders/1X6z1IAgK2UOWDH-SegtdOMotX8GIiOsf"
+          },
+          {
+            "tab_index": 7,
+            "title": "Fix Browse Folder Error",
+            "url": "https://chatgpt.com/c/6aa53d0c-2d54-83ee-af19-63a6178146c7"
+          },
+          {
+            "tab_index": 8,
+            "title": "https://3080-m-s-kkb-usw1b1-2qrnv3vezoacx-b.us-west1-1.prod.colab.dev/",
+            "url": "https://3080-m-s-kkb-usw1b1-2qrnv3vezoacx-b.us-west1-1.prod.colab.dev/"
+          },
+          {
+            "tab_index": 9,
+            "title": "portal2.terrayug.com",
+            "url": "https://portal2.terrayug.com:4002/"
+          },
+          {
+            "tab_index": 10,
+            "title": "हनुमान और सूक्ष्म नाड़ियों का विज्ञान: Lahiri Mahasaya: My reflections - YouTube",
+            "url": "https://www.youtube.com/watch?v=FaA7fT5jf9U"
+          },
+          {
+            "tab_index": 11,
+            "title": "(21) Feed | LinkedIn",
+            "url": "https://www.linkedin.com/feed/"
+          }
+        ]
+      }
+    ]
+  },
+  "tasks": [],
+  "notes": []
+}
