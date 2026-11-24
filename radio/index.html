@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10111b">
+    <title>Global Radio - Listen Worldwide</title>
+
+    <style>
+        :root {
+            --bg: #10111b;
+            --panel: #191b29;
+            --panel2: #222437;
+            --text: #f5f5fa;
+            --muted: #999caf;
+            --accent: #a78bfa;
+            --green: #48e0a4;
+            --border: #303247;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Inter, system-ui, Arial, sans-serif;
+            padding-bottom: 115px;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        header {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #10111bed;
+            backdrop-filter: blur(15px);
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .live {
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .live::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            margin-right: 7px;
+        }
+
+        main {
+            width: 90%;
+            max-width: 1350px;
+            margin: auto;
+        }
+
+        .hero {
+            padding: 65px 0 35px;
+        }
+
+        .hero h1 {
+            font-size: clamp(36px, 6vw, 65px);
+            letter-spacing: -3px;
+            margin: 0 0 12px;
+        }
+
+        .hero h1 span {
+            color: var(--accent);
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .search {
+            display: flex;
+            gap: 10px;
+            max-width: 720px;
+            margin-top: 30px;
+        }
+
+        .search input {
+            flex: 1;
+            min-width: 0;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            padding: 16px;
+            outline: none;
+        }
+
+        .search input:focus {
+            border-color: var(--accent);
+        }
+
+        .primary {
+            background: var(--accent);
+            color: #171322;
+            border: 0;
+            border-radius: 12px;
+            padding: 0 23px;
+            font-weight: 750;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0 35px;
+            flex-wrap: wrap;
+        }
+
+        .filters select {
+            background: var(--panel);
+            color: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            min-width: 170px;
+            outline: none;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 32px 0 20px;
+        }
+
+        .section-head h2 {
+            font-size: 23px;
+            margin: 0;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .genres {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+        }
+
+        .genre {
+            white-space: nowrap;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 30px;
+            padding: 11px 19px;
+        }
+
+        .genre:hover,
+        .genre.active {
+            background: var(--accent);
+            color: #171322;
+            border-color: var(--accent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 17px;
+        }
+
+        .station {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            transition: .2s;
+            min-width: 0;
+        }
+
+        .station:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .station-top {
+            display: flex;
+            gap: 13px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .station img {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: var(--panel2);
+        }
+
+        .station h3 {
+            font-size: 15px;
+            margin: 0 0 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .station small {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .tags {
+            color: var(--muted);
+            font-size: 12px;
+            min-height: 30px;
+            margin-bottom: 12px;
+        }
+
+        .station-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .play {
+            background: var(--accent);
+            color: #171322;
+            border: 0;
+            border-radius: 9px;
+            padding: 10px 17px;
+            font-weight: 700;
+        }
+
+        .playing {
+            background: var(--green);
+        }
+
+        .empty,
+        .loading {
+            color: var(--muted);
+            padding: 35px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 20;
+            background: #191b29f5;
+            border-top: 1px solid var(--border);
+            backdrop-filter: blur(15px);
+            padding: 14px 5%;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .player-info img {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: var(--panel2);
+        }
+
+        .player-info h4 {
+            margin: 0 0 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .player-info p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .control-btn {
+            background: var(--accent);
+            border: 0;
+            border-radius: 50%;
+            width: 43px;
+            height: 43px;
+            font-size: 17px;
+        }
+
+        .volume {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume input {
+            width: 100px;
+            accent-color: var(--accent);
+        }
+
+        audio {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--muted);
+            padding: 35px 10px;
+            font-size: 12px;
+        }
+
+        @media(max-width: 650px) {
+            header {
+                padding: 0 5%;
+            }
+
+            main {
+                width: 92%;
+            }
+
+            .hero {
+                padding-top: 45px;
+            }
+
+            .hero h1 {
+                letter-spacing: -2px;
+            }
+
+            .search {
+                flex-direction: column;
+            }
+
+            .primary {
+                padding: 14px;
+            }
+
+            .player {
+                grid-template-columns: 1fr auto;
+                gap: 10px;
+                padding: 10px 4%;
+            }
+
+            .volume {
+                display: none;
+            }
+
+            .player-info img {
+                width: 42px;
+                height: 42px;
+            }
+
+            .controls {
+                gap: 8px;
+            }
+
+            .station {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">GLOBAL<span>RADIO.</span></div>
+        <div class="live">LIVE WORLDWIDE</div>
+    </header>
+
+    <main>
+
+        <section class="hero">
+            <h1>One World.<br><span>Millions of Sounds.</span></h1>
+            <p>Discover and listen to live radio stations from around the world.</p>
+
+            <div class="search">
+                <input id="searchInput" type="search" placeholder="Search radio, station, country or music..."
+                    autocomplete="off">
+                <button class="primary" id="searchBtn">Search Radio</button>
+            </div>
+        </section>
+
+        <div class="filters">
+            <select id="countrySelect">
+                <option value="">🌍 All Countries</option>
+            </select>
+            <select id="sortSelect">
+                <option value="votes">Most Popular</option>
+                <option value="clickcount">Most Played</option>
+                <option value="name">Station Name</option>
+                <option value="bitrate">Highest Quality</option>
+            </select>
+        </div>
+
+        <section>
+            <div class="section-head">
+                <h2>Explore Genres</h2>
+                <span class="muted">Choose your sound</span>
+            </div>
+            <div class="genres" id="genreList">
+                <button class="genre active" data-tag="">All</button>
+                <button class="genre" data-tag="pop">🎵 Pop</button>
+                <button class="genre" data-tag="rock">🎸 Rock</button>
+                <button class="genre" data-tag="jazz">🎷 Jazz</button>
+                <button class="genre" data-tag="classical">🎻 Classical</button>
+                <button class="genre" data-tag="news">📰 News</button>
+                <button class="genre" data-tag="electronic">🎧 Electronic</button>
+                <button class="genre" data-tag="dance">💃 Dance</button>
+                <button class="genre" data-tag="hip-hop">🎤 Hip Hop</button>
+                <button class="genre" data-tag="indian">🇮🇳 Indian</button>
+                <button class="genre" data-tag="country">🤠 Country</button>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-head">
+                <h2 id="listTitle">Popular Radio Stations</h2>
+                <span class="muted" id="resultCount"></span>
+            </div>
+            <div class="grid" id="stationGrid">
+                <div class="loading">Loading radio stations...</div>
+            </div>
+        </section>
+
+        <footer>
+            Powered by Radio Browser API · Independent radio stations worldwide
+        </footer>
+    </main>
+
+    <audio id="audioPlayer" preload="none"></audio>
+
+    <div class="player">
+        <div class="player-info">
+            <img id="playerImage" alt="Station artwork" src="https://placehold.co/100x100/222437/ffffff?text=RADIO">
+            <div style="min-width:0">
+                <h4 id="playerName">Select a radio station</h4>
+                <p id="playerStatus">Ready to listen</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" id="playPause" aria-label="Play or pause">▶</button>
+            <span class="live">LIVE</span>
+        </div>
+
+        <div class="volume">
+            <span>🔊</span>
+            <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8">
+        </div>
+    </div>
+
+    <script>
+        const API_SERVERS = [
+            "https://de1.api.radio-browser.info",
+            "https://de2.api.radio-browser.info",
+            "https://nl1.api.radio-browser.info"
+        ];
+
+        let activeServer = 0;
+        let stations = [];
+        let currentStation = null;
+        let currentGenre = "";
+        let currentSearch = "";
+        let currentCountry = "";
+
+        const $ = id => document.getElementById(id);
+
+        const audio = $("audioPlayer");
+        const grid = $("stationGrid");
+
+        const FALLBACK_IMAGE =
+            "https://placehold.co/100x100/222437/ffffff?text=RADIO";
+
+        // API request with mirror fallback.
+        async function api(path) {
+            let lastError;
+
+            for (let i = 0; i < API_SERVERS.length; i++) {
+                const serverIndex = (activeServer + i) % API_SERVERS.length;
+
+                try {
+                    const response = await fetch(
+                        API_SERVERS[serverIndex] + path,
+                        { headers: { "Accept": "application/json" } }
+                    );
+
+                    if (!response.ok) throw new Error("API request failed");
+
+                    activeServer = serverIndex;
+                    return await response.json();
+
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+
+            throw lastError || new Error("Radio service unavailable");
+        }
+
+        // Load countries.
+        async function loadCountries() {
+            try {
+                const countries = await api(
+                    "/json/countries?order=stationcount&reverse=true"
+                );
+
+                countries
+                    .filter(c => c.name && c.stationcount > 0)
+                    .forEach(country => {
+                        const option = document.createElement("option");
+                        option.value = country.name;
+                        option.textContent = country.name +
+                            " (" + country.stationcount + ")";
+                        $("countrySelect").appendChild(option);
+                    });
+
+            } catch (error) {
+                console.warn("Could not load countries", error);
+            }
+        }
+
+        // Fetch radio stations.
+        async function loadStations() {
+            grid.innerHTML = '<div class="loading">Finding radio stations...</div>';
+
+            const params = new URLSearchParams();
+
+            if (currentSearch) params.set("name", currentSearch);
+            if (currentCountry) params.set("country", currentCountry);
+            if (currentGenre) params.set("tag", currentGenre);
+
+            params.set("limit", "48");
+            params.set("hidebroken", "true");
+            params.set("order", $("sortSelect").value);
+            params.set("reverse", "true");
+
+            try {
+                stations = await api(
+                    "/json/stations/search?" + params.toString()
+                );
+
+                renderStations();
+
+            } catch (error) {
+                grid.innerHTML =
+                    '<div class="empty">Unable to connect to radio directory. Please try again.</div>';
+                $("resultCount").textContent = "";
+            }
+        }
+
+        // Render station cards safely.
+        function renderStations() {
+            grid.innerHTML = "";
+
+            $("resultCount").textContent =
+                stations.length + " stations";
+
+            if (!stations.length) {
+                grid.innerHTML =
+                    '<div class="empty">No stations found. Try another search.</div>';
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+
+            stations.forEach(station => {
+                const card = document.createElement("article");
+                card.className = "station";
+
+                const top = document.createElement("div");
+                top.className = "station-top";
+
+                const img = document.createElement("img");
+                img.src = station.favicon || FALLBACK_IMAGE;
+                img.alt = "";
+                img.loading = "lazy";
+                img.onerror = () => { img.src = FALLBACK_IMAGE; };
+
+                const details = document.createElement("div");
+                details.style.minWidth = "0";
+
+                const title = document.createElement("h3");
+                title.textContent = station.name || "Unknown Station";
+
+                const country = document.createElement("small");
+                country.textContent =
+                    (station.country || "Worldwide") +
+                    " · " + (station.bitrate || 0) + " kbps";
+
+                details.append(title, country);
+                top.append(img, details);
+
+                const tags = document.createElement("div");
+                tags.className = "tags";
+                tags.textContent =
+                    (station.tags || "Radio").split(",").slice(0, 3).join(" · ");
+
+                const bottom = document.createElement("div");
+                bottom.className = "station-bottom";
+
+                const votes = document.createElement("small");
+                votes.className = "muted";
+                votes.textContent = "★ " + (station.votes || 0);
+
+                const button = document.createElement("button");
+                button.className = "play";
+                button.textContent = "▶ Listen";
+                button.addEventListener("click", () => playStation(station));
+
+                bottom.append(votes, button);
+                card.append(top, tags, bottom);
+                fragment.appendChild(card);
+            });
+
+            grid.appendChild(fragment);
+        }
+
+        // Play selected station.
+        async function playStation(station) {
+            if (!station.url_resolved && !station.url) return;
+
+            currentStation = station;
+
+            $("playerName").textContent = station.name;
+            $("playerStatus").textContent =
+                (station.country || "Worldwide") + " · Connecting...";
+            $("playerImage").src = station.favicon || FALLBACK_IMAGE;
+            $("playPause").textContent = "Ⅱ";
+
+            audio.pause();
+            audio.src = station.url_resolved || station.url;
+            audio.load();
+
+            try {
+                await audio.play();
+
+                $("playerStatus").textContent =
+                    "LIVE STREAM · " + (station.country || "Worldwide");
+
+                // Count station click in Radio Browser.
+                if (station.stationuuid) {
+                    api("/json/url/" + encodeURIComponent(station.stationuuid))
+                        .catch(() => { });
+                }
+
+            } catch (error) {
+                $("playerStatus").textContent =
+                    "Stream unavailable or playback blocked. Try another station.";
+                $("playPause").textContent = "▶";
+            }
+        }
+
+        // Player controls.
+        $("playPause").addEventListener("click", async () => {
+            if (!currentStation) return;
+
+            if (audio.paused) {
+                try {
+                    await audio.play();
+                } catch {
+                    $("playerStatus").textContent = "Unable to play this stream.";
+                }
+            } else {
+                audio.pause();
+            }
+        });
+
+        audio.addEventListener("play", () => {
+            $("playPause").textContent = "Ⅱ";
+        });
+
+        audio.addEventListener("pause", () => {
+            $("playPause").textContent = "▶";
+        });
+
+        audio.addEventListener("error", () => {
+            $("playerStatus").textContent =
+                "Stream error. Try another station.";
+            $("playPause").textContent = "▶";
+        });
+
+        $("volume").addEventListener("input", event => {
+            audio.volume = Number(event.target.value);
+        });
+
+        audio.volume = 0.8;
+
+        // Search.
+        function searchStations() {
+            currentSearch = $("searchInput").value.trim();
+            $("listTitle").textContent = currentSearch
+                ? "Search Results"
+                : "Popular Radio Stations";
+            loadStations();
+        }
+
+        $("searchBtn").addEventListener("click", searchStations);
+
+        $("searchInput").addEventListener("keydown", event => {
+            if (event.key === "Enter") searchStations();
+        });
+
+        // Country filter.
+        $("countrySelect").addEventListener("change", event => {
+            currentCountry = event.target.value;
+            $("listTitle").textContent = currentCountry
+                ? currentCountry + " Radio Stations"
+                : "Popular Radio Stations";
+            loadStations();
+        });
+
+        // Sorting.
+        $("sortSelect").addEventListener("change", loadStations);
+
+        // Genre filter.
+        $("genreList").addEventListener("click", event => {
+            const button = event.target.closest("[data-tag]");
+            if (!button) return;
+
+            document.querySelectorAll(".genre")
+                .forEach(item => item.classList.remove("active"));
+
+            button.classList.add("active");
+
+            currentGenre = button.dataset.tag;
+            $("listTitle").textContent = currentGenre
+                ? currentGenre.toUpperCase() + " Radio Stations"
+                : "Popular Radio Stations";
+
+            loadStations();
+        });
+
+        // Initialize.
+        async function init() {
+            await Promise.all([
+                loadCountries(),
+                loadStations()
+            ]);
+        }
+
+        init();
+    </script>
+
+</body>
+
+</html>

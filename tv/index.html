@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZetaMeld - Live Television</title>
+
+    <!-- HLS support for browsers without native HLS -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script> -->
+    <link rel="stylesheet" href="style.css">
+    <script src="hls.js"></script>
+
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">ZetaMeld<span>TV.</span></div>
+        <input type="search" id="search" class="search" placeholder="Search channels...">
+    </header>
+
+    <main class="container">
+
+        <section class="hero">
+            <h1>Watch Live TV Anywhere</h1>
+            <p>Explore free, publicly listed television streams from around the world.</p>
+        </section>
+
+        <section id="playerSection" class="player-section">
+            <h2 id="playingTitle">Now Playing</h2>
+
+            <video id="video" controls autoplay playsinline>
+                Your browser does not support video.
+            </video>
+
+            <div class="player-info">
+                <span id="playerStatus">Loading stream...</span>
+                <button class="close-btn" onclick="closePlayer()">Close</button>
+            </div>
+        </section>
+
+        <div class="filters">
+            <select id="countryFilter">
+                <option value="">All Countries</option>
+            </select>
+
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+            </select>
+
+            <select id="languageFilter">
+                <option value="">All Languages</option>
+            </select>
+        </div>
+
+        <div class="section-title">
+            <h2>Live Channels</h2>
+            <span id="count">Loading...</span>
+        </div>
+
+        <p class="status" id="status">Fetching channels...</p>
+
+        <div class="channels" id="channels"></div>
+
+    </main>
+
+    <footer>
+        ZetaMeld - Personal Stream Player
+    </footer>
+    <script src="script.js"></script>
+</body>
+
+</html>
